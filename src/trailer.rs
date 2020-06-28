@@ -10,9 +10,9 @@ pub struct Trailer {
 }
 
 impl Trailer {
-    /// Create a new trailer
+    /// Create a new `Trailer`
     ///
-    /// This creates a new element that represents the sort of trailers you get at the end of commits
+    /// This creates a new element that represents the sort of `Trailers` you get at the end of commits
     ///
     /// For example there's `Co-authored-by`, `Relates-to`, and `Signed-off-by`
     ///
@@ -33,6 +33,37 @@ impl Trailer {
             key: String::from(key),
             value: String::from(value),
         }
+    }
+
+    /// Get the key of the `Trailer`
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use mit_commit::{Body, Trailer};
+    /// use std::convert::TryFrom;
+    /// assert_eq!(
+    ///     Trailer::new("Co-authored-by", "#124").get_key(),
+    ///     "Co-authored-by"
+    /// )
+    /// ```
+    #[must_use]
+    pub fn get_key(&self) -> String {
+        self.key.clone()
+    }
+
+    /// Get the value of the `Trailer`
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use mit_commit::{Body, Trailer};
+    /// use std::convert::TryFrom;
+    /// assert_eq!(Trailer::new("Co-authored-by", "#124").get_value(), "#124")
+    /// ```
+    #[must_use]
+    pub fn get_value(&self) -> String {
+        self.value.clone()
     }
 }
 
@@ -70,6 +101,20 @@ mod tests {
     use crate::body::Body;
     use pretty_assertions::assert_eq;
     use std::convert::TryFrom;
+
+    #[test]
+    fn it_can_tell_me_its_key() {
+        let trailer = Trailer::new("Relates-to", "#128");
+
+        assert_eq!(trailer.get_key(), String::from("Relates-to"))
+    }
+
+    #[test]
+    fn it_can_tell_me_its_value() {
+        let trailer = Trailer::new("Relates-to", "#128");
+
+        assert_eq!(trailer.get_value(), String::from("#128"))
+    }
 
     #[test]
     fn it_can_give_me_itself_as_a_string() {

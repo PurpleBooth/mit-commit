@@ -1,16 +1,59 @@
 use crate::fragment::Fragment;
 use crate::trailer::Trailer;
 use std::convert::TryFrom;
+use std::slice::Iter;
 
 /// A Collection of `Trailer`
 #[derive(Debug, PartialEq, Clone)]
 pub struct Trailers {
     trailers: Vec<Trailer>,
+    iterator_index: usize,
+}
+
+impl Trailers {
+    /// Iterate over the trailers
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::Trailer;
+    /// use mit_commit::Trailers;
+    /// let trailers = Trailers::from(vec![
+    ///     Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
+    ///     Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
+    ///     Trailer::new("Relates-to", "#124"),
+    /// ]);
+    /// let mut iterator = trailers.iter();
+    ///
+    /// assert_eq!(
+    ///     iterator.next(),
+    ///     Some(&Trailer::new(
+    ///         "Co-authored-by",
+    ///         "Billie Thompson <billie@example.com>"
+    ///     ))
+    /// );
+    /// assert_eq!(
+    ///     iterator.next(),
+    ///     Some(&Trailer::new(
+    ///         "Co-authored-by",
+    ///         "Someone Else <someone@example.com>"
+    ///     ))
+    /// );
+    /// assert_eq!(iterator.next(), Some(&Trailer::new("Relates-to", "#124")));
+    /// assert_eq!(iterator.next(), None);
+    /// ```
+    #[must_use]
+    pub fn iter(&self) -> Iter<'_, Trailer> {
+        self.trailers.iter()
+    }
 }
 
 impl From<Vec<Trailer>> for Trailers {
     fn from(trailers: Vec<Trailer>) -> Self {
-        Trailers { trailers }
+        Trailers {
+            trailers,
+            iterator_index: 0,
+        }
     }
 }
 
@@ -61,6 +104,33 @@ mod tests {
     use crate::Body;
     use indoc::indoc;
     use pretty_assertions::assert_eq;
+
+    #[test]
+    fn implements_iterator() {
+        let trailers = Trailers::from(vec![
+            Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
+            Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
+            Trailer::new("Relates-to", "#124"),
+        ]);
+        let mut iterator = trailers.iter();
+
+        assert_eq!(
+            iterator.next(),
+            Some(&Trailer::new(
+                "Co-authored-by",
+                "Billie Thompson <billie@example.com>"
+            ))
+        );
+        assert_eq!(
+            iterator.next(),
+            Some(&Trailer::new(
+                "Co-authored-by",
+                "Someone Else <someone@example.com>"
+            ))
+        );
+        assert_eq!(iterator.next(), Some(&Trailer::new("Relates-to", "#124")));
+        assert_eq!(iterator.next(), None);
+    }
 
     #[test]
     fn it_can_give_me_it_as_a_string() {
