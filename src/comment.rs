@@ -18,8 +18,8 @@ impl Comment {
     /// assert_eq!(
     ///     Comment::from(indoc!(
     ///         "
-    ///                 Example 1
-    ///                 Example 2"
+    ///         Example 1
+    ///         Example 2"
     ///     )),
     ///     Comment::from("Example 1").append(&Comment::from("Example 2"))
     /// )
