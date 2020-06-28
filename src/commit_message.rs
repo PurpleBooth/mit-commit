@@ -640,11 +640,17 @@ impl CommitMessage {
     /// assert_eq!(commit.matches_pattern(&re), true);
     /// ```
     pub fn matches_pattern(&self, re: &Regex) -> bool {
-        let subject = self.clone().get_subject();
-        let bodies = self.clone().get_body();
-
-        let commit_text = format!("{}{}", subject, bodies);
-        re.is_match(&commit_text)
+        let text = self
+            .clone()
+            .get_ast()
+            .into_iter()
+            .filter_map(|fragment| match fragment {
+                Fragment::Body(body) => Some(String::from(body)),
+                Fragment::Comment(_) => None,
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        re.is_match(&text)
     }
 }
 
@@ -780,6 +786,8 @@ mod tests {
             Example Commit Message
 
             This is an example commit message for linting
+
+            Relates-to: #153
             # Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
             # die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
             # bricht den Commit ab.
@@ -800,6 +808,9 @@ mod tests {
         assert_eq!(commit.matches_pattern(&re), true);
 
         let re = Regex::new("[Ee]xample Commit Message").unwrap();
+        assert_eq!(commit.matches_pattern(&re), true);
+
+        let re = Regex::new("Relates[- ]to").unwrap();
         assert_eq!(commit.matches_pattern(&re), true);
     }
 
