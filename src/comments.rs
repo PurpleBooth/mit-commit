@@ -1,10 +1,38 @@
 use crate::comment::Comment;
 use crate::fragment::Fragment;
+use std::slice::Iter;
 
 /// A collection of comments from a `CommitMessage`
 #[derive(Debug, PartialEq, Clone)]
 pub struct Comments {
     comments: Vec<Comment>,
+}
+
+impl Comments {
+    /// Iterate over the `Comment` in the `Comments`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::Comment;
+    /// use mit_commit::Comments;
+    ///
+    /// let trailers = Comments::from(vec![
+    ///     Comment::from("# Comment 1"),
+    ///     Comment::from("# Comment 2"),
+    ///     Comment::from("# Comment 3"),
+    /// ]);
+    /// let mut iterator = trailers.iter();
+    ///
+    /// assert_eq!(iterator.next(), Some(&Comment::from("# Comment 1")));
+    /// assert_eq!(iterator.next(), Some(&Comment::from("# Comment 2")));
+    /// assert_eq!(iterator.next(), Some(&Comment::from("# Comment 3")));
+    /// assert_eq!(iterator.next(), None);
+    /// ```
+    #[must_use]
+    pub fn iter(&self) -> Iter<'_, Comment> {
+        self.comments.iter()
+    }
 }
 
 impl From<Vec<Comment>> for Comments {
@@ -47,6 +75,23 @@ mod tests {
     use crate::fragment::Fragment;
     use indoc::indoc;
     use pretty_assertions::assert_eq;
+
+    #[test]
+    fn implements_iterator() {
+        use crate::Comment;
+        use crate::Comments;
+        let trailers = Comments::from(vec![
+            Comment::from("# Comment 1"),
+            Comment::from("# Comment 2"),
+            Comment::from("# Comment 3"),
+        ]);
+        let mut iterator = trailers.iter();
+
+        assert_eq!(iterator.next(), Some(&Comment::from("# Comment 1")));
+        assert_eq!(iterator.next(), Some(&Comment::from("# Comment 2")));
+        assert_eq!(iterator.next(), Some(&Comment::from("# Comment 3")));
+        assert_eq!(iterator.next(), None);
+    }
 
     #[test]
     fn it_can_give_me_it_as_a_string() {

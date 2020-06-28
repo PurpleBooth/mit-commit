@@ -4,6 +4,7 @@ use crate::trailer::Trailer;
 use std::convert::TryFrom;
 use std::fmt;
 use std::fmt::{Display, Formatter};
+use std::slice::Iter;
 
 /// A collection of user input `CommitMessage` text
 #[derive(Debug, PartialEq, Clone)]
@@ -32,6 +33,30 @@ impl Bodies {
     #[must_use]
     pub fn first(&self) -> Option<Body> {
         self.bodies.first().cloned()
+    }
+
+    /// Iterate over the `Body` in the `Bodies`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::Bodies;
+    /// use mit_commit::Body;
+    /// let trailers = Bodies::from(vec![
+    ///     Body::from("Body 1"),
+    ///     Body::from("Body 2"),
+    ///     Body::from("Body 3"),
+    /// ]);
+    /// let mut iterator = trailers.iter();
+    ///
+    /// assert_eq!(iterator.next(), Some(&Body::from("Body 1")));
+    /// assert_eq!(iterator.next(), Some(&Body::from("Body 2")));
+    /// assert_eq!(iterator.next(), Some(&Body::from("Body 3")));
+    /// assert_eq!(iterator.next(), None);
+    /// ```
+    #[must_use]
+    pub fn iter(&self) -> Iter<'_, Body> {
+        self.bodies.iter()
     }
 }
 
@@ -97,6 +122,23 @@ mod tests {
     use crate::fragment::Fragment;
     use indoc::indoc;
     use pretty_assertions::assert_eq;
+
+    #[test]
+    fn implements_iterator() {
+        use crate::Bodies;
+        use crate::Body;
+        let trailers = Bodies::from(vec![
+            Body::from("Body 1"),
+            Body::from("Body 2"),
+            Body::from("Body 3"),
+        ]);
+        let mut iterator = trailers.iter();
+
+        assert_eq!(iterator.next(), Some(&Body::from("Body 1")));
+        assert_eq!(iterator.next(), Some(&Body::from("Body 2")));
+        assert_eq!(iterator.next(), Some(&Body::from("Body 3")));
+        assert_eq!(iterator.next(), None);
+    }
 
     #[test]
     fn it_can_give_me_it_as_a_string() {
