@@ -8,6 +8,7 @@ use super::subject::Subject;
 use super::trailers::Trailers;
 use crate::scissors::Scissors;
 
+/// A `CommitMessage`, the primary entry point to the library
 #[derive(Debug, PartialEq, Clone)]
 pub struct CommitMessage {
     scissors: Option<Scissors>,

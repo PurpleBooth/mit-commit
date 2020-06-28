@@ -1,5 +1,6 @@
 const SCISSORS_MARKER: &str = "------------------------ >8 ------------------------";
 
+/// The `Scissors` from a `CommitMessage`
 #[derive(Debug, PartialEq, Clone)]
 pub struct Scissors {
     scissors: String,

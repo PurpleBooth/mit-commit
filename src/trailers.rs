@@ -2,6 +2,7 @@ use crate::fragment::Fragment;
 use crate::trailer::Trailer;
 use std::convert::TryFrom;
 
+/// A Collection of `Trailer`
 #[derive(Debug, PartialEq, Clone)]
 pub struct Trailers {
     trailers: Vec<Trailer>,

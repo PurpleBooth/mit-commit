@@ -1,6 +1,7 @@
 use crate::comment::Comment;
 use crate::fragment::Fragment;
 
+/// A collection of comments from a `CommitMessage`
 #[derive(Debug, PartialEq, Clone)]
 pub struct Comments {
     comments: Vec<Comment>,

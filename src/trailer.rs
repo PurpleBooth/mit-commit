@@ -2,6 +2,7 @@ use crate::body::Body;
 use std::convert::TryFrom;
 use thiserror::Error;
 
+/// A `Trailer` you might see a in a `CommitMessage`, for example 'Co-authored-by: Billie Thompson <billie@example.com>'
 #[derive(Debug, PartialEq, Clone)]
 pub struct Trailer {
     key: String,

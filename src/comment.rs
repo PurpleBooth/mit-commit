@@ -1,3 +1,4 @@
+/// A single comment from a `CommitMessage`
 #[derive(Debug, PartialEq, Clone)]
 pub struct Comment {
     comment: String,

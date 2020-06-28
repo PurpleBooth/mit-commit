@@ -1,6 +1,7 @@
 use crate::body::Body;
 use crate::fragment::Fragment;
 
+/// The `Subject` from the `CommitMessage`
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct Subject {
     text: String,
