@@ -33,4 +33,4 @@ assert_eq!(
 )
 ```
 
-Read me at [Docs.rs](https://docs.rs/mit-commit/)
+Read more at [Docs.rs](https://docs.rs/mit-commit/)
