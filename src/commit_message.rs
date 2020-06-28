@@ -154,14 +154,17 @@ impl CommitMessage {
         )
     }
 
-    fn convert_to_per_line_ast(comment_character: char, rest: &str) -> Vec<Fragment> {
+    fn convert_to_per_line_ast(comment_character: Option<char>, rest: &str) -> Vec<Fragment> {
         rest.lines()
-            .map(|line| {
-                if line.starts_with(comment_character) {
-                    Fragment::Comment(Comment::from(line))
-                } else {
-                    Fragment::Body(Body::from(line))
+            .map(|line| match comment_character {
+                Some(comment_character) => {
+                    if line.starts_with(comment_character) {
+                        Fragment::Comment(Comment::from(line))
+                    } else {
+                        Fragment::Body(Body::from(line))
+                    }
                 }
+                None => Fragment::Body(Body::from(line)),
             })
             .collect()
     }
@@ -716,15 +719,15 @@ impl From<&str> for CommitMessage {
     /// ```
     fn from(message: &str) -> Self {
         let (rest, scissors) = Scissors::parse_sections(message);
-        let comment_character: char = rest
-            .lines()
-            .filter(|line| !line.is_empty())
-            .last()
-            .and_then(|line| line.chars().next())
-            .unwrap_or('#');
+        let comment_character = CommitMessage::guess_comment_character(&rest, scissors.clone());
         let per_line_ast = CommitMessage::convert_to_per_line_ast(comment_character, &rest);
         let trailers = per_line_ast.clone().into();
-        let ast: Vec<Fragment> = CommitMessage::group_ast(per_line_ast);
+        let mut ast: Vec<Fragment> = CommitMessage::group_ast(per_line_ast);
+
+        if let (None, Some('\n')) = (scissors.clone(), message.chars().last()) {
+            ast.push(Fragment::Body(Body::default()))
+        }
+
         let subject = Subject::from(ast.clone());
         let comments = Comments::from(ast.clone());
         let bodies = Bodies::from(ast.clone());
@@ -1674,5 +1677,112 @@ mod tests {
         ];
 
         assert_eq!(message.get_trailers(), Trailers::from(trailers))
+    }
+
+    const COMMIT_MESSAGE_WITH_NO_COMMENTS: &str = indoc!(
+        "
+        Update bashrc to include kubernetes completions
+
+        This should make it easier to deploy things for the developers.
+        Benchmarked with Hyperfine, no noticable performance decrease.
+
+        Co-authored-by: Billie Thomposon <billie@example.com>
+        Co-authored-by: Somebody Else <somebody@example.com>
+        "
+    );
+
+    #[test]
+    fn can_reliably_parse_from_a_commit_message_without_commits() {
+        let first_commit_message = CommitMessage::from(COMMIT_MESSAGE_WITH_NO_COMMENTS);
+        let string_version_of_commit = String::from(first_commit_message.clone());
+        let second_commit_message = CommitMessage::from(string_version_of_commit.clone());
+
+        assert_eq!(string_version_of_commit, COMMIT_MESSAGE_WITH_NO_COMMENTS);
+        assert_eq!(first_commit_message, second_commit_message)
+    }
+
+    #[test]
+    fn can_get_ast_from_a_commit_message_without_commits() {
+        let message = CommitMessage::from(COMMIT_MESSAGE_WITH_NO_COMMENTS);
+        let ast: Vec<Fragment> = vec![
+            Fragment::Body(Body::from("Update bashrc to include kubernetes completions")),
+            Fragment::Body(Body::default()),
+            Fragment::Body(Body::from("This should make it easier to deploy things for the developers.\nBenchmarked with Hyperfine, no noticable performance decrease.")),
+            Fragment::Body(Body::default()),
+            Fragment::Body(Body::from("Co-authored-by: Billie Thomposon <billie@example.com>\nCo-authored-by: Somebody Else <somebody@example.com>")),
+            Fragment::Body(Body::default()),
+        ];
+
+        assert_eq!(message.get_ast(), ast)
+    }
+
+    #[test]
+    fn can_get_subject_from_a_commit_message_without_commits() {
+        let message = CommitMessage::from(COMMIT_MESSAGE_WITH_NO_COMMENTS);
+
+        assert_eq!(
+            message.get_subject(),
+            Subject::from("Update bashrc to include kubernetes completions")
+        )
+    }
+
+    #[test]
+    fn can_get_body_from_a_commit_message_without_commits() {
+        let message = CommitMessage::from(COMMIT_MESSAGE_WITH_NO_COMMENTS);
+
+        assert_eq!(
+            message.get_body(),
+            Bodies::from(vec![
+                Body::default(),
+                Body::from(indoc!(
+                    "
+                    This should make it easier to deploy things for the developers.
+                    Benchmarked with Hyperfine, no noticable performance decrease."
+                )),
+            ])
+        )
+    }
+
+    #[test]
+    fn can_get_scissors_section_from_a_commit_message_without_commits() {
+        let message = CommitMessage::from(COMMIT_MESSAGE_WITH_NO_COMMENTS);
+
+        assert_eq!(message.get_scissors(), None)
+    }
+
+    #[test]
+    fn can_get_comments_from_a_commit_message_without_commits() {
+        let message = CommitMessage::from(COMMIT_MESSAGE_WITH_NO_COMMENTS);
+        let comments: Vec<Comment> = vec![];
+
+        assert_eq!(message.get_comments(), Comments::from(comments))
+    }
+
+    #[test]
+    fn can_get_trailers_from_a_commit_message_without_commits() {
+        let message = CommitMessage::from(COMMIT_MESSAGE_WITH_NO_COMMENTS);
+        let trailers: Vec<Trailer> = vec![
+            Trailer::new("Co-authored-by", "Billie Thomposon <billie@example.com>"),
+            Trailer::new("Co-authored-by", "Somebody Else <somebody@example.com>"),
+        ];
+
+        assert_eq!(message.get_trailers(), Trailers::from(trailers))
+    }
+}
+
+impl CommitMessage {
+    fn guess_comment_character(rest: &str, scissors: Option<Scissors>) -> Option<char> {
+        match scissors {
+            Some(scissors) => String::from(scissors).chars().next(),
+            None => rest
+                .lines()
+                .last()
+                .and_then(|line| line.chars().next())
+                .filter(|x| {
+                    Regex::new("^\\W$")
+                        .unwrap()
+                        .is_match(x.to_string().as_str())
+                }),
+        }
     }
 }
