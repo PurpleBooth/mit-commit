@@ -2,6 +2,7 @@ use crate::body::Body;
 use crate::fragment::Fragment;
 use std::fmt;
 use std::fmt::{Display, Formatter};
+use std::str::Chars;
 
 /// The `Subject` from the `CommitMessage`
 #[derive(Debug, PartialEq, Clone, Default)]
@@ -10,7 +11,7 @@ pub struct Subject {
 }
 
 impl Subject {
-    /// Count characters in subject
+    /// Count characters in `Subject`
     ///
     /// # Examples
     ///
@@ -25,7 +26,7 @@ impl Subject {
         self.text.len()
     }
 
-    /// Is the subject empty
+    /// Is the `Subject` empty
     ///
     /// # Examples
     ///
@@ -38,6 +39,27 @@ impl Subject {
     #[must_use]
     pub fn is_empty(&self) -> bool {
         self.text.is_empty()
+    }
+
+    /// Convert the `Subject` into chars
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::Subject;
+    ///
+    /// let subject = Subject::from("y\u{306}");
+    ///
+    /// let mut chars = subject.chars();
+    ///
+    /// assert_eq!(Some('y'), chars.next());
+    /// assert_eq!(Some('\u{0306}'), chars.next());
+    ///
+    /// assert_eq!(None, chars.next());
+    /// ```
+    #[must_use]
+    pub fn chars(&self) -> Chars<'_> {
+        self.text.chars()
     }
 }
 
@@ -99,6 +121,18 @@ mod tests {
     fn len() {
         assert_eq!(Subject::from("hello, world!").len(), 13);
         assert_eq!(Subject::from("goodbye").len(), 7)
+    }
+
+    #[test]
+    fn chars() {
+        let subject = Subject::from("y\u{306}");
+
+        let mut chars = subject.chars();
+
+        assert_eq!(Some('y'), chars.next());
+        assert_eq!(Some('\u{0306}'), chars.next());
+
+        assert_eq!(None, chars.next());
     }
 
     #[test]
