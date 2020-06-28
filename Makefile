@@ -11,12 +11,12 @@ show-help:
 .PHONY: test
 ## Test it was built ok
 test:
-	unset GIT_MIT_AUTHORS_EXEC && RUST_BACKTRACE=1 cargo test --locked
+	unset GIT_MIT_AUTHORS_EXEC && RUST_BACKTRACE=1 cargo test
 
 .PHONY: build
 ## Build release version
 build:
-	cargo build --locked --release
+	cargo build --release
 
 .PHONY: lint
 ## Lint it
