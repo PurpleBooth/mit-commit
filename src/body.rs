@@ -21,8 +21,8 @@ impl Body {
     /// assert_eq!(
     ///     Body::from(indoc!(
     ///         "
-    ///                 Example 1
-    ///                 Example 2"
+    ///         Example 1
+    ///         Example 2"
     ///     )),
     ///     Body::from("Example 1").append(&Body::from("Example 2"))
     /// )
