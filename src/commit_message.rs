@@ -718,6 +718,7 @@ impl From<&str> for CommitMessage {
         let (rest, scissors) = Scissors::parse_sections(message);
         let comment_character: char = rest
             .lines()
+            .filter(|line| !line.is_empty())
             .last()
             .and_then(|line| line.chars().next())
             .unwrap_or('#');
