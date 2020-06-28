@@ -136,6 +136,25 @@ jobs:
         with:
           # This part is also where you can pass other options, for example:
           prettier_options: --check **/*.{yml,yaml}
+  publish-to-cargo:
+    if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'Release v')
+    needs:
+      - version
+      - test
+      - lints
+      - check
+      - security-audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.1
+        with:
+          token: "${{ secrets.COMMITTER_TOKEN }}"
+          fetch-depth: 0
+      - env:
+          CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
+        run: |
+          cargo login "$CARGO_TOKEN"
+          cargo publish
   merge-and-push:
     if: github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'Release v')
     needs:
