@@ -11,6 +11,30 @@ pub struct Bodies {
     bodies: Vec<Body>,
 }
 
+impl Bodies {
+    /// Get the first `Body` in this list of `Bodies`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::{Bodies, Body, Subject};
+    ///
+    /// let bodies: Vec<Body> = Vec::default();
+    /// assert_eq!(None, Bodies::from(bodies).first());
+    ///
+    /// let bodies: Vec<Body> = vec![
+    ///     Body::from("First"),
+    ///     Body::from("Second"),
+    ///     Body::from("Third"),
+    /// ];
+    /// assert_eq!(Some(Body::from("First")), Bodies::from(bodies).first());
+    /// ```
+    #[must_use]
+    pub fn first(&self) -> Option<Body> {
+        self.bodies.first().cloned()
+    }
+}
+
 impl Display for Bodies {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", String::from(self.clone()))
@@ -108,6 +132,15 @@ mod tests {
                 Another Message Body"
             ))
         )
+    }
+    #[test]
+    fn get_first() {
+        let bodies = Bodies::from(vec![
+            Body::from("Message Body"),
+            Body::from("Another Message Body"),
+        ]);
+
+        assert_eq!(bodies.first(), Some(Body::from("Message Body")))
     }
 
     #[test]
