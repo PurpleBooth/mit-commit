@@ -1,4 +1,5 @@
 use crate::body::Body;
+use crate::Fragment;
 use std::convert::TryFrom;
 use thiserror::Error;
 
@@ -73,6 +74,13 @@ impl From<Trailer> for String {
     }
 }
 
+impl From<Trailer> for Fragment {
+    fn from(trailer: Trailer) -> Self {
+        let trailer: String = trailer.into();
+        Fragment::Body(Body::from(trailer))
+    }
+}
+
 impl TryFrom<Body> for Trailer {
     type Error = Error;
 
@@ -99,6 +107,7 @@ pub enum Error {
 mod tests {
     use super::Trailer;
     use crate::body::Body;
+    use crate::Fragment;
     use pretty_assertions::assert_eq;
     use std::convert::TryFrom;
 
@@ -131,5 +140,13 @@ mod tests {
             String::from(trailer.expect("Could not parse from string")),
             String::from("Relates-to: #128")
         )
+    }
+
+    #[test]
+    fn can_generate_from_body() {
+        let trailer = Trailer::new("Relates-to", "#128");
+        let body: Fragment = Fragment::from(trailer);
+
+        assert_eq!(body, Fragment::Body(Body::from("Relates-to: #128")))
     }
 }

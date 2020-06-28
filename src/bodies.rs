@@ -102,13 +102,14 @@ impl From<Vec<Fragment>> for Bodies {
             .rev()
             .take_while(|body| body.is_empty() || Trailer::try_from(body.clone()).is_ok())
             .count();
-        let non_trailer_item_count = raw_body.len() - trailer_count;
+        let mut non_trailer_item_count = raw_body.len() - trailer_count;
+        non_trailer_item_count = non_trailer_item_count.saturating_sub(1);
 
         raw_body
             .into_iter()
             .enumerate()
             .skip(1)
-            .take(non_trailer_item_count - 1)
+            .take(non_trailer_item_count)
             .map(|(_, body)| body)
             .collect::<Vec<Body>>()
             .into()
