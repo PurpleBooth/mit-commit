@@ -134,7 +134,6 @@ jobs:
       - name: Prettify code
         uses: creyD/prettier_action@v3.0
         with:
-          # This part is also where you can pass other options, for example:
           prettier_options: --check **/*.{yml,yaml}
   publish-to-cargo:
     if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'Release v')
@@ -194,6 +193,7 @@ jobs:
       - shell: bash
         env:
           GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
@@ -203,10 +203,4 @@ jobs:
 
           git checkout -b "release-$(cat ./version/version)"
           git push -f origin "release-$(cat ./version/version)"
-      - name: pull-request
-        uses: repo-sync/pull-request@v2
-        with:
-          github_token: "${{ secrets.COMMITTER_TOKEN }}"
-          pr_label: "releases"
-          destination_branch: "main"
-          source_branch: "release-${{ steps.get_current_version.outputs.V_VERSION }}"
+          gh pr create -l releases --fill
