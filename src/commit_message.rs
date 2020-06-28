@@ -8,6 +8,12 @@ use super::subject::Subject;
 use super::trailers::Trailers;
 use crate::scissors::Scissors;
 use regex::Regex;
+use std::convert::TryFrom;
+use std::fs::File;
+use std::io;
+use std::io::Read;
+use std::path::PathBuf;
+use thiserror::Error;
 
 /// A `CommitMessage`, the primary entry point to the library
 #[derive(Debug, PartialEq, Clone)]
@@ -654,11 +660,30 @@ impl From<&str> for CommitMessage {
     }
 }
 
+impl TryFrom<PathBuf> for CommitMessage {
+    type Error = Error;
+
+    fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
+        let mut file = File::open(value)?;
+        let mut buffer = String::new();
+
+        file.read_to_string(&mut buffer)
+            .map_err(Error::from)
+            .map(move |_| CommitMessage::from(buffer))
+    }
+}
+
 impl From<String> for CommitMessage {
     fn from(message: String) -> Self {
         let str: &str = &message;
         CommitMessage::from(str)
     }
+}
+
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error("failed to read commit file {0}")]
+    Io(#[from] io::Error),
 }
 
 #[cfg(test)]
