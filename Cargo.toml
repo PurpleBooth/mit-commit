@@ -1,0 +1,22 @@
+[package]
+name = "mit-commit"
+version = "0.1.0"
+authors = [ "Billie Thompson <billie+mit-commit@billiecodes.com>" ]
+edition = "2018"
+license = "Creative Commons Zero v1.0 Universal"
+description = "For building commit linters. This makes it eas."
+categories = [ "parser-implementations", "parsing", "text-editors" ]
+keywords = [ "git", "git-hooks" ]
+readme = "README.md"
+repository = "https://github.com/PurpleBooth/mit-commit"
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+indoc = "0.3"
+thiserror = "1.0.20"
+
+[dev-dependencies]
+pretty_assertions = "0.6.1"
+indoc = "0.3"
