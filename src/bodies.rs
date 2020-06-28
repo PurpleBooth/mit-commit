@@ -2,11 +2,19 @@ use crate::body::Body;
 use crate::fragment::Fragment;
 use crate::trailer::Trailer;
 use std::convert::TryFrom;
+use std::fmt;
+use std::fmt::{Display, Formatter};
 
 /// A collection of user input `CommitMessage` text
 #[derive(Debug, PartialEq, Clone)]
 pub struct Bodies {
     bodies: Vec<Body>,
+}
+
+impl Display for Bodies {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", String::from(self.clone()))
+    }
 }
 
 impl From<Vec<Body>> for Bodies {
@@ -75,6 +83,24 @@ mod tests {
 
         assert_eq!(
             String::from(bodies),
+            String::from(indoc!(
+                "
+                Message Body
+
+                Another Message Body"
+            ))
+        )
+    }
+
+    #[test]
+    fn it_can_be_formatted() {
+        let bodies = Bodies::from(vec![
+            Body::from("Message Body"),
+            Body::from("Another Message Body"),
+        ]);
+
+        assert_eq!(
+            format!("{}", bodies),
             String::from(indoc!(
                 "
                 Message Body
