@@ -1,6 +1,6 @@
 [package]
 name = "mit-commit"
-version = "0.1.0"
+version = "0.3.0"
 authors = [ "Billie Thompson <billie+mit-commit@billiecodes.com>" ]
 edition = "2018"
 license = "CC0-1.0"
@@ -9,9 +9,6 @@ categories = [ "parser-implementations", "parsing", "text-editors" ]
 keywords = [ "git", "git-hooks" ]
 readme = "README.md"
 repository = "https://github.com/PurpleBooth/mit-commit"
-
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 indoc = "0.3"
