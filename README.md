@@ -32,3 +32,5 @@ assert_eq!(
     Subject::from("Update bashrc to include kubernetes completions")
 )
 ```
+
+Read me at [Docs.rs](https://docs.rs/mit-commit/)
