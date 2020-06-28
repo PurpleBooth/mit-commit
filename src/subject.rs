@@ -1,5 +1,7 @@
 use crate::body::Body;
 use crate::fragment::Fragment;
+use std::fmt;
+use std::fmt::{Display, Formatter};
 
 /// The `Subject` from the `CommitMessage`
 #[derive(Debug, PartialEq, Clone, Default)]
@@ -59,6 +61,12 @@ impl From<Subject> for String {
     }
 }
 
+impl Display for Subject {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", String::from(self.clone()))
+    }
+}
+
 impl From<Body> for Subject {
     fn from(body: Body) -> Subject {
         Subject::from(String::from(body))
@@ -100,11 +108,22 @@ mod tests {
     }
 
     #[test]
+    fn it_can_be_formatted() {
+        let _subject = String::from(Subject::from("hello, world!"));
+
+        assert_eq!(
+            format!("{}", Subject::from("hello, world!")),
+            String::from("hello, world!")
+        )
+    }
+
+    #[test]
     fn it_can_be_created_from_a_str() {
         let subject = String::from(Subject::from("hello, world!"));
 
         assert_eq!(subject, String::from("hello, world!"))
     }
+
     #[test]
     fn it_can_be_created_from_a_string() {
         let subject = String::from(Subject::from(String::from("hello, world!")));

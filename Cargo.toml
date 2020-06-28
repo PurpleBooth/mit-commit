@@ -13,7 +13,9 @@ repository = "https://github.com/PurpleBooth/mit-commit"
 [dependencies]
 indoc = "0.3"
 thiserror = "1.0.20"
+regex = "1"
 
 [dev-dependencies]
 pretty_assertions = "0.6.1"
 indoc = "0.3"
+regex = "1"
