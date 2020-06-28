@@ -1,6 +1,7 @@
 use std::fmt;
 use std::fmt::{Display, Formatter};
 
+/// A single contiguous block of `CommitMessage` text
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct Body {
     text: String,

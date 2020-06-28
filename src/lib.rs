@@ -46,32 +46,13 @@ mod subject;
 mod trailer;
 mod trailers;
 
-/// A collection of user input `CommitMessage` text
 pub use bodies::Bodies;
-
-/// A single contiguous block of `CommitMessage` text
 pub use body::Body;
-
-/// A single comment from a `CommitMessage`
 pub use comment::Comment;
-
-/// A collection of comments from a `CommitMessage`
 pub use comments::Comments;
-
-/// A `CommitMessage`, the primary entry point to the library
 pub use commit_message::CommitMessage;
-
-/// A `Fragment` from the `CommitMessage`, either a comment or body
 pub use fragment::Fragment;
-
-/// The `Scissors` from a `CommitMessage`
 pub use scissors::Scissors;
-
-/// The `Subject` from the `CommitMessage`
 pub use subject::Subject;
-
-/// A `Trailer` you might see a in a `CommitMessage`, for example 'Co-authored-by: Billie Thompson <billie@example.com>'
 pub use trailer::Trailer;
-
-/// A Collection of `Trailer`
 pub use trailers::Trailers;

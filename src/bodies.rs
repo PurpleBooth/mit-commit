@@ -3,6 +3,7 @@ use crate::fragment::Fragment;
 use crate::trailer::Trailer;
 use std::convert::TryFrom;
 
+/// A collection of user input `CommitMessage` text
 #[derive(Debug, PartialEq, Clone)]
 pub struct Bodies {
     bodies: Vec<Body>,
