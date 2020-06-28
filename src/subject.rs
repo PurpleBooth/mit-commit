@@ -7,6 +7,38 @@ pub struct Subject {
     text: String,
 }
 
+impl Subject {
+    /// Count characters in subject
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::Subject;
+    ///
+    /// assert_eq!(Subject::from("hello, world!").len(), 13);
+    /// assert_eq!(Subject::from("goodbye").len(), 7)
+    /// ```
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.text.len()
+    }
+
+    /// Is the subject empty
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::Subject;
+    ///
+    /// assert_eq!(Subject::from("hello, world!").is_empty(), false);
+    /// assert_eq!(Subject::from("").is_empty(), true)
+    /// ```
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.text.is_empty()
+    }
+}
+
 impl From<&str> for Subject {
     fn from(subject: &str) -> Self {
         Subject {
@@ -54,6 +86,18 @@ mod tests {
     use crate::fragment::Fragment;
     use crate::Comment;
     use pretty_assertions::assert_eq;
+
+    #[test]
+    fn len() {
+        assert_eq!(Subject::from("hello, world!").len(), 13);
+        assert_eq!(Subject::from("goodbye").len(), 7)
+    }
+
+    #[test]
+    fn is_empty() {
+        assert_eq!(Subject::from("hello, world!").is_empty(), false);
+        assert_eq!(Subject::from("").is_empty(), true)
+    }
 
     #[test]
     fn it_can_be_created_from_a_str() {
