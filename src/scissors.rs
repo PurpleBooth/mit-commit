@@ -68,9 +68,11 @@ impl From<Scissors> for String {
 
 #[cfg(test)]
 mod tests {
-    use super::Scissors;
-    use indoc::indoc;
     use pretty_assertions::assert_eq;
+
+    use indoc::indoc;
+
+    use super::Scissors;
 
     #[test]
     fn can_give_me_it_as_string() {
@@ -78,6 +80,7 @@ mod tests {
 
         assert_eq!(message, String::from("hello, world!"))
     }
+
     #[test]
     fn it_can_be_created_from_a_string() {
         let message = String::from(Scissors::from(String::from("hello, world!")));

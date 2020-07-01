@@ -1,6 +1,7 @@
+use std::slice::Iter;
+
 use crate::comment::Comment;
 use crate::fragment::Fragment;
-use std::slice::Iter;
 
 /// A collection of comments from a `CommitMessage`
 #[derive(Debug, PartialEq, Clone)]
@@ -69,12 +70,15 @@ impl From<Vec<Fragment>> for Comments {
 
 #[cfg(test)]
 mod tests {
-    use super::Comments;
+    use pretty_assertions::assert_eq;
+
+    use indoc::indoc;
+
     use crate::body::Body;
     use crate::comment::Comment;
     use crate::fragment::Fragment;
-    use indoc::indoc;
-    use pretty_assertions::assert_eq;
+
+    use super::Comments;
 
     #[test]
     fn implements_iterator() {

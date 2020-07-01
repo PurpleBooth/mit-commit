@@ -52,9 +52,11 @@ impl From<Comment> for String {
 
 #[cfg(test)]
 mod tests {
-    use super::Comment;
-    use indoc::indoc;
     use pretty_assertions::assert_eq;
+
+    use indoc::indoc;
+
+    use super::Comment;
 
     #[test]
     fn it_can_be_created_from_a_str() {

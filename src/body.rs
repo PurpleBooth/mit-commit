@@ -79,9 +79,11 @@ impl Display for Body {
 
 #[cfg(test)]
 mod tests {
-    use super::Body;
-    use indoc::indoc;
     use pretty_assertions::assert_eq;
+
+    use indoc::indoc;
+
+    use super::Body;
 
     #[test]
     fn it_can_give_me_it_as_a_string_from_a_str() {
@@ -89,6 +91,7 @@ mod tests {
 
         assert_eq!(String::from(body), String::from("Example Body"))
     }
+
     #[test]
     fn it_can_give_me_it_as_a_string_from_a_string() {
         let body = Body::from(String::from("Example Body"));
@@ -102,6 +105,7 @@ mod tests {
 
         assert_eq!(format!("{}", body), "Example Body")
     }
+
     #[test]
     fn it_can_append_another_body_fragment() {
         assert_eq!(
@@ -113,10 +117,12 @@ mod tests {
             Body::from("Example 1").append(&Body::from("Example 2"))
         )
     }
+
     #[test]
     fn it_can_tell_me_if_it_is_empty() {
         assert_eq!(Body::from("").is_empty(), true)
     }
+
     #[test]
     fn it_can_tell_me_if_it_is_full() {
         assert_eq!(Body::from("something").is_empty(), false)
