@@ -1,7 +1,8 @@
-use crate::fragment::Fragment;
-use crate::trailer::Trailer;
 use std::convert::TryFrom;
 use std::slice::Iter;
+
+use crate::fragment::Fragment;
+use crate::trailer::Trailer;
 
 /// A Collection of `Trailer`
 #[derive(Debug, PartialEq, Clone)]
@@ -141,12 +142,15 @@ impl From<Vec<Fragment>> for Trailers {
 
 #[cfg(test)]
 mod tests {
-    use super::Trailers;
+    use pretty_assertions::assert_eq;
+
+    use indoc::indoc;
+
     use crate::fragment::Fragment;
     use crate::trailer::Trailer;
     use crate::Body;
-    use indoc::indoc;
-    use pretty_assertions::assert_eq;
+
+    use super::Trailers;
 
     #[test]
     fn implements_iterator() {
@@ -161,14 +165,14 @@ mod tests {
             iterator.next(),
             Some(&Trailer::new(
                 "Co-authored-by",
-                "Billie Thompson <billie@example.com>"
+                "Billie Thompson <billie@example.com>",
             ))
         );
         assert_eq!(
             iterator.next(),
             Some(&Trailer::new(
                 "Co-authored-by",
-                "Someone Else <someone@example.com>"
+                "Someone Else <someone@example.com>",
             ))
         );
         assert_eq!(iterator.next(), Some(&Trailer::new("Relates-to", "#124")));

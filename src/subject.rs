@@ -1,8 +1,9 @@
-use crate::body::Body;
-use crate::fragment::Fragment;
 use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::str::Chars;
+
+use crate::body::Body;
+use crate::fragment::Fragment;
 
 /// The `Subject` from the `CommitMessage`
 #[derive(Debug, PartialEq, Clone, Default)]
@@ -111,11 +112,13 @@ impl From<Vec<Fragment>> for Subject {
 
 #[cfg(test)]
 mod tests {
-    use super::Subject;
+    use pretty_assertions::assert_eq;
+
     use crate::body::Body;
     use crate::fragment::Fragment;
     use crate::Comment;
-    use pretty_assertions::assert_eq;
+
+    use super::Subject;
 
     #[test]
     fn len() {
@@ -164,6 +167,7 @@ mod tests {
 
         assert_eq!(subject, String::from("hello, world!"))
     }
+
     #[test]
     fn it_can_be_created_from_a_body() {
         let subject = Subject::from(Body::from("hello, world!"));

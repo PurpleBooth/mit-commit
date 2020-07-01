@@ -35,17 +35,6 @@
 //! )
 //! ```
 
-mod bodies;
-mod body;
-mod comment;
-mod comments;
-mod commit_message;
-mod fragment;
-mod scissors;
-mod subject;
-mod trailer;
-mod trailers;
-
 pub use bodies::Bodies;
 pub use body::Body;
 pub use comment::Comment;
@@ -58,3 +47,14 @@ pub use subject::Subject;
 pub use trailer::Error as TrailerError;
 pub use trailer::Trailer;
 pub use trailers::Trailers;
+
+mod bodies;
+mod body;
+mod comment;
+mod comments;
+mod commit_message;
+mod fragment;
+mod scissors;
+mod subject;
+mod trailer;
+mod trailers;

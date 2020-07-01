@@ -1277,9 +1277,9 @@ mod tests {
                 Body::default(),
                 Body::from(indoc!(
                     "
-                This adds file primarily for demonstration purposes. It might not be
-                useful as an actual commit, but it's very useful as a example to use in
-                tests."
+                    This adds file primarily for demonstration purposes. It might not be
+                    useful as an actual commit, but it's very useful as a example to use in
+                    tests."
                 ))
             ])
         )
