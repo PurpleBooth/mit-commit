@@ -46,6 +46,49 @@ impl Trailers {
     pub fn iter(&self) -> Iter<'_, Trailer> {
         self.trailers.iter()
     }
+
+    /// How many trailers are there
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::Trailer;
+    /// use mit_commit::Trailers;
+    /// let trailers = Trailers::from(vec![
+    ///     Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
+    ///     Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
+    /// ]);
+    ///
+    /// assert_eq!(trailers.len(), 2)
+    /// ```
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.trailers.len()
+    }
+
+    /// Are there no trailers
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::Trailer;
+    /// use mit_commit::Trailers;
+    /// assert_eq!(
+    ///     Trailers::from(vec![
+    ///         Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
+    ///         Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
+    ///     ])
+    ///     .is_empty(),
+    ///     false
+    /// );
+    ///
+    /// let trailers: Vec<Trailer> = Vec::new();
+    /// assert_eq!(Trailers::from(trailers).is_empty(), true)
+    /// ```
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.trailers.is_empty()
+    }
 }
 
 impl From<Vec<Trailer>> for Trailers {
@@ -143,6 +186,31 @@ mod tests {
             String::from(trailers),
             String::from("Co-authored-by: Billie Thompson <billie@example.com>")
         )
+    }
+
+    #[test]
+    fn it_can_give_me_the_length() {
+        let trailers = Trailers::from(vec![
+            Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
+            Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
+        ]);
+
+        assert_eq!(trailers.len(), 2)
+    }
+
+    #[test]
+    fn it_can_tell_me_if_it_is_empty() {
+        assert_eq!(
+            Trailers::from(vec![
+                Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
+                Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
+            ])
+            .is_empty(),
+            false
+        );
+
+        let trailers: Vec<Trailer> = Vec::new();
+        assert_eq!(Trailers::from(trailers).is_empty(), true)
     }
 
     #[test]
