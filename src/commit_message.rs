@@ -87,6 +87,62 @@ impl CommitMessage {
     }
 
     /// A helper method to let you insert trailers
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use indoc::indoc;
+    /// use mit_commit::CommitMessage;
+    /// use mit_commit::Trailer;
+    /// let commit = CommitMessage::from(indoc!(
+    ///     "
+    ///     Example Commit Message
+    ///
+    ///     This is an example commit message for linting
+    ///
+    ///     Relates-to: #153
+    ///
+    ///     ; Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+    ///     ; die mit ';' beginnen, werden ignoriert, und eine leere Beschreibung
+    ///     ; bricht den Commit ab.
+    ///     ;
+    ///     ; Auf Branch main
+    ///     ; Ihr Branch ist auf demselben Stand wie 'origin/main'.
+    ///     ;
+    ///     ; Zum Commit vorgemerkte \u{00E4}nderungen:
+    ///     ;    neue Datei:     file
+    ///     ;
+    ///     "
+    /// ));
+    ///
+    /// assert_eq!(
+    ///     String::from(commit.add_trailer(Trailer::new(
+    ///         "Co-authored-by",
+    ///         "Test Trailer <test@example.com>"
+    ///     ))),
+    ///     String::from(CommitMessage::from(indoc!(
+    ///         "
+    ///         Example Commit Message
+    ///
+    ///         This is an example commit message for linting
+    ///
+    ///         Relates-to: #153
+    ///         Co-authored-by: Test Trailer <test@example.com>
+    ///
+    ///         ; Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+    ///         ; die mit ';' beginnen, werden ignoriert, und eine leere Beschreibung
+    ///         ; bricht den Commit ab.
+    ///         ;
+    ///         ; Auf Branch main
+    ///         ; Ihr Branch ist auf demselben Stand wie 'origin/main'.
+    ///         ;
+    ///         ; Zum Commit vorgemerkte \u{00E4}nderungen:
+    ///         ;    neue Datei:     file
+    ///         ;
+    ///         "
+    ///     )))
+    /// );
+    /// ```
     #[must_use]
     pub fn add_trailer(&self, trailer: Trailer) -> Self {
         let mut fragments = Vec::new();
@@ -984,6 +1040,7 @@ mod tests {
             String::from(expected)
         );
     }
+
     #[test]
     fn can_add_trailers_to_an_empty_commit_with_single_trailer() {
         let commit = CommitMessage::from(indoc!(
