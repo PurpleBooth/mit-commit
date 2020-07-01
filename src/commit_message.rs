@@ -1,19 +1,22 @@
+use std::convert::TryFrom;
+use std::fs::File;
+use std::io;
+use std::io::Read;
+use std::path::PathBuf;
+
+use regex::Regex;
+use thiserror::Error;
+
+use crate::scissors::Scissors;
+use crate::Trailer;
+
 use super::bodies::Bodies;
 use super::body::Body;
 use super::comment::Comment;
 use super::comments::Comments;
 use super::fragment::Fragment;
 use super::subject::Subject;
-
 use super::trailers::Trailers;
-use crate::scissors::Scissors;
-use regex::Regex;
-use std::convert::TryFrom;
-use std::fs::File;
-use std::io;
-use std::io::Read;
-use std::path::PathBuf;
-use thiserror::Error;
 
 /// A `CommitMessage`, the primary entry point to the library
 #[derive(Debug, PartialEq, Clone)]
@@ -83,6 +86,24 @@ impl CommitMessage {
         CommitMessage::from(format!("{}{}", body, scissors))
     }
 
+    /// A helper method to let you insert trailers
+    #[must_use]
+    pub fn add_trailer(&self, trailer: Trailer) -> Self {
+        let mut fragments = Vec::new();
+
+        if self.bodies.iter().all(Body::is_empty) && self.trailers.is_empty() {
+            fragments.push(Fragment::Body(Body::default()));
+        }
+
+        if self.trailers.is_empty() {
+            fragments.push(Fragment::Body(Body::default()));
+        }
+
+        fragments.push(trailer.into());
+
+        self.insert_after_last_full_body(fragments)
+    }
+
     /// Insert text in the place you're most likely to want it
     ///
     /// In case you don't have any full bodies in there, it inserts it at the top of the commit
@@ -108,7 +129,7 @@ impl CommitMessage {
     ///         ];
     ///         let commit = CommitMessage::from_fragments(ast, None);
     ///
-    ///         assert_eq!(commit.insert_after_last_full_body(Fragment::Body(Body::from("Relates-to: #656"))).get_ast(), vec![
+    ///         assert_eq!(commit.insert_after_last_full_body(vec![Fragment::Body(Body::from("Relates-to: #656"))]).get_ast(), vec![
     ///             Fragment::Body(Body::from("Add file")),
     ///             Fragment::Body(Body::default()),
     ///             Fragment::Body(Body::from("Looks-like-a-trailer: But isn\'t")),
@@ -123,7 +144,7 @@ impl CommitMessage {
     ///         ])
     /// ```
     #[must_use]
-    pub fn insert_after_last_full_body(&self, fragment: Fragment) -> CommitMessage {
+    pub fn insert_after_last_full_body(&self, fragment: Vec<Fragment>) -> CommitMessage {
         let position = self
             .ast
             .clone()
@@ -146,7 +167,7 @@ impl CommitMessage {
         CommitMessage::from_fragments(
             [
                 before.into_iter().map(|(_, x)| x).collect(),
-                vec![fragment],
+                fragment,
                 after.into_iter().map(|(_, x)| x).collect(),
             ]
             .concat(),
@@ -716,7 +737,6 @@ impl From<&str> for CommitMessage {
     ///     message.get_subject(),
     ///     Subject::from("Update bashrc to include kubernetes completions")
     /// )
-    /// ```
     fn from(message: &str) -> Self {
         let (rest, scissors) = Scissors::parse_sections(message);
         let comment_character = CommitMessage::guess_comment_character(&rest, scissors.clone());
@@ -771,7 +791,10 @@ pub enum Error {
 
 #[cfg(test)]
 mod tests {
-    use super::CommitMessage;
+    use indoc::indoc;
+    use pretty_assertions::assert_eq;
+    use regex::Regex;
+
     use crate::bodies::Bodies;
     use crate::body::Body;
     use crate::comment::Comment;
@@ -781,9 +804,8 @@ mod tests {
     use crate::trailer::Trailer;
     use crate::trailers::Trailers;
     use crate::Fragment;
-    use indoc::indoc;
-    use pretty_assertions::assert_eq;
-    use regex::Regex;
+
+    use super::CommitMessage;
 
     #[test]
     fn can_check_if_it_matches_pattern() {
@@ -818,6 +840,197 @@ mod tests {
 
         let re = Regex::new("Relates[- ]to").unwrap();
         assert_eq!(commit.matches_pattern(&re), true);
+    }
+
+    #[test]
+    fn can_add_trailers_to_a_normal_commit() {
+        let commit = CommitMessage::from(indoc!(
+            "
+            Example Commit Message
+
+            This is an example commit message for linting
+
+            Relates-to: #153
+
+            # Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+            # die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
+            # bricht den Commit ab.
+            #
+            # Auf Branch main
+            # Ihr Branch ist auf demselben Stand wie 'origin/main'.
+            #
+            # Zum Commit vorgemerkte \u{00E4}nderungen:
+            #	neue Datei:     file
+            #
+            "
+        ));
+
+        assert_eq!(
+            String::from(commit.add_trailer(Trailer::new("Co-authored-by", "Test Trailer <test@example.com>"))),
+            String::from(CommitMessage::from(indoc!(
+            "
+            Example Commit Message
+
+            This is an example commit message for linting
+
+            Relates-to: #153
+            Co-authored-by: Test Trailer <test@example.com>
+
+            # Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+            # die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
+            # bricht den Commit ab.
+            #
+            # Auf Branch main
+            # Ihr Branch ist auf demselben Stand wie 'origin/main'.
+            #
+            # Zum Commit vorgemerkte \u{00E4}nderungen:
+            #	neue Datei:     file
+            #
+            "
+        ))));
+    }
+
+    #[test]
+    fn can_add_trailers_to_a_commit_without_existing_trailers() {
+        let commit = CommitMessage::from(indoc!(
+            "
+            Example Commit Message
+
+            This is an example commit message for linting
+
+            # Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+            # die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
+            # bricht den Commit ab.
+            #
+            # Auf Branch main
+            # Ihr Branch ist auf demselben Stand wie 'origin/main'.
+            #
+            # Zum Commit vorgemerkte \u{00E4}nderungen:
+            #	neue Datei:     file
+            #
+            "
+        ));
+
+        let expected = CommitMessage::from(indoc!(
+            "
+            Example Commit Message
+
+            This is an example commit message for linting
+
+            Co-authored-by: Test Trailer <test@example.com>
+
+            # Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+            # die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
+            # bricht den Commit ab.
+            #
+            # Auf Branch main
+            # Ihr Branch ist auf demselben Stand wie 'origin/main'.
+            #
+            # Zum Commit vorgemerkte \u{00E4}nderungen:
+            #	neue Datei:     file
+            #
+            "
+        ));
+        assert_eq!(
+            String::from(commit.add_trailer(Trailer::new(
+                "Co-authored-by",
+                "Test Trailer <test@example.com>"
+            ))),
+            String::from(expected)
+        );
+    }
+
+    #[test]
+    fn can_add_trailers_to_an_empty_commit() {
+        let commit = CommitMessage::from(indoc!(
+            "
+
+            # Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+            # die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
+            # bricht den Commit ab.
+            #
+            # Auf Branch main
+            # Ihr Branch ist auf demselben Stand wie 'origin/main'.
+            #
+            # Zum Commit vorgemerkte \u{00E4}nderungen:
+            #	neue Datei:     file
+            #
+            "
+        ));
+
+        let expected = CommitMessage::from(indoc!(
+            "
+
+
+            Co-authored-by: Test Trailer <test@example.com>
+
+            # Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+            # die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
+            # bricht den Commit ab.
+            #
+            # Auf Branch main
+            # Ihr Branch ist auf demselben Stand wie 'origin/main'.
+            #
+            # Zum Commit vorgemerkte \u{00E4}nderungen:
+            #	neue Datei:     file
+            #
+            "
+        ));
+        assert_eq!(
+            String::from(commit.add_trailer(Trailer::new(
+                "Co-authored-by",
+                "Test Trailer <test@example.com>"
+            ))),
+            String::from(expected)
+        );
+    }
+    #[test]
+    fn can_add_trailers_to_an_empty_commit_with_single_trailer() {
+        let commit = CommitMessage::from(indoc!(
+            "
+
+
+            Co-authored-by: Test Trailer <test@example.com>
+
+            # Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+            # die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
+            # bricht den Commit ab.
+            #
+            # Auf Branch main
+            # Ihr Branch ist auf demselben Stand wie 'origin/main'.
+            #
+            # Zum Commit vorgemerkte \u{00E4}nderungen:
+            #	neue Datei:     file
+            #
+            "
+        ));
+
+        let expected = CommitMessage::from(indoc!(
+            "
+
+
+            Co-authored-by: Test Trailer <test@example.com>
+            Co-authored-by: Someone Else <someone@example.com>
+
+            # Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+            # die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
+            # bricht den Commit ab.
+            #
+            # Auf Branch main
+            # Ihr Branch ist auf demselben Stand wie 'origin/main'.
+            #
+            # Zum Commit vorgemerkte \u{00E4}nderungen:
+            #	neue Datei:     file
+            #
+            "
+        ));
+        assert_eq!(
+            String::from(commit.add_trailer(Trailer::new(
+                "Co-authored-by",
+                "Someone Else <someone@example.com>"
+            ))),
+            String::from(expected)
+        );
     }
 
     #[test]
@@ -956,7 +1169,7 @@ mod tests {
         ];
         let commit = CommitMessage::from_fragments(ast, None);
 
-        assert_eq!(commit.insert_after_last_full_body(Fragment::Body(Body::from("Relates-to: #656"))).get_ast(), vec![
+        assert_eq!(commit.insert_after_last_full_body(vec![Fragment::Body(Body::from("Relates-to: #656"))]).get_ast(), vec![
             Fragment::Body(Body::from("Add file")),
             Fragment::Body(Body::default()),
             Fragment::Body(Body::from("Looks-like-a-trailer: But isn\'t")),
@@ -980,7 +1193,7 @@ mod tests {
         ];
         let commit = CommitMessage::from_fragments(ast, None);
 
-        assert_eq!(commit.insert_after_last_full_body(Fragment::Body(Body::from("Relates-to: #656"))).get_ast(), vec![
+        assert_eq!(commit.insert_after_last_full_body(vec![Fragment::Body(Body::from("Relates-to: #656"))]).get_ast(), vec![
             Fragment::Body(Body::from("Relates-to: #656")),
             Fragment::Comment(Comment::from("# Short (50 chars or less) summary of changes\n#\n# More detailed explanatory text, if necessary.  Wrap it to\n# about 72 characters or so.  In some contexts, the first\n# line is treated as the subject of an email and the rest of\n# the text as the body.  The blank line separating the\n# summary from the body is critical (unless you omit the body\n# entirely); tools like rebase can get confused if you run\n# the two together.\n#\n# Further paragraphs come after blank lines.\n#\n#   - Bullet points are okay, too\n#\n#   - Typically a hyphen or asterisk is used for the bullet,\n#     preceded by a single space, with blank lines in\n#     between, but conventions vary here")),
             Fragment::Body(Body::default()),
@@ -1191,9 +1404,9 @@ mod tests {
         let message = CommitMessage::from(LONG_SUBJECT_ONLY_COMMIT);
         let ast: Vec<Fragment> = vec![
             Fragment::Body(Body::from("Initial Commit")),
-            Fragment::Comment(Comment::from( "# Short (50 chars or less) summary of changes\n#\n# More detailed explanatory text, if necessary.  Wrap it to\n# about 72 characters or so.  In some contexts, the first\n# line is treated as the subject of an email and the rest of\n# the text as the body.  The blank line separating the\n# summary from the body is critical (unless you omit the body\n# entirely); tools like rebase can get confused if you run\n# the two together.\n#\n# Further paragraphs come after blank lines.\n#\n#   - Bullet points are okay, too\n#\n#   - Typically a hyphen or asterisk is used for the bullet,\n#     preceded by a single space, with blank lines in\n#     between, but conventions vary here")),
+            Fragment::Comment(Comment::from("# Short (50 chars or less) summary of changes\n#\n# More detailed explanatory text, if necessary.  Wrap it to\n# about 72 characters or so.  In some contexts, the first\n# line is treated as the subject of an email and the rest of\n# the text as the body.  The blank line separating the\n# summary from the body is critical (unless you omit the body\n# entirely); tools like rebase can get confused if you run\n# the two together.\n#\n# Further paragraphs come after blank lines.\n#\n#   - Bullet points are okay, too\n#\n#   - Typically a hyphen or asterisk is used for the bullet,\n#     preceded by a single space, with blank lines in\n#     between, but conventions vary here")),
             Fragment::Body(Body::default()),
-            Fragment::Comment(Comment::from( "# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch master\n#\n# Initialer Commit\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     src/bodies.rs\n#\tneue Datei:     src/body.rs\n#\tneue Datei:     src/comment.rs\n#\tneue Datei:     src/comments.rs\n#\tneue Datei:     src/commit_message.rs\n#\tneue Datei:     src/scissors.rs\n#\tneue Datei:     src/subject.rs\n#\tneue Datei:     src/trailer.rs\n#\tneue Datei:     src/trailers.rs\n#\n# \u{e4}nderungen, die nicht zum Commit vorgemerkt sind:\n#\tge\u{e4}ndert:       src/bodies.rs\n#\tge\u{e4}ndert:       src/body.rs\n#\tge\u{e4}ndert:       src/comment.rs\n#\tge\u{e4}ndert:       src/comments.rs\n#\tge\u{e4}ndert:       src/commit_message.rs\n#\tge\u{e4}ndert:       src/scissors.rs\n#\tge\u{e4}ndert:       src/subject.rs\n#\tge\u{e4}ndert:       src/trailer.rs\n#\tge\u{e4}ndert:       src/trailers.rs\n#\n# Unversionierte Dateien:\n#\t.gitignore\n#\tCargo.toml\n#\tsrc/lib.rs\n#")),
+            Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch master\n#\n# Initialer Commit\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     src/bodies.rs\n#\tneue Datei:     src/body.rs\n#\tneue Datei:     src/comment.rs\n#\tneue Datei:     src/comments.rs\n#\tneue Datei:     src/commit_message.rs\n#\tneue Datei:     src/scissors.rs\n#\tneue Datei:     src/subject.rs\n#\tneue Datei:     src/trailer.rs\n#\tneue Datei:     src/trailers.rs\n#\n# \u{e4}nderungen, die nicht zum Commit vorgemerkt sind:\n#\tge\u{e4}ndert:       src/bodies.rs\n#\tge\u{e4}ndert:       src/body.rs\n#\tge\u{e4}ndert:       src/comment.rs\n#\tge\u{e4}ndert:       src/comments.rs\n#\tge\u{e4}ndert:       src/commit_message.rs\n#\tge\u{e4}ndert:       src/scissors.rs\n#\tge\u{e4}ndert:       src/subject.rs\n#\tge\u{e4}ndert:       src/trailer.rs\n#\tge\u{e4}ndert:       src/trailers.rs\n#\n# Unversionierte Dateien:\n#\t.gitignore\n#\tCargo.toml\n#\tsrc/lib.rs\n#")),
         ];
 
         assert_eq!(message.get_ast(), ast)
