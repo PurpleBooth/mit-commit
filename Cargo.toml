@@ -19,3 +19,8 @@ regex = "1"
 pretty_assertions = "0.6.1"
 indoc = "0.3"
 regex = "1"
+criterion = "0.3"
+
+[[bench]]
+name = "commit_message"
+harness = false
