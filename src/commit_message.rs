@@ -201,14 +201,10 @@ impl CommitMessage {
     /// ```
     #[must_use]
     pub fn insert_after_last_full_body(&self, fragment: Vec<Fragment>) -> CommitMessage {
-        let position = self
-            .ast
-            .clone()
-            .into_iter()
-            .rposition(|fragment| match fragment {
-                Fragment::Body(body) => !body.is_empty(),
-                Fragment::Comment(_) => false,
-            });
+        let position = self.ast.iter().rposition(|fragment| match fragment {
+            Fragment::Body(body) => !body.is_empty(),
+            Fragment::Comment(_) => false,
+        });
 
         let (before, after): (Vec<_>, Vec<_>) = match position {
             Some(position) => self
