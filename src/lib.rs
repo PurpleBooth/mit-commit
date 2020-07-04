@@ -35,6 +35,9 @@
 //! )
 //! ```
 
+#[macro_use]
+extern crate lazy_static;
+
 pub use bodies::Bodies;
 pub use body::Body;
 pub use comment::Comment;

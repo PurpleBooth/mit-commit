@@ -2036,6 +2036,10 @@ mod tests {
     }
 }
 
+lazy_static! {
+    static ref NOT_WHITESPACE_RE: Regex = Regex::new("^\\W$").unwrap();
+}
+
 impl CommitMessage {
     fn guess_comment_character(rest: &str, scissors: Option<Scissors>) -> Option<char> {
         match scissors {
@@ -2044,11 +2048,7 @@ impl CommitMessage {
                 .lines()
                 .last()
                 .and_then(|line| line.chars().next())
-                .filter(|x| {
-                    Regex::new("^\\W$")
-                        .unwrap()
-                        .is_match(x.to_string().as_str())
-                }),
+                .filter(|x| NOT_WHITESPACE_RE.is_match(&x.to_string())),
         }
     }
 }
