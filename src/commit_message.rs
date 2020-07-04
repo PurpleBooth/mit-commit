@@ -246,37 +246,34 @@ impl CommitMessage {
         ungrouped_ast
             .into_iter()
             .fold(vec![], |acc: Vec<Fragment>, new_fragment| {
-                let len = acc.len();
-                let previous_fragments = acc.clone();
+                let mut previous_fragments = acc.clone();
                 match (acc.last(), &new_fragment) {
-                    (None, fragment) => vec![previous_fragments, vec![fragment.clone()]].concat(),
-                    (Some(Fragment::Comment(existing)), Fragment::Comment(new)) => vec![
+                    (None, fragment) => {
+                        previous_fragments.push(fragment.clone());
                         previous_fragments
-                            .into_iter()
-                            .take(len - 1)
-                            .collect::<Vec<Fragment>>(),
-                        vec![Fragment::Comment(existing.clone().append(&new.clone()))],
-                    ]
-                    .concat(),
+                    }
+                    (Some(Fragment::Comment(existing)), Fragment::Comment(new)) => {
+                        previous_fragments.truncate(acc.len() - 1);
+                        previous_fragments.push(Fragment::Comment(existing.append(&new)));
+                        previous_fragments
+                    }
                     (Some(Fragment::Body(existing)), Fragment::Body(new)) => {
                         if new.is_empty() || existing.is_empty() {
-                            vec![previous_fragments, vec![Fragment::Body(new.clone())]].concat()
+                            previous_fragments.push(Fragment::Body(new.clone()));
+                            previous_fragments
                         } else {
-                            vec![
-                                previous_fragments
-                                    .into_iter()
-                                    .take(len - 1)
-                                    .collect::<Vec<Fragment>>(),
-                                vec![Fragment::Body(existing.clone().append(&new.clone()))],
-                            ]
-                            .concat()
+                            previous_fragments.truncate(acc.len() - 1);
+                            previous_fragments.push(Fragment::Body(existing.append(&new)));
+                            previous_fragments
                         }
                     }
                     (Some(Fragment::Body(_)), Fragment::Comment(new)) => {
-                        vec![previous_fragments, vec![Fragment::Comment(new.clone())]].concat()
+                        previous_fragments.push(Fragment::Comment(new.clone()));
+                        previous_fragments
                     }
                     (Some(Fragment::Comment(_)), Fragment::Body(new)) => {
-                        vec![previous_fragments, vec![Fragment::Body(new.clone())]].concat()
+                        previous_fragments.push(Fragment::Body(new.clone()));
+                        previous_fragments
                     }
                 }
             })
