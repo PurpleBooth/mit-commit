@@ -18,6 +18,11 @@ test:
 build:
 	cargo build --release
 
+.PHONY: bench
+## Check performance
+bench:
+	cargo bench
+
 .PHONY: lint
 ## Lint it
 lint:
