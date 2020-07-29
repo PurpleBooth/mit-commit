@@ -4,9 +4,10 @@ use thiserror::Error;
 
 use crate::body::Body;
 use crate::Fragment;
+use std::hash::{Hash, Hasher};
 
 /// A `Trailer` you might see a in a `CommitMessage`, for example 'Co-authored-by: Billie Thompson <billie@example.com>'
-#[derive(Debug, PartialEq, Clone, Eq, Hash, Ord, PartialOrd)]
+#[derive(Debug, Clone, Eq, Ord, PartialOrd)]
 pub struct Trailer {
     key: String,
     value: String,
@@ -70,6 +71,19 @@ impl Trailer {
     }
 }
 
+impl PartialEq for Trailer {
+    fn eq(&self, other: &Self) -> bool {
+        self.key == other.key && self.value.trim_end() == other.value.trim_end()
+    }
+}
+
+impl Hash for Trailer {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.key.hash(state);
+        self.value.trim_end().hash(state);
+    }
+}
+
 impl From<Trailer> for String {
     fn from(trailer: Trailer) -> Self {
         format!("{}: {}", trailer.key, trailer.value)
@@ -115,6 +129,8 @@ mod tests {
     use crate::Fragment;
 
     use super::Trailer;
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
 
     #[test]
     fn it_can_tell_me_its_key() {
@@ -131,6 +147,25 @@ mod tests {
     }
 
     #[test]
+    fn it_does_not_take_trailing_whitespace_into_account_in_equality_checks() {
+        let a = Trailer::new("Relates-to", "#128\n");
+        let b = Trailer::new("Relates-to", "#128");
+
+        assert_eq!(a, b)
+    }
+
+    #[test]
+    fn it_does_not_take_trailing_whitespace_into_account_in_hashing() {
+        let mut hasher_a = DefaultHasher::new();
+        Trailer::new("Relates-to", "#128\n").hash(&mut hasher_a);
+
+        let mut hasher_b = DefaultHasher::new();
+        Trailer::new("Relates-to", "#128").hash(&mut hasher_b);
+
+        assert_eq!(hasher_a.finish(), hasher_b.finish())
+    }
+
+    #[test]
     fn it_can_give_me_itself_as_a_string() {
         let trailer = Trailer::new("Relates-to", "#128");
 
@@ -144,6 +179,16 @@ mod tests {
         assert_eq!(
             String::from(trailer.expect("Could not parse from string")),
             String::from("Relates-to: #128")
+        )
+    }
+
+    #[test]
+    fn it_preserves_preceding_whitespace() {
+        let trailer = Trailer::try_from(Body::from("Relates-to:      #128\n"));
+
+        assert_eq!(
+            String::from(trailer.expect("Could not parse from string")),
+            String::from("Relates-to:      #128\n")
         )
     }
 
