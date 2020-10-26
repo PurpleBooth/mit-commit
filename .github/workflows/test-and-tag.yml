@@ -156,7 +156,7 @@ jobs:
           command: clippy
           args: "--all-targets --all-features -- -D warnings -Dclippy::all -D clippy::pedantic -D clippy::cargo"
       - name: Prettify code
-        uses: creyD/prettier_action@v3.0
+        uses: creyD/prettier_action@v3.1
         with:
           prettier_options: --check **/*.{yml,yaml}
   publish-to-cargo:
