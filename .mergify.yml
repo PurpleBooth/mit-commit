@@ -9,4 +9,5 @@ pull_request_rules:
       - check-success=lints
     actions:
       merge:
+        strict: smart+fasttrack
         method: merge
