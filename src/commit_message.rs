@@ -714,6 +714,7 @@ impl CommitMessage {
     /// let re = Regex::new("[Ee]xample Commit Message").unwrap();
     /// assert_eq!(commit.matches_pattern(&re), true);
     /// ```
+    #[must_use]
     pub fn matches_pattern(&self, re: &Regex) -> bool {
         let text = self
             .clone()
@@ -802,12 +803,12 @@ impl From<&str> for CommitMessage {
         let bodies = Bodies::from(ast.clone());
 
         CommitMessage {
+            scissors,
             ast,
             subject,
-            bodies,
-            comments,
             trailers,
-            scissors,
+            comments,
+            bodies,
         }
     }
 }
