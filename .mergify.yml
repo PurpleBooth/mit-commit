@@ -1,0 +1,12 @@
+pull_request_rules:
+  - name: automatic merge for Dependabot pull requests
+    conditions:
+      - author~=^dependabot(|-preview)\[bot\]$
+      - check-success=security-audit
+      - check-success=check
+      - check-success=test (ubuntu-latest)
+      - check-success=bench (ubuntu-latest)
+      - check-success=lints
+    actions:
+      merge:
+        method: merge
