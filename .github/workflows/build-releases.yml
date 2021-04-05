@@ -34,7 +34,7 @@ jobs:
           args: clog-cli
       - id: get_previous_version
         name: Calculate previous version
-        run: echo ::set-output name=PREVIOUS_VERSION::$(git tag | sort --version-sort | tail -n 2 | head -n 1)
+        run: echo ::set-output name=PREVIOUS_VERSION::$(git tag | sort --version-sort | tail -n 3 | head -n 1)
         shell: bash
       - uses: actions-rs/cargo@v1
         name: Install TOML Reader
