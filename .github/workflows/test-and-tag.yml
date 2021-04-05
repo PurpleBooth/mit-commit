@@ -1,3 +1,4 @@
+name: Test
 "on":
   push:
     branches:
@@ -8,7 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
+        name: Checkout the repository
       - uses: actions/cache@v2.1.4
+        name: Cache cargo
         with:
           path: |
             ~/.cargo/registry
@@ -17,50 +20,25 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       - uses: actions-rs/audit-check@v1
+        name: Audit check cargo packages
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
   version:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions-rs/toolchain@v1
+      - name: Checkout code
+        uses: actions/checkout@v2.3.4
         with:
-          profile: minimal
-          toolchain: stable
-          default: true
-      - uses: actions/checkout@v2.3.4
-      - uses: actions/cache@v2.1.4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-      - id: get_previous_version
-        run: echo ::set-output name=PREVIOUS_VERSION::$(git tag | sort --version-sort | tail -n 1)
-        shell: bash
-      - id: semvers
-        uses: WyriHaximus/github-action-next-semvers@master
-        with:
-          version: "${{ steps.get_previous_version.outputs.PREVIOUS_VERSION }}"
-      - run: mkdir -p ./version
-      - if: "!contains(github.event.head_commit.message, 'BC BREAK') && !contains(github.event.head_commit.message, 'Signed-off-by: dependabot-preview[bot] <support@dependabot.com>')"
-        run: echo "$VERSION" >./version/version
+          fetch-depth: 0
+      - uses: chaaz/versio-actions/install@v1.1
+        name: Install versio
+      - name: Check projects
+        run: versio check
+      - name: Print changes
+        run: versio plan
         env:
-          VERSION: ${{ steps.semvers.outputs.v_minor }}
-      - if: github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]'
-        run: echo "$VERSION" >./version/version
-        env:
-          VERSION: ${{ steps.semvers.outputs.v_patch }}
-      - run: echo "$VERSION" > ./version/version
-        env:
-          VERSION: ${{ steps.semvers.outputs.v_major }}
-        if: "contains(github.event.head_commit.message, 'BC BREAK')"
-      - uses: actions/upload-artifact@v2
-        with:
-          name: version
-          path: ./version/version
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_USER: ${{ github.actor }}
   check:
     runs-on: ubuntu-latest
     steps:
@@ -88,6 +66,9 @@ jobs:
         include:
           - os: ubuntu-latest
     steps:
+      - run: ${{ matrix.install }}
+        env:
+          DEBIAN_FRONTEND: noninteractive
       - uses: actions/checkout@v2.3.4
       - uses: actions/cache@v2.1.4
         with:
@@ -160,7 +141,7 @@ jobs:
         with:
           prettier_options: --check **/*.{yml,yaml}
   publish-to-cargo:
-    if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'Release v')
+    if: "github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'build(deploy): Versio update versions')"
     needs:
       - version
       - test
@@ -179,7 +160,7 @@ jobs:
           cargo login "$CARGO_TOKEN"
           cargo publish
   merge-and-push:
-    if: github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'Release v')
+    if: github.ref == 'refs/heads/main'
     needs:
       - version
       - test
@@ -192,39 +173,10 @@ jobs:
         with:
           token: "${{ secrets.COMMITTER_TOKEN }}"
           fetch-depth: 0
-      - uses: actions/cache@v2.1.4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions/download-artifact@v2
-      - id: get_current_version
-        run: |
-          echo ::set-output name=VERSION::$(cat ./version/version | cut -c2-)
-          echo ::set-output name=V_VERSION::$(cat ./version/version)
-        shell: bash
-      - uses: ciiiii/toml-editor@1.0.0
-        with:
-          file: "Cargo.toml"
-          key: "package.version"
-          value: ${{ steps.get_current_version.outputs.VERSION }}
-      - uses: actions-rs/cargo@v1
-        with:
-          command: check
-      - shell: bash
+      - uses: chaaz/versio-actions/install@v1.1
+        name: Install versio
+      - name: Generate release
+        run: versio release
         env:
-          GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git commit -am "Release $(cat ./version/version)"
-          git tag -a -m "Release $(cat ./version/version)" "$(cat ./version/version)"
-          git push --tags
-
-          git checkout -b "release-$(cat ./version/version)"
-          git push -f origin "release-$(cat ./version/version)"
-          gh pr create -l releases --fill
+          GITHUB_USER: ${{ github.actor }}
