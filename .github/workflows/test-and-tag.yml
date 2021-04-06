@@ -1,182 +1,184 @@
 name: Test
-"on":
+on:
   push:
     branches:
-      - "*"
-  pull_request: null
+    - '*'
+  pull_request:
 jobs:
   security-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
-        name: Checkout the repository
-      - uses: actions/cache@v2.1.4
-        name: Cache cargo
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions-rs/audit-check@v1
-        name: Audit check cargo packages
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/checkout@v2.3.4
+      name: Checkout the repository
+    - uses: actions/cache@v2.1.4
+      name: Cache cargo
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          ~/.cargo/bin
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - uses: actions-rs/audit-check@v1
+      name: Audit check cargo packages
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
   version:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2.3.4
-        with:
-          fetch-depth: 0
-      - uses: chaaz/versio-actions/install@v1.1
-        name: Install versio
-      - name: Check projects
-        run: versio check
-      - name: Print changes
-        run: versio plan
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_USER: ${{ github.actor }}
+    - name: Checkout code
+      uses: actions/checkout@v2.3.4
+      with:
+        fetch-depth: 0
+    - uses: chaaz/versio-actions/install@v1.1
+      name: Install versio
+    - name: Check projects
+      run: versio check
+    - name: Print changes
+      run: versio plan
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_USER: ${{ github.actor }}
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
-      - uses: actions/cache@v2.1.4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          default: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: check
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/cache@v2.1.4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          ~/.cargo/bin
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        default: true
+    - uses: actions-rs/cargo@v1
+      with:
+        command: check
   test:
-    runs-on: "${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+        - os: ubuntu-latest
     steps:
-      - run: ${{ matrix.install }}
-        env:
-          DEBIAN_FRONTEND: noninteractive
-      - uses: actions/checkout@v2.3.4
-      - uses: actions/cache@v2.1.4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          default: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
+    - run: ${{ matrix.install }}
+      env:
+        DEBIAN_FRONTEND: noninteractive
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/cache@v2.1.4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          ~/.cargo/bin
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        default: true
+    - uses: actions-rs/cargo@v1
+      with:
+        command: test
   bench:
-    runs-on: "${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+        - os: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
-      - uses: actions/cache@v2.1.4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          default: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: bench
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/cache@v2.1.4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          ~/.cargo/bin
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        default: true
+    - uses: actions-rs/cargo@v1
+      with:
+        command: bench
   lints:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
-      - uses: actions/cache@v2.1.4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ~/.cargo/bin
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          default: true
-          components: "rustfmt, clippy"
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: "--all -- --check"
-      - uses: actions-rs/cargo@v1
-        with:
-          command: clippy
-          args: "--all-targets --all-features -- -D warnings -Dclippy::all -D clippy::pedantic -D clippy::cargo"
-      - name: Prettify code
-        uses: creyD/prettier_action@v3.3
-        with:
-          prettier_options: --check **/*.{yml,yaml}
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/cache@v2.1.4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          ~/.cargo/bin
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: stable
+        default: true
+        components: rustfmt, clippy
+    - uses: actions-rs/cargo@v1
+      with:
+        command: fmt
+        args: --all -- --check
+    - uses: actions-rs/cargo@v1
+      with:
+        command: clippy
+        args: --all-targets --all-features -- -D warnings -Dclippy::all -D clippy::pedantic
+          -D clippy::cargo
+    - name: Prettify code
+      uses: creyD/prettier_action@v3.3
+      with:
+        prettier_options: --check **/*.{yml,yaml}
   publish-to-cargo:
-    if: "github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'build(deploy): Versio update versions')"
+    if: "github.ref == 'refs/heads/main' && contains(github.event.head_commit.message,\
+      \ 'build(deploy): Versio update versions')"
     needs:
-      - version
-      - test
-      - lints
-      - check
-      - security-audit
+    - version
+    - test
+    - lints
+    - check
+    - security-audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
-        with:
-          token: "${{ secrets.COMMITTER_TOKEN }}"
-          fetch-depth: 0
-      - env:
-          CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
-        run: |
-          cargo login "$CARGO_TOKEN"
-          cargo publish
+    - uses: actions/checkout@v2.3.4
+      with:
+        token: ${{ secrets.COMMITTER_TOKEN }}
+        fetch-depth: 0
+    - env:
+        CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
+      run: |
+        cargo login "$CARGO_TOKEN"
+        cargo publish
   merge-and-push:
     if: github.ref == 'refs/heads/main'
     needs:
-      - version
-      - test
-      - lints
-      - check
-      - security-audit
+    - version
+    - test
+    - lints
+    - check
+    - security-audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
-        with:
-          token: "${{ secrets.COMMITTER_TOKEN }}"
-          fetch-depth: 0
-      - uses: chaaz/versio-actions/install@v1.1
-        name: Install versio
-      - name: Generate release
-        run: versio release
-        env:
-          GITHUB_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
-          GITHUB_USER: ${{ github.actor }}
+    - uses: actions/checkout@v2.3.4
+      with:
+        token: ${{ secrets.COMMITTER_TOKEN }}
+        fetch-depth: 0
+    - uses: chaaz/versio-actions/install@v1.1
+      name: Install versio
+    - name: Generate release
+      run: versio release
+      env:
+        GITHUB_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
+        GITHUB_USER: ${{ github.actor }}
