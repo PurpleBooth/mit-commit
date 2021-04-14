@@ -1,0 +1,1 @@
+Fix directory opening with portal and use them by default with KDE
