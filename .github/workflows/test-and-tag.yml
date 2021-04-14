@@ -156,8 +156,24 @@ jobs:
       with:
         token: ${{ secrets.COMMITTER_TOKEN }}
         fetch-depth: 0
+    - uses: actions-rs/cargo@v1
+      name: Install TOML Reader
+      with:
+        command: install
+        args: toml-cli
+    - id: get_version
+      name: Calculate current version number
+      run: echo ::set-output name=VERSION::$(toml get Cargo.toml package.version |
+        tail -c +2 | head -c -2)
+      shell: bash
+    - id: get_cargo_version
+      name: Calculate cargo version number
+      run: echo ::set-output name=VERSION::$(cargo search serde | sed -r "s/.* = \"([0-9].*)\"
+        +#.*/\1/g" |  head -n 1)
     - env:
         CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
+      if: ${{ steps.get_version.outputs.VERSION != steps.get_cargo_version.outputs.VERSION
+        }}
       run: |
         cargo login "$CARGO_TOKEN"
         cargo publish
