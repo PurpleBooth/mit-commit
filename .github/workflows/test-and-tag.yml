@@ -56,7 +56,7 @@ jobs:
         profile: minimal
         toolchain: stable
         default: true
-    - uses: actions-rs/cargo@v1
+    - uses: actions-rs/cargo@v1.0.3
       with:
         command: check
   test:
@@ -83,7 +83,7 @@ jobs:
         profile: minimal
         toolchain: stable
         default: true
-    - uses: actions-rs/cargo@v1
+    - uses: actions-rs/cargo@v1.0.3
       with:
         command: test
   bench:
@@ -107,7 +107,7 @@ jobs:
         profile: minimal
         toolchain: stable
         default: true
-    - uses: actions-rs/cargo@v1
+    - uses: actions-rs/cargo@v1.0.3
       with:
         command: bench
   lints:
@@ -128,11 +128,11 @@ jobs:
         toolchain: stable
         default: true
         components: rustfmt, clippy
-    - uses: actions-rs/cargo@v1
+    - uses: actions-rs/cargo@v1.0.3
       with:
         command: fmt
         args: --all -- --check
-    - uses: actions-rs/cargo@v1
+    - uses: actions-rs/cargo@v1.0.3
       with:
         command: clippy
         args: --all-targets --all-features -- -D warnings -Dclippy::all -D clippy::pedantic
@@ -156,7 +156,7 @@ jobs:
       with:
         token: ${{ secrets.COMMITTER_TOKEN }}
         fetch-depth: 0
-    - uses: actions-rs/cargo@v1
+    - uses: actions-rs/cargo@v1.0.3
       name: Install TOML Reader
       with:
         command: install
