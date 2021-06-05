@@ -158,7 +158,7 @@ mod tests {
 
                 Another Message Body"
             ))
-        )
+        );
     }
 
     #[test]
@@ -176,7 +176,7 @@ mod tests {
 
                 Another Message Body"
             ))
-        )
+        );
     }
 
     #[test]
@@ -186,7 +186,7 @@ mod tests {
             Body::from("Another Message Body"),
         ]);
 
-        assert_eq!(bodies.first(), Some(Body::from("Message Body")))
+        assert_eq!(bodies.first(), Some(Body::from("Message Body")));
     }
 
     #[test]
@@ -210,6 +210,6 @@ mod tests {
                 Body::default(),
                 Body::from("Some content in the body of the message"),
             ])
-        )
+        );
     }
 }

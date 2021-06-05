@@ -78,14 +78,14 @@ mod tests {
     fn can_give_me_it_as_string() {
         let message = String::from(Scissors::from("hello, world!"));
 
-        assert_eq!(message, String::from("hello, world!"))
+        assert_eq!(message, String::from("hello, world!"));
     }
 
     #[test]
     fn it_can_be_created_from_a_string() {
         let message = String::from(Scissors::from(String::from("hello, world!")));
 
-        assert_eq!(message, String::from("hello, world!"))
+        assert_eq!(message, String::from("hello, world!"));
     }
 
     #[test]
@@ -114,7 +114,7 @@ mod tests {
                     "
                 )))
             )
-        )
+        );
     }
 
     #[test]
@@ -144,6 +144,6 @@ mod tests {
                     .into()
                 })
             )
-        )
+        );
     }
 }

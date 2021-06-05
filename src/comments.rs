@@ -112,7 +112,7 @@ mod tests {
 
                 # Another Message Body"
             ))
-        )
+        );
     }
 
     #[test]
@@ -129,6 +129,6 @@ mod tests {
                 Comment::from("# Message Body"),
                 Comment::from("# Another Message Body"),
             ])
-        )
+        );
     }
 }

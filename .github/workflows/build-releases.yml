@@ -2,65 +2,68 @@ name: Build GitHub Releases
 on:
   push:
     tags-ignore:
-    - versio-prev
+      - versio-prev
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2.3.4
-      name: Checkout the repository
-      with:
-        lfs: true
-        fetch-depth: 0
-    - uses: actions/cache@v2.1.6
-      name: Cache cargo dependencies
-      with:
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          ~/.cargo/bin
-          target
-    - uses: actions-rs/toolchain@v1.0.7
-      name: Install rust toolchain
-      with:
-        default: true
-        profile: minimal
-        toolchain: stable
-    - id: get_previous_version
-      name: Calculate previous version
-      run: echo ::set-output name=PREVIOUS_VERSION::$(git tag | sort --version-sort
-        | tail -n 3 | head -n 1)
-      shell: bash
-    - uses: actions-rs/cargo@v1.0.3
-      name: Install TOML Reader
-      with:
-        args: toml-cli
-        command: install
-    - id: get_repository_name
-      name: Calculate repository name
-      run: echo ::set-output name=REPOSITORY_NAME::$(echo "$GITHUB_REPOSITORY" | awk
-        -F / '{print $2}' | sed -e "s/:refs//")
-      shell: bash
-    - id: get_version
-      name: Calculate current version number
-      run: echo ::set-output name=VERSION::v$(toml get Cargo.toml package.version
-        | tail -c +2 | head -c -2)
-      shell: bash
-    - uses: dlavrenuek/conventional-changelog-action@v1.1.2
-      name: Generate change log
-      id: changelog
-      with:
-        from: ${{ steps.get_previous_version.outputs.PREVIOUS_VERSION }}
-        to: ${{ steps.get_version.outputs.VERSION }}
-    - env:
-        GITHUB_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
-      id: create_release
-      name: Create GitHub Release
-      uses: actions/create-release@v1.1.4
-      with:
-        draft: false
-        prerelease: false
-        body: ${{ steps.changelog.outputs.body }}
-        release_name: Release ${{ steps.get_version.outputs.VERSION }}
-        tag_name: ${{ steps.get_version.outputs.VERSION }}
+      - uses: actions/checkout@v2.3.4
+        name: Checkout the repository
+        with:
+          lfs: true
+          fetch-depth: 0
+      - uses: actions/cache@v2.1.6
+        name: Cache cargo dependencies
+        with:
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+            target
+      - uses: actions-rs/toolchain@v1.0.7
+        name: Install rust toolchain
+        with:
+          default: true
+          profile: minimal
+          toolchain: stable
+      - id: get_previous_version
+        name: Calculate previous version
+        run:
+          echo ::set-output name=PREVIOUS_VERSION::$(git tag | sort --version-sort
+          | tail -n 3 | head -n 1)
+        shell: bash
+      - uses: actions-rs/cargo@v1.0.3
+        name: Install TOML Reader
+        with:
+          args: toml-cli
+          command: install
+      - id: get_repository_name
+        name: Calculate repository name
+        run:
+          echo ::set-output name=REPOSITORY_NAME::$(echo "$GITHUB_REPOSITORY" | awk
+          -F / '{print $2}' | sed -e "s/:refs//")
+        shell: bash
+      - id: get_version
+        name: Calculate current version number
+        run:
+          echo ::set-output name=VERSION::v$(toml get Cargo.toml package.version
+          | tail -c +2 | head -c -2)
+        shell: bash
+      - uses: dlavrenuek/conventional-changelog-action@v1.1.2
+        name: Generate change log
+        id: changelog
+        with:
+          from: ${{ steps.get_previous_version.outputs.PREVIOUS_VERSION }}
+          to: ${{ steps.get_version.outputs.VERSION }}
+      - env:
+          GITHUB_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
+        id: create_release
+        name: Create GitHub Release
+        uses: actions/create-release@v1.1.4
+        with:
+          draft: false
+          prerelease: false
+          body: ${{ steps.changelog.outputs.body }}
+          release_name: Release ${{ steps.get_version.outputs.VERSION }}
+          tag_name: ${{ steps.get_version.outputs.VERSION }}

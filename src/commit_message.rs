@@ -254,18 +254,17 @@ impl CommitMessage {
                     }
                     (Some(Fragment::Comment(existing)), Fragment::Comment(new)) => {
                         previous_fragments.truncate(acc.len() - 1);
-                        previous_fragments.push(Fragment::Comment(existing.append(&new)));
+                        previous_fragments.push(Fragment::Comment(existing.append(new)));
                         previous_fragments
                     }
                     (Some(Fragment::Body(existing)), Fragment::Body(new)) => {
                         if new.is_empty() || existing.is_empty() {
                             previous_fragments.push(Fragment::Body(new.clone()));
-                            previous_fragments
                         } else {
                             previous_fragments.truncate(acc.len() - 1);
-                            previous_fragments.push(Fragment::Body(existing.append(&new)));
-                            previous_fragments
+                            previous_fragments.push(Fragment::Body(existing.append(new)));
                         }
+                        previous_fragments
                     }
                     (Some(Fragment::Body(_)), Fragment::Comment(new)) => {
                         previous_fragments.push(Fragment::Comment(new.clone()));
@@ -795,7 +794,7 @@ impl From<&str> for CommitMessage {
         let mut ast: Vec<Fragment> = CommitMessage::group_ast(per_line_ast);
 
         if let (None, Some('\n')) = (scissors.clone(), message.chars().last()) {
-            ast.push(Fragment::Body(Body::default()))
+            ast.push(Fragment::Body(Body::default()));
         }
 
         let subject = Subject::from(ast.clone());
@@ -1121,7 +1120,7 @@ mod tests {
                 index 0000000..e69de29
                 "
             ))
-        )
+        );
     }
 
     const COMMIT_WITH_ALL_FEATURES: &str = indoc!(
@@ -1180,7 +1179,7 @@ mod tests {
         let second_commit_message = CommitMessage::from(string_version_of_commit.clone());
 
         assert_eq!(string_version_of_commit, COMMIT_WITH_ALL_FEATURES);
-        assert_eq!(first_commit_message, second_commit_message)
+        assert_eq!(first_commit_message, second_commit_message);
     }
 
     #[test]
@@ -1200,7 +1199,7 @@ mod tests {
             Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch main\n# Ihr Branch ist auf demselben Stand wie \'origin/main\'.\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     file\n#"))
         ];
 
-        assert_eq!(message.get_ast(), ast)
+        assert_eq!(message.get_ast(), ast);
     }
 
     #[test]
@@ -1232,7 +1231,7 @@ mod tests {
             Fragment::Comment(Comment::from("# Short (50 chars or less) summary of changes\n#\n# More detailed explanatory text, if necessary.  Wrap it to\n# about 72 characters or so.  In some contexts, the first\n# line is treated as the subject of an email and the rest of\n# the text as the body.  The blank line separating the\n# summary from the body is critical (unless you omit the body\n# entirely); tools like rebase can get confused if you run\n# the two together.\n#\n# Further paragraphs come after blank lines.\n#\n#   - Bullet points are okay, too\n#\n#   - Typically a hyphen or asterisk is used for the bullet,\n#     preceded by a single space, with blank lines in\n#     between, but conventions vary here")),
             Fragment::Body(Body::default()),
             Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch main\n# Ihr Branch ist auf demselben Stand wie \'origin/main\'.\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     file\n#"))
-        ])
+        ]);
     }
 
     #[test]
@@ -1249,14 +1248,14 @@ mod tests {
             Fragment::Comment(Comment::from("# Short (50 chars or less) summary of changes\n#\n# More detailed explanatory text, if necessary.  Wrap it to\n# about 72 characters or so.  In some contexts, the first\n# line is treated as the subject of an email and the rest of\n# the text as the body.  The blank line separating the\n# summary from the body is critical (unless you omit the body\n# entirely); tools like rebase can get confused if you run\n# the two together.\n#\n# Further paragraphs come after blank lines.\n#\n#   - Bullet points are okay, too\n#\n#   - Typically a hyphen or asterisk is used for the bullet,\n#     preceded by a single space, with blank lines in\n#     between, but conventions vary here")),
             Fragment::Body(Body::default()),
             Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch main\n# Ihr Branch ist auf demselben Stand wie \'origin/main\'.\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     file\n#"))
-        ])
+        ]);
     }
 
     #[test]
     fn can_get_subject_from_commit_with_all_features() {
         let message = CommitMessage::from(COMMIT_WITH_ALL_FEATURES);
 
-        assert_eq!(message.get_subject(), Subject::from("Add file"))
+        assert_eq!(message.get_subject(), Subject::from("Add file"));
     }
 
     #[test]
@@ -1276,7 +1275,7 @@ mod tests {
                     tests."
                 ))
             ])
-        )
+        );
     }
 
     #[test]
@@ -1295,7 +1294,7 @@ mod tests {
                 index 0000000..e69de29
                 "
             )))
-        )
+        );
     }
 
     #[test]
@@ -1339,7 +1338,7 @@ mod tests {
                     #"
                 ))
             ])
-        )
+        );
     }
 
     #[test]
@@ -1349,7 +1348,7 @@ mod tests {
         assert_eq!(
             message.get_trailers(),
             Trailers::from(vec![Trailer::new("Relates-to", "#128")])
-        )
+        );
     }
 
     const LONG_SUBJECT_ONLY_COMMIT: &str = indoc!(
@@ -1447,7 +1446,7 @@ mod tests {
         let second_commit_message = CommitMessage::from(string_version_of_commit.clone());
 
         assert_eq!(string_version_of_commit, LONG_SUBJECT_ONLY_COMMIT);
-        assert_eq!(first_commit_message, second_commit_message)
+        assert_eq!(first_commit_message, second_commit_message);
     }
 
     #[test]
@@ -1460,14 +1459,14 @@ mod tests {
             Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch master\n#\n# Initialer Commit\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     src/bodies.rs\n#\tneue Datei:     src/body.rs\n#\tneue Datei:     src/comment.rs\n#\tneue Datei:     src/comments.rs\n#\tneue Datei:     src/commit_message.rs\n#\tneue Datei:     src/scissors.rs\n#\tneue Datei:     src/subject.rs\n#\tneue Datei:     src/trailer.rs\n#\tneue Datei:     src/trailers.rs\n#\n# \u{e4}nderungen, die nicht zum Commit vorgemerkt sind:\n#\tge\u{e4}ndert:       src/bodies.rs\n#\tge\u{e4}ndert:       src/body.rs\n#\tge\u{e4}ndert:       src/comment.rs\n#\tge\u{e4}ndert:       src/comments.rs\n#\tge\u{e4}ndert:       src/commit_message.rs\n#\tge\u{e4}ndert:       src/scissors.rs\n#\tge\u{e4}ndert:       src/subject.rs\n#\tge\u{e4}ndert:       src/trailer.rs\n#\tge\u{e4}ndert:       src/trailers.rs\n#\n# Unversionierte Dateien:\n#\t.gitignore\n#\tCargo.toml\n#\tsrc/lib.rs\n#")),
         ];
 
-        assert_eq!(message.get_ast(), ast)
+        assert_eq!(message.get_ast(), ast);
     }
 
     #[test]
     fn can_get_subject_from_subject_only_commit() {
         let message = CommitMessage::from(LONG_SUBJECT_ONLY_COMMIT);
 
-        assert_eq!(message.get_subject(), Subject::from("Initial Commit"))
+        assert_eq!(message.get_subject(), Subject::from("Initial Commit"));
     }
 
     #[test]
@@ -1475,7 +1474,7 @@ mod tests {
         let message = CommitMessage::from(LONG_SUBJECT_ONLY_COMMIT);
         let bodies: Vec<Body> = vec![];
 
-        assert_eq!(message.get_body(), Bodies::from(bodies))
+        assert_eq!(message.get_body(), Bodies::from(bodies));
     }
 
     #[test]
@@ -1517,7 +1516,7 @@ mod tests {
                 new file mode 100644
                 index 0000000..e69de29"
             )))
-        )
+        );
     }
 
     #[test]
@@ -1586,7 +1585,7 @@ mod tests {
                     #"
                 ))
             ])
-        )
+        );
     }
 
     #[test]
@@ -1594,7 +1593,7 @@ mod tests {
         let message = CommitMessage::from(LONG_SUBJECT_ONLY_COMMIT);
         let trailers: Vec<Trailer> = Vec::default();
 
-        assert_eq!(message.get_trailers(), Trailers::from(trailers))
+        assert_eq!(message.get_trailers(), Trailers::from(trailers));
     }
 
     const NOT_VERBOSE_COMMIT: &str = indoc!(
@@ -1626,7 +1625,7 @@ mod tests {
         let second_commit_message = CommitMessage::from(string_version_of_commit.clone());
 
         assert_eq!(string_version_of_commit, NOT_VERBOSE_COMMIT);
-        assert_eq!(first_commit_message, second_commit_message)
+        assert_eq!(first_commit_message, second_commit_message);
     }
 
     #[test]
@@ -1640,7 +1639,7 @@ mod tests {
             Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Datum:            Sat Jun 27 21:40:14 2020 +0200\n#\n# Auf Branch master\n#\n# Initialer Commit\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     .bashrc\n#"))
         ];
 
-        assert_eq!(message.get_ast(), ast)
+        assert_eq!(message.get_ast(), ast);
     }
 
     #[test]
@@ -1650,7 +1649,7 @@ mod tests {
         assert_eq!(
             message.get_subject(),
             Subject::from("Update bashrc to include kubernetes completions")
-        )
+        );
     }
 
     #[test]
@@ -1667,14 +1666,14 @@ mod tests {
                     Benchmarked with Hyperfine, no noticable performance decrease."
                 )),
             ])
-        )
+        );
     }
 
     #[test]
     fn can_get_scissors_section_from_not_verbose_commit() {
         let message = CommitMessage::from(NOT_VERBOSE_COMMIT);
 
-        assert_eq!(message.get_scissors(), None)
+        assert_eq!(message.get_scissors(), None);
     }
 
     #[test]
@@ -1701,7 +1700,7 @@ mod tests {
                     #"
                 ))
             ])
-        )
+        );
     }
 
     #[test]
@@ -1709,7 +1708,7 @@ mod tests {
         let message = CommitMessage::from(NOT_VERBOSE_COMMIT);
         let trailers: Vec<Trailer> = Vec::default();
 
-        assert_eq!(message.get_trailers(), Trailers::from(trailers))
+        assert_eq!(message.get_trailers(), Trailers::from(trailers));
     }
 
     const NON_STANDARD_COMMENT_CHARACTER: &str = indoc!(
@@ -1736,7 +1735,7 @@ mod tests {
         let second_commit_message = CommitMessage::from(string_version_of_commit.clone());
 
         assert_eq!(string_version_of_commit, NON_STANDARD_COMMENT_CHARACTER);
-        assert_eq!(first_commit_message, second_commit_message)
+        assert_eq!(first_commit_message, second_commit_message);
     }
 
     #[test]
@@ -1752,7 +1751,7 @@ mod tests {
             Fragment::Comment(Comment::from("; Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{c4}nderungen ein. Zeilen,\n; die mit \';\' beginnen, werden ignoriert, und eine leere Beschreibung\n; bricht den Commit ab."))
         ];
 
-        assert_eq!(message.get_ast(), ast)
+        assert_eq!(message.get_ast(), ast);
     }
 
     #[test]
@@ -1762,7 +1761,7 @@ mod tests {
         assert_eq!(
             message.get_subject(),
             Subject::from("Allow the server to respond to https")
-        )
+        );
     }
 
     #[test]
@@ -1787,14 +1786,14 @@ mod tests {
                     #6438"
                 )),
             ])
-        )
+        );
     }
 
     #[test]
     fn can_get_scissors_section_from_non_standard_comment_char_commit() {
         let message = CommitMessage::from(NON_STANDARD_COMMENT_CHARACTER);
 
-        assert_eq!(message.get_scissors(), None)
+        assert_eq!(message.get_scissors(), None);
     }
 
     #[test]
@@ -1809,7 +1808,7 @@ mod tests {
                 ; die mit ';' beginnen, werden ignoriert, und eine leere Beschreibung
                 ; bricht den Commit ab."
             ))])
-        )
+        );
     }
 
     #[test]
@@ -1817,7 +1816,7 @@ mod tests {
         let message = CommitMessage::from(NON_STANDARD_COMMENT_CHARACTER);
         let trailers: Vec<Trailer> = Vec::default();
 
-        assert_eq!(message.get_trailers(), Trailers::from(trailers))
+        assert_eq!(message.get_trailers(), Trailers::from(trailers));
     }
 
     const MULTIPLE_TRAILERS: &str = indoc!(
@@ -1852,7 +1851,7 @@ mod tests {
         let second_commit_message = CommitMessage::from(string_version_of_commit.clone());
 
         assert_eq!(string_version_of_commit, MULTIPLE_TRAILERS);
-        assert_eq!(first_commit_message, second_commit_message)
+        assert_eq!(first_commit_message, second_commit_message);
     }
 
     #[test]
@@ -1868,7 +1867,7 @@ mod tests {
             Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Datum:            Sat Jun 27 21:40:14 2020 +0200\n#\n# Auf Branch master\n#\n# Initialer Commit\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     .bashrc\n#"))
         ];
 
-        assert_eq!(message.get_ast(), ast)
+        assert_eq!(message.get_ast(), ast);
     }
 
     #[test]
@@ -1878,7 +1877,7 @@ mod tests {
         assert_eq!(
             message.get_subject(),
             Subject::from("Update bashrc to include kubernetes completions")
-        )
+        );
     }
 
     #[test]
@@ -1895,14 +1894,14 @@ mod tests {
                     Benchmarked with Hyperfine, no noticable performance decrease."
                 )),
             ])
-        )
+        );
     }
 
     #[test]
     fn can_get_scissors_section_from_multiple_trailers() {
         let message = CommitMessage::from(MULTIPLE_TRAILERS);
 
-        assert_eq!(message.get_scissors(), None)
+        assert_eq!(message.get_scissors(), None);
     }
 
     #[test]
@@ -1929,7 +1928,7 @@ mod tests {
                     #"
                 ))
             ])
-        )
+        );
     }
 
     #[test]
@@ -1940,7 +1939,7 @@ mod tests {
             Trailer::new("Co-authored-by", "Somebody Else <somebody@example.com>"),
         ];
 
-        assert_eq!(message.get_trailers(), Trailers::from(trailers))
+        assert_eq!(message.get_trailers(), Trailers::from(trailers));
     }
 
     const TRAILING_EMPTY_NEWLINES: &str = indoc!(
@@ -1978,7 +1977,7 @@ mod tests {
         let second_commit_message = CommitMessage::from(string_version_of_commit.clone());
 
         assert_eq!(string_version_of_commit, TRAILING_EMPTY_NEWLINES);
-        assert_eq!(first_commit_message, second_commit_message)
+        assert_eq!(first_commit_message, second_commit_message);
     }
 
     #[test]
@@ -1997,7 +1996,7 @@ mod tests {
             Fragment::Body(Body::default()),
         ];
 
-        assert_eq!(message.get_ast(), ast)
+        assert_eq!(message.get_ast(), ast);
     }
 
     #[test]
@@ -2007,7 +2006,7 @@ mod tests {
         assert_eq!(
             message.get_subject(),
             Subject::from("Update bashrc to include kubernetes completions")
-        )
+        );
     }
 
     #[test]
@@ -2024,14 +2023,14 @@ mod tests {
                     Benchmarked with Hyperfine, no noticable performance decrease."
                 )),
             ])
-        )
+        );
     }
 
     #[test]
     fn can_get_scissors_section_from_trailing_empty_newlines() {
         let message = CommitMessage::from(TRAILING_EMPTY_NEWLINES);
 
-        assert_eq!(message.get_scissors(), None)
+        assert_eq!(message.get_scissors(), None);
     }
 
     #[test]
@@ -2058,7 +2057,7 @@ mod tests {
                     #"
                 ))
             ])
-        )
+        );
     }
 
     #[test]
@@ -2069,7 +2068,7 @@ mod tests {
             Trailer::new("Co-authored-by", "Somebody Else <somebody@example.com>"),
         ];
 
-        assert_eq!(message.get_trailers(), Trailers::from(trailers))
+        assert_eq!(message.get_trailers(), Trailers::from(trailers));
     }
 
     const COMMIT_MESSAGE_WITH_NO_COMMENTS: &str = indoc!(
@@ -2091,7 +2090,7 @@ mod tests {
         let second_commit_message = CommitMessage::from(string_version_of_commit.clone());
 
         assert_eq!(string_version_of_commit, COMMIT_MESSAGE_WITH_NO_COMMENTS);
-        assert_eq!(first_commit_message, second_commit_message)
+        assert_eq!(first_commit_message, second_commit_message);
     }
 
     #[test]
@@ -2106,7 +2105,7 @@ mod tests {
             Fragment::Body(Body::default()),
         ];
 
-        assert_eq!(message.get_ast(), ast)
+        assert_eq!(message.get_ast(), ast);
     }
 
     #[test]
@@ -2116,7 +2115,7 @@ mod tests {
         assert_eq!(
             message.get_subject(),
             Subject::from("Update bashrc to include kubernetes completions")
-        )
+        );
     }
 
     #[test]
@@ -2133,14 +2132,14 @@ mod tests {
                     Benchmarked with Hyperfine, no noticable performance decrease."
                 )),
             ])
-        )
+        );
     }
 
     #[test]
     fn can_get_scissors_section_from_a_commit_message_without_commits() {
         let message = CommitMessage::from(COMMIT_MESSAGE_WITH_NO_COMMENTS);
 
-        assert_eq!(message.get_scissors(), None)
+        assert_eq!(message.get_scissors(), None);
     }
 
     #[test]
@@ -2148,7 +2147,7 @@ mod tests {
         let message = CommitMessage::from(COMMIT_MESSAGE_WITH_NO_COMMENTS);
         let comments: Vec<Comment> = vec![];
 
-        assert_eq!(message.get_comments(), Comments::from(comments))
+        assert_eq!(message.get_comments(), Comments::from(comments));
     }
 
     #[test]
@@ -2159,7 +2158,7 @@ mod tests {
             Trailer::new("Co-authored-by", "Somebody Else <somebody@example.com>"),
         ];
 
-        assert_eq!(message.get_trailers(), Trailers::from(trailers))
+        assert_eq!(message.get_trailers(), Trailers::from(trailers));
     }
 
     const COMMIT_MESSAGE_WITH_WHITESPACE_STARTING_LAST_LINE: &str = indoc!(
@@ -2185,7 +2184,7 @@ mod tests {
             string_version_of_commit,
             COMMIT_MESSAGE_WITH_WHITESPACE_STARTING_LAST_LINE
         );
-        assert_eq!(first_commit_message, second_commit_message)
+        assert_eq!(first_commit_message, second_commit_message);
     }
 
     #[test]
@@ -2200,7 +2199,7 @@ mod tests {
             Fragment::Body(Body::default()),
         ];
 
-        assert_eq!(message.get_ast(), ast)
+        assert_eq!(message.get_ast(), ast);
     }
 
     #[test]
@@ -2210,7 +2209,7 @@ mod tests {
         assert_eq!(
             message.get_subject(),
             Subject::from("Update bashrc to include kubernetes completions")
-        )
+        );
     }
 
     #[test]
@@ -2227,14 +2226,14 @@ mod tests {
                     Benchmarked with Hyperfine, no noticable performance decrease."
                 )),
             ])
-        )
+        );
     }
 
     #[test]
     fn can_get_scissors_section_from_a_commit_message_with_trailing_whitespace() {
         let message = CommitMessage::from(COMMIT_MESSAGE_WITH_WHITESPACE_STARTING_LAST_LINE);
 
-        assert_eq!(message.get_scissors(), None)
+        assert_eq!(message.get_scissors(), None);
     }
 
     #[test]
@@ -2242,7 +2241,7 @@ mod tests {
         let message = CommitMessage::from(COMMIT_MESSAGE_WITH_WHITESPACE_STARTING_LAST_LINE);
         let comments: Vec<Comment> = vec![];
 
-        assert_eq!(message.get_comments(), Comments::from(comments))
+        assert_eq!(message.get_comments(), Comments::from(comments));
     }
 
     #[test]
@@ -2253,7 +2252,7 @@ mod tests {
             Trailer::new(" Co-authored-by", "Somebody Else <somebody@example.com>"),
         ];
 
-        assert_eq!(message.get_trailers(), Trailers::from(trailers))
+        assert_eq!(message.get_trailers(), Trailers::from(trailers));
     }
 }
 
@@ -2270,7 +2269,7 @@ impl CommitMessage {
                 .rev()
                 .find(|line| !line.trim().is_empty())
                 .and_then(|line| line.chars().next())
-                .filter(|x| NOT_WHITESPACE_RE.is_match(&x.to_string().trim())),
+                .filter(|x| NOT_WHITESPACE_RE.is_match(x.to_string().trim())),
         }
     }
 }

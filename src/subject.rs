@@ -123,7 +123,7 @@ mod tests {
     #[test]
     fn len() {
         assert_eq!(Subject::from("hello, world!").len(), 13);
-        assert_eq!(Subject::from("goodbye").len(), 7)
+        assert_eq!(Subject::from("goodbye").len(), 7);
     }
 
     #[test]
@@ -141,7 +141,7 @@ mod tests {
     #[test]
     fn is_empty() {
         assert_eq!(Subject::from("hello, world!").is_empty(), false);
-        assert_eq!(Subject::from("").is_empty(), true)
+        assert_eq!(Subject::from("").is_empty(), true);
     }
 
     #[test]
@@ -151,35 +151,35 @@ mod tests {
         assert_eq!(
             format!("{}", Subject::from("hello, world!")),
             String::from("hello, world!")
-        )
+        );
     }
 
     #[test]
     fn it_can_be_created_from_a_str() {
         let subject = String::from(Subject::from("hello, world!"));
 
-        assert_eq!(subject, String::from("hello, world!"))
+        assert_eq!(subject, String::from("hello, world!"));
     }
 
     #[test]
     fn it_can_be_created_from_a_string() {
         let subject = String::from(Subject::from(String::from("hello, world!")));
 
-        assert_eq!(subject, String::from("hello, world!"))
+        assert_eq!(subject, String::from("hello, world!"));
     }
 
     #[test]
     fn it_can_be_created_from_a_body() {
         let subject = Subject::from(Body::from("hello, world!"));
 
-        assert_eq!(subject, Subject::from("hello, world!"))
+        assert_eq!(subject, Subject::from("hello, world!"));
     }
 
     #[test]
     fn it_can_be_created_from_fragments() {
         let subject = Subject::from(vec![Fragment::Body(Body::from("hello, world!"))]);
 
-        assert_eq!(subject, Subject::from("hello, world!"))
+        assert_eq!(subject, Subject::from("hello, world!"));
     }
 
     #[test]
@@ -189,6 +189,6 @@ mod tests {
             Fragment::Body(Body::from("hello, world!")),
         ]);
 
-        assert_eq!(subject, Subject::from("hello, world!"))
+        assert_eq!(subject, Subject::from("hello, world!"));
     }
 }

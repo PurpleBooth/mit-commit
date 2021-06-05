@@ -189,7 +189,7 @@ mod tests {
         assert_eq!(
             String::from(trailers),
             String::from("Co-authored-by: Billie Thompson <billie@example.com>")
-        )
+        );
     }
 
     #[test]
@@ -199,7 +199,7 @@ mod tests {
             Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
         ]);
 
-        assert_eq!(trailers.len(), 2)
+        assert_eq!(trailers.len(), 2);
     }
 
     #[test]
@@ -214,7 +214,7 @@ mod tests {
         );
 
         let trailers: Vec<Trailer> = Vec::new();
-        assert_eq!(Trailers::from(trailers).is_empty(), true)
+        assert_eq!(Trailers::from(trailers).is_empty(), true);
     }
 
     #[test]
@@ -243,6 +243,6 @@ mod tests {
         ]
         .into();
 
-        assert_eq!(Trailers::from(trailers), expected)
+        assert_eq!(Trailers::from(trailers), expected);
     }
 }
