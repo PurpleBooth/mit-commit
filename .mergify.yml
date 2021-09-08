@@ -1,3 +1,14 @@
+queue_rules:
+  - name: default
+    conditions:
+      - check-success=security-audit
+      - check-success=check
+      - check-success=test (ubuntu-latest)
+      - check-success=bench (ubuntu-latest)
+      - check-success=lints
+      - base=main
+      - author~=^dependabot(|-preview)\[bot\]$
+
 pull_request_rules:
   - name: request review on external contributor
     conditions:
