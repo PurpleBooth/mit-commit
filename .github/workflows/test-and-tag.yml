@@ -84,7 +84,6 @@ jobs:
           default: true
       - uses: actions-rs/cargo@v1.0.3
         with:
-          args: " --locked"
           command: test
   lints:
     runs-on: ubuntu-latest
