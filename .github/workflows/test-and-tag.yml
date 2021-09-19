@@ -115,11 +115,7 @@ jobs:
             -D clippy::cargo
       - uses: gaurav-nelson/github-action-markdown-link-check@1.0.13
   bench:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
       - uses: actions/cache@v2.1.6
