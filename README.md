@@ -2,7 +2,7 @@
 
 A library to parse commit messages in git hooks
 
-```rust
+``` rust
 use indoc::indoc;
 use mit_commit::{Bodies, CommitMessage, Subject};
 
