@@ -204,17 +204,14 @@ mod tests {
 
     #[test]
     fn it_can_tell_me_if_it_is_empty() {
-        assert_eq!(
-            Trailers::from(vec![
-                Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
-                Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
-            ])
-            .is_empty(),
-            false
-        );
+        assert!(!Trailers::from(vec![
+            Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
+            Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
+        ])
+        .is_empty());
 
         let trailers: Vec<Trailer> = Vec::new();
-        assert_eq!(Trailers::from(trailers).is_empty(), true);
+        assert!(Trailers::from(trailers).is_empty());
     }
 
     #[test]

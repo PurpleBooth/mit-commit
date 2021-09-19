@@ -879,16 +879,16 @@ mod tests {
         ));
 
         let re = Regex::new("[Bb]itte").unwrap();
-        assert_eq!(commit.matches_pattern(&re), false);
+        assert!(!commit.matches_pattern(&re));
 
         let re = Regex::new("f[o\u{00FC}]r linting").unwrap();
-        assert_eq!(commit.matches_pattern(&re), true);
+        assert!(commit.matches_pattern(&re));
 
         let re = Regex::new("[Ee]xample Commit Message").unwrap();
-        assert_eq!(commit.matches_pattern(&re), true);
+        assert!(commit.matches_pattern(&re));
 
         let re = Regex::new("Relates[- ]to").unwrap();
-        assert_eq!(commit.matches_pattern(&re), true);
+        assert!(commit.matches_pattern(&re));
     }
 
     #[test]

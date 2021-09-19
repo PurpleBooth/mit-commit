@@ -140,8 +140,8 @@ mod tests {
 
     #[test]
     fn is_empty() {
-        assert_eq!(Subject::from("hello, world!").is_empty(), false);
-        assert_eq!(Subject::from("").is_empty(), true);
+        assert!(!Subject::from("hello, world!").is_empty());
+        assert!(Subject::from("").is_empty());
     }
 
     #[test]

@@ -120,11 +120,11 @@ mod tests {
 
     #[test]
     fn it_can_tell_me_if_it_is_empty() {
-        assert_eq!(Body::from("").is_empty(), true);
+        assert!(Body::from("").is_empty());
     }
 
     #[test]
     fn it_can_tell_me_if_it_is_full() {
-        assert_eq!(Body::from("something").is_empty(), false);
+        assert!(!Body::from("something").is_empty());
     }
 }
