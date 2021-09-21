@@ -1,12 +1,14 @@
-use std::convert::TryFrom;
+use std::{
+    convert::TryFrom,
+    hash::{Hash, Hasher},
+};
 
 use thiserror::Error;
 
-use crate::body::Body;
-use crate::Fragment;
-use std::hash::{Hash, Hasher};
+use crate::{body::Body, Fragment};
 
-/// A `Trailer` you might see a in a `CommitMessage`, for example 'Co-authored-by: Billie Thompson <billie@example.com>'
+/// A `Trailer` you might see a in a `CommitMessage`, for example
+/// 'Co-authored-by: Billie Thompson <billie@example.com>'
 #[derive(Debug, Clone, Eq, Ord, PartialOrd)]
 pub struct Trailer {
     key: String,
@@ -16,15 +18,17 @@ pub struct Trailer {
 impl Trailer {
     /// Create a new `Trailer`
     ///
-    /// This creates a new element that represents the sort of `Trailers` you get at the end of commits
+    /// This creates a new element that represents the sort of `Trailers` you
+    /// get at the end of commits
     ///
     /// For example there's `Co-authored-by`, `Relates-to`, and `Signed-off-by`
     ///
     /// # Example
     ///
     /// ```
-    /// use mit_commit::{Body, Trailer};
     /// use std::convert::TryFrom;
+    ///
+    /// use mit_commit::{Body, Trailer};
     /// assert_eq!(
     ///     Trailer::new("Co-authored-by", "#124"),
     ///     Trailer::try_from(Body::from("Co-authored-by: #124"))
@@ -44,8 +48,9 @@ impl Trailer {
     /// # Example
     ///
     /// ```
-    /// use mit_commit::{Body, Trailer};
     /// use std::convert::TryFrom;
+    ///
+    /// use mit_commit::{Body, Trailer};
     /// assert_eq!(
     ///     Trailer::new("Co-authored-by", "#124").get_key(),
     ///     "Co-authored-by"
@@ -61,8 +66,9 @@ impl Trailer {
     /// # Example
     ///
     /// ```
-    /// use mit_commit::{Body, Trailer};
     /// use std::convert::TryFrom;
+    ///
+    /// use mit_commit::{Body, Trailer};
     /// assert_eq!(Trailer::new("Co-authored-by", "#124").get_value(), "#124")
     /// ```
     #[must_use]
@@ -121,16 +127,16 @@ pub enum Error {
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryFrom;
+    use std::{
+        collections::hash_map::DefaultHasher,
+        convert::TryFrom,
+        hash::{Hash, Hasher},
+    };
 
     use pretty_assertions::assert_eq;
 
-    use crate::body::Body;
-    use crate::Fragment;
-
     use super::Trailer;
-    use std::collections::hash_map::DefaultHasher;
-    use std::hash::{Hash, Hasher};
+    use crate::{body::Body, Fragment};
 
     #[test]
     fn it_can_tell_me_its_key() {

@@ -42,13 +42,11 @@ pub use bodies::Bodies;
 pub use body::Body;
 pub use comment::Comment;
 pub use comments::Comments;
-pub use commit_message::CommitMessage;
-pub use commit_message::Error as CommitMessageError;
+pub use commit_message::{CommitMessage, Error as CommitMessageError};
 pub use fragment::Fragment;
 pub use scissors::Scissors;
 pub use subject::Subject;
-pub use trailer::Error as TrailerError;
-pub use trailer::Trailer;
+pub use trailer::{Error as TrailerError, Trailer};
 pub use trailers::Trailers;
 
 mod bodies;

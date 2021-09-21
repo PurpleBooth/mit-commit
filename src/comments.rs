@@ -1,7 +1,6 @@
 use std::slice::Iter;
 
-use crate::comment::Comment;
-use crate::fragment::Fragment;
+use crate::{comment::Comment, fragment::Fragment};
 
 /// A collection of comments from a `CommitMessage`
 #[derive(Debug, PartialEq, Clone)]
@@ -15,8 +14,7 @@ impl Comments {
     /// # Examples
     ///
     /// ```
-    /// use mit_commit::Comment;
-    /// use mit_commit::Comments;
+    /// use mit_commit::{Comment, Comments};
     ///
     /// let trailers = Comments::from(vec![
     ///     Comment::from("# Comment 1"),
@@ -70,20 +68,15 @@ impl From<Vec<Fragment>> for Comments {
 
 #[cfg(test)]
 mod tests {
+    use indoc::indoc;
     use pretty_assertions::assert_eq;
 
-    use indoc::indoc;
-
-    use crate::body::Body;
-    use crate::comment::Comment;
-    use crate::fragment::Fragment;
-
     use super::Comments;
+    use crate::{body::Body, comment::Comment, fragment::Fragment};
 
     #[test]
     fn implements_iterator() {
-        use crate::Comment;
-        use crate::Comments;
+        use crate::{Comment, Comments};
         let trailers = Comments::from(vec![
             Comment::from("# Comment 1"),
             Comment::from("# Comment 2"),

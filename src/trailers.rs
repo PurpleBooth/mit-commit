@@ -1,8 +1,6 @@
-use std::convert::TryFrom;
-use std::slice::Iter;
+use std::{convert::TryFrom, slice::Iter};
 
-use crate::fragment::Fragment;
-use crate::trailer::Trailer;
+use crate::{fragment::Fragment, trailer::Trailer};
 
 /// A Collection of `Trailer`
 #[derive(Debug, PartialEq, Clone)]
@@ -17,8 +15,7 @@ impl Trailers {
     /// # Examples
     ///
     /// ```
-    /// use mit_commit::Trailer;
-    /// use mit_commit::Trailers;
+    /// use mit_commit::{Trailer, Trailers};
     /// let trailers = Trailers::from(vec![
     ///     Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
     ///     Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
@@ -53,8 +50,7 @@ impl Trailers {
     /// # Examples
     ///
     /// ```
-    /// use mit_commit::Trailer;
-    /// use mit_commit::Trailers;
+    /// use mit_commit::{Trailer, Trailers};
     /// let trailers = Trailers::from(vec![
     ///     Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
     ///     Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
@@ -72,8 +68,7 @@ impl Trailers {
     /// # Examples
     ///
     /// ```
-    /// use mit_commit::Trailer;
-    /// use mit_commit::Trailers;
+    /// use mit_commit::{Trailer, Trailers};
     /// assert_eq!(
     ///     Trailers::from(vec![
     ///         Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
@@ -142,15 +137,11 @@ impl From<Vec<Fragment>> for Trailers {
 
 #[cfg(test)]
 mod tests {
+    use indoc::indoc;
     use pretty_assertions::assert_eq;
 
-    use indoc::indoc;
-
-    use crate::fragment::Fragment;
-    use crate::trailer::Trailer;
-    use crate::Body;
-
     use super::Trailers;
+    use crate::{fragment::Fragment, trailer::Trailer, Body};
 
     #[test]
     fn implements_iterator() {

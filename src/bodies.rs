@@ -1,11 +1,11 @@
-use std::convert::TryFrom;
-use std::fmt;
-use std::fmt::{Display, Formatter};
-use std::slice::Iter;
+use std::{
+    convert::TryFrom,
+    fmt,
+    fmt::{Display, Formatter},
+    slice::Iter,
+};
 
-use crate::body::Body;
-use crate::fragment::Fragment;
-use crate::trailer::Trailer;
+use crate::{body::Body, fragment::Fragment, trailer::Trailer};
 
 /// A collection of user input `CommitMessage` text
 #[derive(Debug, PartialEq, Clone)]
@@ -41,8 +41,7 @@ impl Bodies {
     /// # Examples
     ///
     /// ```
-    /// use mit_commit::Bodies;
-    /// use mit_commit::Body;
+    /// use mit_commit::{Bodies, Body};
     /// let trailers = Bodies::from(vec![
     ///     Body::from("Body 1"),
     ///     Body::from("Body 2"),
@@ -119,14 +118,11 @@ impl From<Vec<Fragment>> for Bodies {
 
 #[cfg(test)]
 mod tests {
+    use indoc::indoc;
     use pretty_assertions::assert_eq;
 
-    use indoc::indoc;
-
-    use crate::body::Body;
-    use crate::fragment::Fragment;
-
     use super::Bodies;
+    use crate::{body::Body, fragment::Fragment};
 
     #[test]
     fn implements_iterator() {

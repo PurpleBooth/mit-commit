@@ -68,9 +68,8 @@ impl From<Scissors> for String {
 
 #[cfg(test)]
 mod tests {
-    use pretty_assertions::assert_eq;
-
     use indoc::indoc;
+    use pretty_assertions::assert_eq;
 
     use super::Scissors;
 

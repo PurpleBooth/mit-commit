@@ -1,8 +1,6 @@
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-
-use mit_commit::{CommitMessage, Trailer};
-
 use indoc::indoc;
+use mit_commit::{CommitMessage, Trailer};
 
 const COMMIT_MESSAGE_WITH_NO_COMMENTS: &str = indoc!(
     "

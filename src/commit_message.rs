@@ -1,22 +1,18 @@
-use std::convert::TryFrom;
-use std::fs::File;
-use std::io;
-use std::io::Read;
-use std::path::PathBuf;
+use std::{convert::TryFrom, fs::File, io, io::Read, path::PathBuf};
 
 use regex::Regex;
 use thiserror::Error;
 
-use crate::scissors::Scissors;
-use crate::Trailer;
-
-use super::bodies::Bodies;
-use super::body::Body;
-use super::comment::Comment;
-use super::comments::Comments;
-use super::fragment::Fragment;
-use super::subject::Subject;
-use super::trailers::Trailers;
+use super::{
+    bodies::Bodies,
+    body::Body,
+    comment::Comment,
+    comments::Comments,
+    fragment::Fragment,
+    subject::Subject,
+    trailers::Trailers,
+};
+use crate::{scissors::Scissors, Trailer};
 
 /// A `CommitMessage`, the primary entry point to the library
 #[derive(Debug, PartialEq, Clone)]
@@ -32,7 +28,8 @@ pub struct CommitMessage {
 impl CommitMessage {
     /// Convert from fragments back into a full `CommitMessage`
     ///
-    /// Get back to a `CommitMessage` from an ast, usually after you've been editing the text.
+    /// Get back to a `CommitMessage` from an ast, usually after you've been
+    /// editing the text.
     ///
     /// # Examples
     ///
@@ -92,8 +89,7 @@ impl CommitMessage {
     ///
     /// ```
     /// use indoc::indoc;
-    /// use mit_commit::CommitMessage;
-    /// use mit_commit::Trailer;
+    /// use mit_commit::{CommitMessage, Trailer};
     /// let commit = CommitMessage::from(indoc!(
     ///     "
     ///     Example Commit Message
@@ -162,8 +158,8 @@ impl CommitMessage {
 
     /// Insert text in the place you're most likely to want it
     ///
-    /// In case you don't have any full bodies in there, it inserts it at the top of the commit
-    /// in the subject line.
+    /// In case you don't have any full bodies in there, it inserts it at the
+    /// top of the commit in the subject line.
     ///
     /// # Examples
     ///
@@ -280,8 +276,8 @@ impl CommitMessage {
 
     /// Get the `Subject` line from the `CommitMessage`
     ///
-    /// It's possible to get this from the ast, but it's a bit of a faff, so this is a convencience
-    /// method
+    /// It's possible to get this from the ast, but it's a bit of a faff, so
+    /// this is a convencience method
     ///
     /// # Examples
     ///
@@ -322,8 +318,9 @@ impl CommitMessage {
 
     /// Get the underlying data structure that represents the `CommitMessage`
     ///
-    /// This is the underlying datastructure for the commit. You might want this to create a
-    /// complicated linter, or modify the `CommitMessage` to your liking.
+    /// This is the underlying datastructure for the commit. You might want this
+    /// to create a complicated linter, or modify the `CommitMessage` to
+    /// your liking.
     ///
     /// Notice how it doesn't include the `Scissors` section.
     ///
@@ -404,12 +401,13 @@ impl CommitMessage {
 
     /// Get the `Bodies` from the `CommitMessage`
     ///
-    /// This gets the bodies from the commit message in easy to use paragraphs, we add in blank
-    /// bodies because starting a new paragraph is a visual delimiter so we want to make that easy
-    /// to detect.
+    /// This gets the bodies from the commit message in easy to use paragraphs,
+    /// we add in blank bodies because starting a new paragraph is a visual
+    /// delimiter so we want to make that easy to detect.
     ///
-    /// It doesn't include the `Subject` line, but if there's a blank line after it (as is
-    /// recommended by the manual), the bodies will start with a new empty body.
+    /// It doesn't include the `Subject` line, but if there's a blank line after
+    /// it (as is recommended by the manual), the bodies will start with a
+    /// new empty body.
     ///
     /// # Examples
     ///
@@ -464,11 +462,12 @@ impl CommitMessage {
 
     /// Get the `Comments` from the `CommitMessage`
     ///
-    /// We this will get you all the comments before the `Scissors` section. The `Scissors` section
-    /// is the bit that appears when you run `git commit --verbose`, that contains the diffs.
+    /// We this will get you all the comments before the `Scissors` section. The
+    /// `Scissors` section is the bit that appears when you run `git commit
+    /// --verbose`, that contains the diffs.
     ///
-    /// If there's `Comment` mixed in with the body, it'll return those too, but not any of the
-    /// `Body` aound them.
+    /// If there's `Comment` mixed in with the body, it'll return those too, but
+    /// not any of the `Body` aound them.
     ///
     /// # Examples
     ///
@@ -525,9 +524,10 @@ impl CommitMessage {
 
     /// Get the `Scissors` from the `CommitMessage`
     ///
-    /// We this will get you all the comments in the `Scissors` section. The `Scissors` section
-    /// is the bit that appears when you run `git commit --verbose`, that contains the diffs, and
-    /// is not preserved when you save the commit.
+    /// We this will get you all the comments in the `Scissors` section. The
+    /// `Scissors` section is the bit that appears when you run `git commit
+    /// --verbose`, that contains the diffs, and is not preserved when you
+    /// save the commit.
     ///
     ///
     /// # Examples
@@ -601,9 +601,10 @@ impl CommitMessage {
 
     /// Get the `Scissors` from the `CommitMessage`
     ///
-    /// We this will get you all the comments in the `Scissors` section. The `Scissors` section
-    /// is the bit that appears when you run `git commit --verbose`, that contains the diffs, and
-    /// is not preserved when you save the commit.
+    /// We this will get you all the comments in the `Scissors` section. The
+    /// `Scissors` section is the bit that appears when you run `git commit
+    /// --verbose`, that contains the diffs, and is not preserved when you
+    /// save the commit.
     ///
     ///
     /// # Examples
@@ -674,8 +675,8 @@ impl CommitMessage {
 
     /// Does the commit match the saved portions of the commit
     ///
-    /// This takes a regex and matches it to the visible portions of the commits, so it excludes
-    /// comments, and everything after the scissors.
+    /// This takes a regex and matches it to the visible portions of the
+    /// commits, so it excludes comments, and everything after the scissors.
     ///
     /// # Examples
     ///
@@ -752,8 +753,8 @@ impl From<CommitMessage> for String {
 impl From<&str> for CommitMessage {
     /// Create a new `CommitMessage`
     ///
-    /// Create a commit message from a string. It's expected that you'll be reading this during some
-    /// sort of Git Hook
+    /// Create a commit message from a string. It's expected that you'll be
+    /// reading this during some sort of Git Hook
     ///
     /// # Examples
     ///
@@ -844,17 +845,18 @@ mod tests {
     use pretty_assertions::assert_eq;
     use regex::Regex;
 
-    use crate::bodies::Bodies;
-    use crate::body::Body;
-    use crate::comment::Comment;
-    use crate::comments::Comments;
-    use crate::scissors::Scissors;
-    use crate::subject::Subject;
-    use crate::trailer::Trailer;
-    use crate::trailers::Trailers;
-    use crate::Fragment;
-
     use super::CommitMessage;
+    use crate::{
+        bodies::Bodies,
+        body::Body,
+        comment::Comment,
+        comments::Comments,
+        scissors::Scissors,
+        subject::Subject,
+        trailer::Trailer,
+        trailers::Trailers,
+        Fragment,
+    };
 
     #[test]
     fn can_check_if_it_matches_pattern() {

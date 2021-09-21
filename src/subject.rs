@@ -1,9 +1,10 @@
-use std::fmt;
-use std::fmt::{Display, Formatter};
-use std::str::Chars;
+use std::{
+    fmt,
+    fmt::{Display, Formatter},
+    str::Chars,
+};
 
-use crate::body::Body;
-use crate::fragment::Fragment;
+use crate::{body::Body, fragment::Fragment};
 
 /// The `Subject` from the `CommitMessage`
 #[derive(Debug, PartialEq, Clone, Default)]
@@ -114,11 +115,8 @@ impl From<Vec<Fragment>> for Subject {
 mod tests {
     use pretty_assertions::assert_eq;
 
-    use crate::body::Body;
-    use crate::fragment::Fragment;
-    use crate::Comment;
-
     use super::Subject;
+    use crate::{body::Body, fragment::Fragment, Comment};
 
     #[test]
     fn len() {

@@ -1,5 +1,7 @@
-use std::fmt;
-use std::fmt::{Display, Formatter};
+use std::{
+    fmt,
+    fmt::{Display, Formatter},
+};
 
 /// A single contiguous block of `CommitMessage` text
 #[derive(Debug, PartialEq, Clone, Default)]
@@ -34,8 +36,8 @@ impl Body {
 
     /// Is this body empty
     ///
-    /// Empty bodies usually indicate a paragraph break in commit messages so it's handy to be able
-    /// to see them.
+    /// Empty bodies usually indicate a paragraph break in commit messages so
+    /// it's handy to be able to see them.
     ///
     /// # Example
     ///
@@ -79,9 +81,8 @@ impl Display for Body {
 
 #[cfg(test)]
 mod tests {
-    use pretty_assertions::assert_eq;
-
     use indoc::indoc;
+    use pretty_assertions::assert_eq;
 
     use super::Body;
 
