@@ -53,7 +53,6 @@ impl From<Comment> for String {
 #[cfg(test)]
 mod tests {
     use indoc::indoc;
-    use pretty_assertions::assert_eq;
 
     use super::Comment;
 

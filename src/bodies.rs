@@ -119,7 +119,6 @@ impl From<Vec<Fragment>> for Bodies {
 #[cfg(test)]
 mod tests {
     use indoc::indoc;
-    use pretty_assertions::assert_eq;
 
     use super::Bodies;
     use crate::{body::Body, fragment::Fragment};

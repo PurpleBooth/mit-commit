@@ -82,7 +82,6 @@ impl Display for Body {
 #[cfg(test)]
 mod tests {
     use indoc::indoc;
-    use pretty_assertions::assert_eq;
 
     use super::Body;
 

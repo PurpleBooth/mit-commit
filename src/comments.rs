@@ -69,7 +69,6 @@ impl From<Vec<Fragment>> for Comments {
 #[cfg(test)]
 mod tests {
     use indoc::indoc;
-    use pretty_assertions::assert_eq;
 
     use super::Comments;
     use crate::{body::Body, comment::Comment, fragment::Fragment};

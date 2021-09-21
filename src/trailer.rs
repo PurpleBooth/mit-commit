@@ -133,8 +133,6 @@ mod tests {
         hash::{Hash, Hasher},
     };
 
-    use pretty_assertions::assert_eq;
-
     use super::Trailer;
     use crate::{body::Body, Fragment};
 

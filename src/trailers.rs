@@ -138,7 +138,6 @@ impl From<Vec<Fragment>> for Trailers {
 #[cfg(test)]
 mod tests {
     use indoc::indoc;
-    use pretty_assertions::assert_eq;
 
     use super::Trailers;
     use crate::{fragment::Fragment, trailer::Trailer, Body};
