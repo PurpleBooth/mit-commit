@@ -87,6 +87,45 @@ impl Trailers {
     }
 }
 
+impl IntoIterator for Trailers {
+    type IntoIter = std::vec::IntoIter<Trailer>;
+    type Item = Trailer;
+
+    /// Iterate over the trailers
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::{Trailer, Trailers};
+    /// let trailers = Trailers::from(vec![
+    ///     Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
+    ///     Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
+    ///     Trailer::new("Relates-to", "#124"),
+    /// ]);
+    /// let mut iterator = trailers.into_iter();
+    ///
+    /// assert_eq!(
+    ///     iterator.next(),
+    ///     Some(Trailer::new(
+    ///         "Co-authored-by",
+    ///         "Billie Thompson <billie@example.com>"
+    ///     ))
+    /// );
+    /// assert_eq!(
+    ///     iterator.next(),
+    ///     Some(Trailer::new(
+    ///         "Co-authored-by",
+    ///         "Someone Else <someone@example.com>"
+    ///     ))
+    /// );
+    /// assert_eq!(iterator.next(), Some(Trailer::new("Relates-to", "#124")));
+    /// assert_eq!(iterator.next(), None);
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        self.trailers.into_iter()
+    }
+}
+
 impl From<Vec<Trailer>> for Trailers {
     fn from(trailers: Vec<Trailer>) -> Self {
         Trailers {

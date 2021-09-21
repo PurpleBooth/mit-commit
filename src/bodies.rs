@@ -3,6 +3,7 @@ use std::{
     fmt,
     fmt::{Display, Formatter},
     slice::Iter,
+    vec::IntoIter,
 };
 
 use crate::{body::Body, fragment::Fragment, trailer::Trailer};
@@ -57,6 +58,33 @@ impl Bodies {
     #[must_use]
     pub fn iter(&self) -> Iter<'_, Body> {
         self.bodies.iter()
+    }
+}
+
+impl IntoIterator for Bodies {
+    type IntoIter = IntoIter<Body>;
+    type Item = Body;
+
+    /// Iterate over the `Body` in the `Bodies`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::{Bodies, Body};
+    /// let trailers = Bodies::from(vec![
+    ///     Body::from("Body 1"),
+    ///     Body::from("Body 2"),
+    ///     Body::from("Body 3"),
+    /// ]);
+    /// let mut iterator = trailers.into_iter();
+    ///
+    /// assert_eq!(iterator.next(), Some(Body::from("Body 1")));
+    /// assert_eq!(iterator.next(), Some(Body::from("Body 2")));
+    /// assert_eq!(iterator.next(), Some(Body::from("Body 3")));
+    /// assert_eq!(iterator.next(), None);
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        self.bodies.into_iter()
     }
 }
 

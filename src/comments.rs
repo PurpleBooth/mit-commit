@@ -34,6 +34,34 @@ impl Comments {
     }
 }
 
+impl IntoIterator for Comments {
+    type IntoIter = std::vec::IntoIter<Comment>;
+    type Item = Comment;
+
+    /// Iterate over the `Comment` in the `Comments`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::{Comment, Comments};
+    ///
+    /// let trailers = Comments::from(vec![
+    ///     Comment::from("# Comment 1"),
+    ///     Comment::from("# Comment 2"),
+    ///     Comment::from("# Comment 3"),
+    /// ]);
+    /// let mut iterator = trailers.into_iter();
+    ///
+    /// assert_eq!(iterator.next(), Some(Comment::from("# Comment 1")));
+    /// assert_eq!(iterator.next(), Some(Comment::from("# Comment 2")));
+    /// assert_eq!(iterator.next(), Some(Comment::from("# Comment 3")));
+    /// assert_eq!(iterator.next(), None);
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        self.comments.into_iter()
+    }
+}
+
 impl From<Vec<Comment>> for Comments {
     fn from(comments: Vec<Comment>) -> Self {
         Comments { comments }
