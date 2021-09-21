@@ -113,7 +113,6 @@ impl From<Vec<Fragment>> for Subject {
 
 #[cfg(test)]
 mod tests {
-
     use super::Subject;
     use crate::{body::Body, fragment::Fragment, Comment};
 
