@@ -113,8 +113,10 @@ impl TryFrom<Body> for Trailer {
 
         let key = value_and_key
             .get(0)
-            .ok_or_else(|| Error::NotATrailer(body.clone()))?;
-        let value = value_and_key.get(1).ok_or(Error::NotATrailer(body))?;
+            .ok_or_else(|| Error::new_not_a_trailer(&body))?;
+        let value = value_and_key
+            .get(1)
+            .ok_or_else(|| Error::new_not_a_trailer(&body))?;
 
         Ok(Trailer::new(key, value))
     }
@@ -122,9 +124,19 @@ impl TryFrom<Body> for Trailer {
 
 #[derive(Error, Debug, Diagnostic)]
 pub enum Error {
-    #[error("no colon in body line, {0} is not a trailer")]
+    #[error("not a trailer")]
     #[diagnostic(url(docsrs), code(mit_commit::trailer::error::not_atrailer))]
-    NotATrailer(Body),
+    NotATrailer(
+        #[source_code] String,
+        #[label("no colon in body line")] (usize, usize),
+    ),
+}
+
+impl Error {
+    fn new_not_a_trailer(body: &Body) -> Error {
+        let text: String = body.clone().into();
+        Error::NotATrailer(text.clone(), (0, text.len()))
+    }
 }
 
 #[cfg(test)]

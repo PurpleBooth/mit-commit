@@ -837,7 +837,11 @@ impl From<String> for CommitMessage {
 #[derive(Error, Debug, Diagnostic)]
 pub enum Error {
     #[error("failed to read commit file {0}")]
-    #[diagnostic(url(docsrs), code(mit_commit::commit_message::error::io))]
+    #[diagnostic(
+        url(docsrs),
+        code(mit_commit::commit_message::error::io),
+        help("check the file is readable")
+    )]
     Io(#[from] io::Error),
 }
 
