@@ -8,7 +8,7 @@ use thiserror::Error;
 
 use crate::{body::Body, Fragment};
 
-/// A `Trailer` you might see a in a `CommitMessage`, for example
+/// A [`Trailer`] you might see a in a [`CommitMessage`], for example
 /// 'Co-authored-by: Billie Thompson <billie@example.com>'
 #[derive(Debug, Clone, Eq, Ord, PartialOrd)]
 pub struct Trailer {
@@ -17,9 +17,9 @@ pub struct Trailer {
 }
 
 impl Trailer {
-    /// Create a new `Trailer`
+    /// Create a new [`Trailer`]
     ///
-    /// This creates a new element that represents the sort of `Trailers` you
+    /// This creates a new element that represents the sort of [`Trailers`] you
     /// get at the end of commits
     ///
     /// For example there's `Co-authored-by`, `Relates-to`, and `Signed-off-by`
@@ -44,7 +44,7 @@ impl Trailer {
         }
     }
 
-    /// Get the key of the `Trailer`
+    /// Get the key of the [`Trailer`]
     ///
     /// # Example
     ///
@@ -62,7 +62,7 @@ impl Trailer {
         self.key.clone()
     }
 
-    /// Get the value of the `Trailer`
+    /// Get the value of the [`Trailer`]
     ///
     /// # Example
     ///

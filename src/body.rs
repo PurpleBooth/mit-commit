@@ -3,16 +3,16 @@ use std::{
     fmt::{Display, Formatter},
 };
 
-/// A single contiguous block of `CommitMessage` text
+/// A single contiguous block of [`CommitMessage`] text
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct Body {
     text: String,
 }
 
 impl Body {
-    /// Append one body onto another
+    /// Append one [`Body`] onto another
     ///
-    /// This is for concatenating multiple bodies together
+    /// This is for concatenating multiple [`Bodies`] together
     ///
     /// # Example
     ///
@@ -34,10 +34,10 @@ impl Body {
         Body::from(format!("{}\n{}", self.text, additional.text))
     }
 
-    /// Is this body empty
+    /// Is this [`Body`] empty
     ///
-    /// Empty bodies usually indicate a paragraph break in commit messages so
-    /// it's handy to be able to see them.
+    /// An empty [`Body`] usually indicate a paragraph break in a
+    /// [`CommitMessage`] so it's handy to be able to see them.
     ///
     /// # Example
     ///

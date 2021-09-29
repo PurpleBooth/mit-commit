@@ -15,7 +15,7 @@ use super::{
 };
 use crate::{scissors::Scissors, Trailer};
 
-/// A `CommitMessage`, the primary entry point to the library
+/// A [`CommitMessage`], the primary entry point to the library
 #[derive(Debug, PartialEq, Clone)]
 pub struct CommitMessage {
     scissors: Option<Scissors>,
@@ -27,9 +27,9 @@ pub struct CommitMessage {
 }
 
 impl CommitMessage {
-    /// Convert from fragments back into a full `CommitMessage`
+    /// Convert from [`Fragment`] back into a full [`CommitMessage`]
     ///
-    /// Get back to a `CommitMessage` from an ast, usually after you've been
+    /// Get back to a [`CommitMessage`] from an ast, usually after you've been
     /// editing the text.
     ///
     /// # Examples
@@ -84,7 +84,7 @@ impl CommitMessage {
         CommitMessage::from(format!("{}{}", body, scissors))
     }
 
-    /// A helper method to let you insert trailers
+    /// A helper method to let you insert [`Trailer`]
     ///
     /// # Examples
     ///
@@ -159,8 +159,8 @@ impl CommitMessage {
 
     /// Insert text in the place you're most likely to want it
     ///
-    /// In case you don't have any full bodies in there, it inserts it at the
-    /// top of the commit in the subject line.
+    /// In the case you don't have any full [`Body`] in there, it inserts it at
+    /// the top of the commit, in the [`Subject`] line.
     ///
     /// # Examples
     ///
@@ -275,10 +275,10 @@ impl CommitMessage {
             })
     }
 
-    /// Get the `Subject` line from the `CommitMessage`
+    /// Get the [`Subject`] line from the [`CommitMessage`]
     ///
     /// It's possible to get this from the ast, but it's a bit of a faff, so
-    /// this is a convencience method
+    /// this is a convenience method
     ///
     /// # Examples
     ///
@@ -317,13 +317,13 @@ impl CommitMessage {
         self.subject.clone()
     }
 
-    /// Get the underlying data structure that represents the `CommitMessage`
+    /// Get the underlying data structure that represents the [`CommitMessage`]
     ///
-    /// This is the underlying datastructure for the commit. You might want this
-    /// to create a complicated linter, or modify the `CommitMessage` to
-    /// your liking.
+    /// This is the underlying datastructure for the [`CommitMessage`]. You
+    /// might want this to create a complicated linter, or modify the
+    /// [`CommitMessage`] to your liking.
     ///
-    /// Notice how it doesn't include the `Scissors` section.
+    /// Notice how it doesn't include the [`Scissors`] section.
     ///
     /// # Examples
     ///
@@ -400,15 +400,15 @@ impl CommitMessage {
         self.ast.clone()
     }
 
-    /// Get the `Bodies` from the `CommitMessage`
+    /// Get the `Bodies` from the [`CommitMessage`]
     ///
-    /// This gets the bodies from the commit message in easy to use paragraphs,
-    /// we add in blank bodies because starting a new paragraph is a visual
-    /// delimiter so we want to make that easy to detect.
+    /// This gets the [`Bodies`] from the [`CommitMessage`] in easy to use
+    /// paragraphs, we add in blank bodies because starting a new paragraph
+    /// is a visual delimiter so we want to make that easy to detect.
     ///
-    /// It doesn't include the `Subject` line, but if there's a blank line after
-    /// it (as is recommended by the manual), the bodies will start with a
-    /// new empty body.
+    /// It doesn't include the [`Subject`] line, but if there's a blank line
+    /// after it (as is recommended by the manual), the [`Bodies`] will
+    /// start with a new empty [`Body`].
     ///
     /// # Examples
     ///
@@ -461,14 +461,14 @@ impl CommitMessage {
         self.bodies.clone()
     }
 
-    /// Get the `Comments` from the `CommitMessage`
+    /// Get the [`Comments`] from the [`CommitMessage`]
     ///
     /// We this will get you all the comments before the `Scissors` section. The
-    /// `Scissors` section is the bit that appears when you run `git commit
+    /// [`Scissors`] section is the bit that appears when you run `git commit
     /// --verbose`, that contains the diffs.
     ///
-    /// If there's `Comment` mixed in with the body, it'll return those too, but
-    /// not any of the `Body` aound them.
+    /// If there's [`Comment`] mixed in with the body, it'll return those too,
+    /// but not any of the [`Body`] around them.
     ///
     /// # Examples
     ///
@@ -523,10 +523,10 @@ impl CommitMessage {
         self.comments.clone()
     }
 
-    /// Get the `Scissors` from the `CommitMessage`
+    /// Get the [`Scissors`] from the [`CommitMessage`]
     ///
-    /// We this will get you all the comments in the `Scissors` section. The
-    /// `Scissors` section is the bit that appears when you run `git commit
+    /// We this will get you all the comments in the [`Scissors`] section. The
+    /// [`Scissors`] section is the bit that appears when you run `git commit
     /// --verbose`, that contains the diffs, and is not preserved when you
     /// save the commit.
     ///
@@ -600,10 +600,10 @@ impl CommitMessage {
         self.scissors.clone()
     }
 
-    /// Get the `Scissors` from the `CommitMessage`
+    /// Get the [`Scissors`] from the [`CommitMessage`]
     ///
-    /// We this will get you all the comments in the `Scissors` section. The
-    /// `Scissors` section is the bit that appears when you run `git commit
+    /// We this will get you all the comments in the [`Scissors`] section. The
+    /// [`Scissors`] section is the bit that appears when you run `git commit
     /// --verbose`, that contains the diffs, and is not preserved when you
     /// save the commit.
     ///
@@ -674,7 +674,7 @@ impl CommitMessage {
         self.trailers.clone()
     }
 
-    /// Does the commit match the saved portions of the commit
+    /// Does the [`CommitMessage`] the saved portions of the commit
     ///
     /// This takes a regex and matches it to the visible portions of the
     /// commits, so it excludes comments, and everything after the scissors.
@@ -752,7 +752,7 @@ impl From<CommitMessage> for String {
 }
 
 impl From<&str> for CommitMessage {
-    /// Create a new `CommitMessage`
+    /// Create a new [`CommitMessage`]
     ///
     /// Create a commit message from a string. It's expected that you'll be
     /// reading this during some sort of Git Hook

@@ -8,7 +8,7 @@ use std::{
 
 use crate::{body::Body, fragment::Fragment, trailer::Trailer};
 
-/// A collection of user input `CommitMessage` text
+/// A collection of user input [`CommitMessage`] text
 ///
 /// # Examples
 ///
@@ -31,7 +31,7 @@ pub struct Bodies {
 }
 
 impl Bodies {
-    /// Get the first `Body` in this list of `Bodies`
+    /// Get the first [`Body`] in this list of [`Bodies`]
     ///
     /// # Examples
     ///
@@ -53,7 +53,7 @@ impl Bodies {
         self.bodies.first().cloned()
     }
 
-    /// Iterate over the `Body` in the `Bodies`
+    /// Iterate over the [`Body`] in the [`Bodies`]
     ///
     /// # Examples
     ///
@@ -81,7 +81,7 @@ impl IntoIterator for Bodies {
     type IntoIter = IntoIter<Body>;
     type Item = Body;
 
-    /// Iterate over the `Body` in the `Bodies`
+    /// Iterate over the [`Body`] in the [`Bodies`]
     ///
     /// # Examples
     ///
@@ -105,7 +105,7 @@ impl IntoIterator for Bodies {
 }
 
 impl Display for Bodies {
-    /// Render the bodies as text
+    /// Render the [`Bodies`] as text
     ///
     /// # Examples
     ///
@@ -125,7 +125,7 @@ impl Display for Bodies {
 }
 
 impl From<Vec<Body>> for Bodies {
-    /// Render the bodies as text
+    /// Combine a [`Vec`] of [`Body`] into [`Bodies`]
     ///
     /// # Examples
     ///

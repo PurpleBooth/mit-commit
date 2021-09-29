@@ -2,14 +2,14 @@ use std::slice::Iter;
 
 use crate::{comment::Comment, fragment::Fragment};
 
-/// A collection of comments from a `CommitMessage`
+/// A collection of comments from a [`CommitMessage`]
 #[derive(Debug, PartialEq, Clone)]
 pub struct Comments {
     comments: Vec<Comment>,
 }
 
 impl Comments {
-    /// Iterate over the `Comment` in the `Comments`
+    /// Iterate over the [`Comment`] in the [`Comments`]
     ///
     /// # Examples
     ///
@@ -38,7 +38,7 @@ impl IntoIterator for Comments {
     type IntoIter = std::vec::IntoIter<Comment>;
     type Item = Comment;
 
-    /// Iterate over the `Comment` in the `Comments`
+    /// Iterate over the [`Comment`] in the [`Comments`]
     ///
     /// # Examples
     ///

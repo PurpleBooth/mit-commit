@@ -5,9 +5,9 @@ pub struct Comment {
 }
 
 impl Comment {
-    /// Append one comment onto another
+    /// Append one [`Comment`] onto another
     ///
-    /// This is for concatenating multiple comments together
+    /// This is for concatenating multiple [`Comment`] together
     ///
     /// # Example
     ///

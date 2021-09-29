@@ -10,7 +10,7 @@ pub struct Trailers {
 }
 
 impl Trailers {
-    /// Iterate over the trailers
+    /// Iterate over the [`Trailers`]
     ///
     /// # Examples
     ///
@@ -45,7 +45,7 @@ impl Trailers {
         self.trailers.iter()
     }
 
-    /// How many trailers are there
+    /// How many [`Trailers`] are there
     ///
     /// # Examples
     ///
@@ -63,7 +63,7 @@ impl Trailers {
         self.trailers.len()
     }
 
-    /// Are there no trailers
+    /// Are there no [`Trailers`]
     ///
     /// # Examples
     ///
@@ -91,7 +91,7 @@ impl IntoIterator for Trailers {
     type IntoIter = std::vec::IntoIter<Trailer>;
     type Item = Trailer;
 
-    /// Iterate over the trailers
+    /// Iterate over the [`Trailers`]
     ///
     /// # Examples
     ///

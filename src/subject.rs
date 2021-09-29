@@ -6,14 +6,14 @@ use std::{
 
 use crate::{body::Body, fragment::Fragment};
 
-/// The `Subject` from the `CommitMessage`
+/// The [`Subject`] from the [`CommitMessage`]
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct Subject {
     text: String,
 }
 
 impl Subject {
-    /// Count characters in `Subject`
+    /// Count characters in [`Subject`]
     ///
     /// # Examples
     ///
@@ -28,7 +28,7 @@ impl Subject {
         self.text.len()
     }
 
-    /// Is the `Subject` empty
+    /// Is the [`Subject`] empty
     ///
     /// # Examples
     ///
@@ -43,7 +43,7 @@ impl Subject {
         self.text.is_empty()
     }
 
-    /// Convert the `Subject` into chars
+    /// Convert the [`Subject`] into chars
     ///
     /// # Examples
     ///
