@@ -1,5 +1,6 @@
 use std::{convert::TryFrom, fs::File, io, io::Read, path::PathBuf};
 
+use miette::Diagnostic;
 use regex::Regex;
 use thiserror::Error;
 
@@ -833,9 +834,10 @@ impl From<String> for CommitMessage {
     }
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Diagnostic)]
 pub enum Error {
     #[error("failed to read commit file {0}")]
+    #[diagnostic(url(docsrs), code(mit_commit::commit_message::error::io))]
     Io(#[from] io::Error),
 }
 

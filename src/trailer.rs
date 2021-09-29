@@ -3,6 +3,7 @@ use std::{
     hash::{Hash, Hasher},
 };
 
+use miette::Diagnostic;
 use thiserror::Error;
 
 use crate::{body::Body, Fragment};
@@ -119,9 +120,10 @@ impl TryFrom<Body> for Trailer {
     }
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Diagnostic)]
 pub enum Error {
     #[error("no colon in body line, {0} is not a trailer")]
+    #[diagnostic(url(docsrs), code(mit_commit::trailer::error::not_atrailer))]
     NotATrailer(Body),
 }
 
