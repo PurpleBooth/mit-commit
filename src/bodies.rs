@@ -9,6 +9,22 @@ use std::{
 use crate::{body::Body, fragment::Fragment, trailer::Trailer};
 
 /// A collection of user input `CommitMessage` text
+///
+/// # Examples
+///
+/// ```
+/// use mit_commit::{Bodies, Body, Subject};
+///
+/// let bodies: Vec<Body> = Vec::default();
+/// assert_eq!(None, Bodies::from(bodies).first());
+///
+/// let bodies: Vec<Body> = vec![
+///     Body::from("First"),
+///     Body::from("Second"),
+///     Body::from("Third"),
+/// ];
+/// assert_eq!(Some(Body::from("First")), Bodies::from(bodies).first());
+/// ```
 #[derive(Debug, PartialEq, Clone)]
 pub struct Bodies {
     bodies: Vec<Body>,
@@ -43,12 +59,12 @@ impl Bodies {
     ///
     /// ```
     /// use mit_commit::{Bodies, Body};
-    /// let trailers = Bodies::from(vec![
+    /// let bodies = Bodies::from(vec![
     ///     Body::from("Body 1"),
     ///     Body::from("Body 2"),
     ///     Body::from("Body 3"),
     /// ]);
-    /// let mut iterator = trailers.iter();
+    /// let mut iterator = bodies.iter();
     ///
     /// assert_eq!(iterator.next(), Some(&Body::from("Body 1")));
     /// assert_eq!(iterator.next(), Some(&Body::from("Body 2")));
@@ -71,12 +87,12 @@ impl IntoIterator for Bodies {
     ///
     /// ```
     /// use mit_commit::{Bodies, Body};
-    /// let trailers = Bodies::from(vec![
+    /// let bodies = Bodies::from(vec![
     ///     Body::from("Body 1"),
     ///     Body::from("Body 2"),
     ///     Body::from("Body 3"),
     /// ]);
-    /// let mut iterator = trailers.into_iter();
+    /// let mut iterator = bodies.into_iter();
     ///
     /// assert_eq!(iterator.next(), Some(Body::from("Body 1")));
     /// assert_eq!(iterator.next(), Some(Body::from("Body 2")));
@@ -89,12 +105,44 @@ impl IntoIterator for Bodies {
 }
 
 impl Display for Bodies {
+    /// Render the bodies as text
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::{Bodies, Body};
+    /// let bodies = Bodies::from(vec![
+    ///     Body::from("Body 1"),
+    ///     Body::from("Body 2"),
+    ///     Body::from("Body 3"),
+    /// ]);
+    ///
+    /// assert_eq!(format!("{}", bodies), "Body 1\n\nBody 2\n\nBody 3");
+    /// ```
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", String::from(self.clone()))
     }
 }
 
 impl From<Vec<Body>> for Bodies {
+    /// Render the bodies as text
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::{Bodies, Body};
+    /// let bodies = Bodies::from(vec![
+    ///     Body::from("Body 1"),
+    ///     Body::from("Body 2"),
+    ///     Body::from("Body 3"),
+    /// ]);
+    /// let mut iterator = bodies.into_iter();
+    ///
+    /// assert_eq!(iterator.next(), Some(Body::from("Body 1")));
+    /// assert_eq!(iterator.next(), Some(Body::from("Body 2")));
+    /// assert_eq!(iterator.next(), Some(Body::from("Body 3")));
+    /// assert_eq!(iterator.next(), None);
+    /// ```
     fn from(bodies: Vec<Body>) -> Self {
         Bodies { bodies }
     }
