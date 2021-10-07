@@ -4,6 +4,8 @@ on:
     branches:
       - "*"
   pull_request:
+  workflow_dispatch:
+
 jobs:
   lint-markdown:
     uses: PurpleBooth/common-pipelines/.github/workflows/markdown-check.yml@main
@@ -11,6 +13,7 @@ jobs:
     uses: PurpleBooth/common-pipelines/.github/workflows/commit-check.yml@main
   rust-checks:
     uses: PurpleBooth/common-pipelines/.github/workflows/rust-check.yml@main
+
   release:
     if: github.ref == 'refs/heads/main'
     env:
@@ -45,44 +48,12 @@ jobs:
         if: steps.current_version.outputs.current_version != steps.previous_version.outputs.previous_version
         id: version_bump
 
-  github-release:
-    needs:
-      - release
-    if: needs.release.outputs.version_bump
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2.3.4
-        name: Checkout the repository
-        with:
-          ref: v${{ needs.release.outputs.current_version }}
-          fetch-depth: 0
-      - name: Generate a changelog
-        uses: orhun/git-cliff-action@v1
-        with:
-          config: cliff.toml
-          args: --verbose --latest
-        env:
-          OUTPUT: CHANGELOG.md
-      - env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        id: create_release
-        uses: ncipollo/release-action@v1.8.10
-        with:
-          allowUpdates: true
-          token: ${{ secrets.COMMITTER_TOKEN }}
-          bodyFile: CHANGELOG.md
-          name: Release v${{ needs.release.outputs.current_version }}
-          tag: v${{ needs.release.outputs.current_version }}
-
   publish-to-cargo:
+    if: needs.release.outputs.version_bump
     needs:
       - release
-    if: needs.release.outputs.version_bump
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2.3.4
-      - env:
-          CARGO_TOKEN: ${{ secrets.CARGO_TOKEN }}
-        run: |
-          cargo login "$CARGO_TOKEN"
-          cargo publish
+    uses: PurpleBooth/common-pipelines/.github/workflows/release-rust-library.yml@main
+    with:
+      current_version: ${{ needs.release.outputs.current_version }}
+    secrets:
+      cargo_token: ${{ secrets.CARGO_TOKEN }}
