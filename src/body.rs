@@ -30,8 +30,8 @@ impl Body {
     /// )
     /// ```
     #[must_use]
-    pub fn append(&self, additional: &Body) -> Body {
-        Body::from(format!("{}\n{}", self.text, additional.text))
+    pub fn append(&self, additional: &Self) -> Self {
+        Self::from(format!("{}\n{}", self.text, additional.text))
     }
 
     /// Is this [`Body`] empty
@@ -55,7 +55,7 @@ impl Body {
 
 impl From<&str> for Body {
     fn from(body: &str) -> Self {
-        Body {
+        Self {
             text: String::from(body),
         }
     }
@@ -63,7 +63,7 @@ impl From<&str> for Body {
 
 impl From<String> for Body {
     fn from(body: String) -> Self {
-        Body { text: body }
+        Self { text: body }
     }
 }
 

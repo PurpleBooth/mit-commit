@@ -7,40 +7,41 @@ pub struct Scissors {
 }
 
 impl Scissors {
-    pub(crate) fn parse_sections(message: &str) -> (String, Option<Scissors>) {
-        if let Some(scissors_position) = message
+    pub(crate) fn parse_sections(message: &str) -> (String, Option<Self>) {
+        message
             .lines()
             .position(|line| line.ends_with(SCISSORS_MARKER))
-        {
-            let lines = message.lines().collect::<Vec<_>>();
-            let body = lines
-                .clone()
-                .into_iter()
-                .take(scissors_position)
-                .collect::<Vec<_>>()
-                .join("\n");
-            let scissors_string = &lines
-                .into_iter()
-                .skip(scissors_position)
-                .collect::<Vec<_>>()
-                .join("\n");
+            .map_or_else(
+                || (message.to_string(), None),
+                |scissors_position| {
+                    let lines = message.lines().collect::<Vec<_>>();
+                    let body = lines
+                        .clone()
+                        .into_iter()
+                        .take(scissors_position)
+                        .collect::<Vec<_>>()
+                        .join("\n");
+                    let scissors_string = &lines
+                        .into_iter()
+                        .skip(scissors_position)
+                        .collect::<Vec<_>>()
+                        .join("\n");
 
-            let scissors = if let Some('\n') = message.chars().last() {
-                Scissors::from(format!("{}\n", scissors_string))
-            } else {
-                Scissors::from(scissors_string)
-            };
+                    let scissors = if message.ends_with('\n') {
+                        Self::from(format!("{}\n", scissors_string))
+                    } else {
+                        Self::from(scissors_string)
+                    };
 
-            (body, Some(scissors))
-        } else {
-            (message.to_string(), None)
-        }
+                    (body, Some(scissors))
+                },
+            )
     }
 }
 
 impl From<&str> for Scissors {
     fn from(scissors: &str) -> Self {
-        Scissors {
+        Self {
             scissors: String::from(scissors),
         }
     }
@@ -48,13 +49,13 @@ impl From<&str> for Scissors {
 
 impl From<String> for Scissors {
     fn from(scissors: String) -> Self {
-        Scissors { scissors }
+        Self { scissors }
     }
 }
 
 impl From<&String> for Scissors {
     fn from(scissors: &String) -> Self {
-        Scissors {
+        Self {
             scissors: scissors.clone(),
         }
     }

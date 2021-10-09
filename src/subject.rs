@@ -67,7 +67,7 @@ impl Subject {
 
 impl From<&str> for Subject {
     fn from(subject: &str) -> Self {
-        Subject {
+        Self {
             text: subject.into(),
         }
     }
@@ -75,12 +75,12 @@ impl From<&str> for Subject {
 
 impl From<String> for Subject {
     fn from(subject: String) -> Self {
-        Subject { text: subject }
+        Self { text: subject }
     }
 }
 
 impl From<Subject> for String {
-    fn from(subject: Subject) -> String {
+    fn from(subject: Subject) -> Self {
         subject.text
     }
 }
@@ -92,8 +92,8 @@ impl Display for Subject {
 }
 
 impl From<Body> for Subject {
-    fn from(body: Body) -> Subject {
-        Subject::from(String::from(body))
+    fn from(body: Body) -> Self {
+        Self::from(String::from(body))
     }
 }
 
@@ -102,7 +102,7 @@ impl From<Vec<Fragment>> for Subject {
         ast.iter()
             .find_map(|values| {
                 if let Fragment::Body(body) = values {
-                    Some(Subject::from(body.clone()))
+                    Some(Self::from(body.clone()))
                 } else {
                     None
                 }

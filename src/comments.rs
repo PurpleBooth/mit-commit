@@ -64,7 +64,7 @@ impl IntoIterator for Comments {
 
 impl From<Vec<Comment>> for Comments {
     fn from(comments: Vec<Comment>) -> Self {
-        Comments { comments }
+        Self { comments }
     }
 }
 
@@ -73,7 +73,7 @@ impl From<Comments> for String {
         comments
             .comments
             .into_iter()
-            .map(String::from)
+            .map(Self::from)
             .collect::<Vec<_>>()
             .join("\n\n")
     }

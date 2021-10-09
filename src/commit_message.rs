@@ -65,7 +65,7 @@ impl CommitMessage {
     /// )
     /// ```
     #[must_use]
-    pub fn from_fragments(fragments: Vec<Fragment>, scissors: Option<Scissors>) -> CommitMessage {
+    pub fn from_fragments(fragments: Vec<Fragment>, scissors: Option<Scissors>) -> Self {
         let body = fragments
             .into_iter()
             .map(|x| match x {
@@ -75,13 +75,11 @@ impl CommitMessage {
             .collect::<Vec<String>>()
             .join("\n");
 
-        let scissors: String = if let Some(contents) = scissors {
-            format!("\n{}", String::from(contents))
-        } else {
-            "".into()
-        };
+        let scissors: String = scissors
+            .map(|contents| format!("\n{}", String::from(contents)))
+            .unwrap_or_default();
 
-        CommitMessage::from(format!("{}{}", body, scissors))
+        Self::from(format!("{}{}", body, scissors))
     }
 
     /// A helper method to let you insert [`Trailer`]
@@ -197,7 +195,7 @@ impl CommitMessage {
     ///         ])
     /// ```
     #[must_use]
-    pub fn insert_after_last_full_body(&self, fragment: Vec<Fragment>) -> CommitMessage {
+    pub fn insert_after_last_full_body(&self, fragment: Vec<Fragment>) -> Self {
         let position = self.ast.iter().rposition(|fragment| match fragment {
             Fragment::Body(body) => !body.is_empty(),
             Fragment::Comment(_) => false,
@@ -213,7 +211,7 @@ impl CommitMessage {
             None => (vec![], self.ast.clone().into_iter().enumerate().collect()),
         };
 
-        CommitMessage::from_fragments(
+        Self::from_fragments(
             [
                 before.into_iter().map(|(_, x)| x).collect(),
                 fragment,
@@ -737,14 +735,14 @@ impl From<CommitMessage> for String {
             .get_ast()
             .iter()
             .map(|item| match item {
-                Fragment::Body(contents) => String::from(contents.clone()),
-                Fragment::Comment(contents) => String::from(contents.clone()),
+                Fragment::Body(contents) => Self::from(contents.clone()),
+                Fragment::Comment(contents) => Self::from(contents.clone()),
             })
             .collect::<Vec<_>>()
             .join("\n");
 
         if let Some(scissors) = commit_message.get_scissors() {
-            format!("{}\n{}", basic_commit, String::from(scissors))
+            format!("{}\n{}", basic_commit, Self::from(scissors))
         } else {
             basic_commit
         }
@@ -790,12 +788,12 @@ impl From<&str> for CommitMessage {
     /// )
     fn from(message: &str) -> Self {
         let (rest, scissors) = Scissors::parse_sections(message);
-        let comment_character = CommitMessage::guess_comment_character(&rest, scissors.clone());
-        let per_line_ast = CommitMessage::convert_to_per_line_ast(comment_character, &rest);
+        let comment_character = Self::guess_comment_character(&rest, scissors.clone());
+        let per_line_ast = Self::convert_to_per_line_ast(comment_character, &rest);
         let trailers = per_line_ast.clone().into();
-        let mut ast: Vec<Fragment> = CommitMessage::group_ast(per_line_ast);
+        let mut ast: Vec<Fragment> = Self::group_ast(per_line_ast);
 
-        if let (None, Some('\n')) = (scissors.clone(), message.chars().last()) {
+        if (scissors.clone(), message.chars().last()) == (None, Some('\n')) {
             ast.push(Fragment::Body(Body::default()));
         }
 
@@ -803,7 +801,7 @@ impl From<&str> for CommitMessage {
         let comments = Comments::from(ast.clone());
         let bodies = Bodies::from(ast.clone());
 
-        CommitMessage {
+        Self {
             scissors,
             ast,
             subject,
@@ -823,14 +821,14 @@ impl TryFrom<PathBuf> for CommitMessage {
 
         file.read_to_string(&mut buffer)
             .map_err(Error::from)
-            .map(move |_| CommitMessage::from(buffer))
+            .map(move |_| Self::from(buffer))
     }
 }
 
 impl From<String> for CommitMessage {
     fn from(message: String) -> Self {
         let str: &str = &message;
-        CommitMessage::from(str)
+        Self::from(str)
     }
 }
 

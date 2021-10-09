@@ -144,7 +144,7 @@ impl From<Vec<Body>> for Bodies {
     /// assert_eq!(iterator.next(), None);
     /// ```
     fn from(bodies: Vec<Body>) -> Self {
-        Bodies { bodies }
+        Self { bodies }
     }
 }
 
@@ -153,7 +153,7 @@ impl From<Bodies> for String {
         bodies
             .bodies
             .into_iter()
-            .map(String::from)
+            .map(Self::from)
             .collect::<Vec<_>>()
             .join("\n\n")
     }

@@ -128,7 +128,7 @@ impl IntoIterator for Trailers {
 
 impl From<Vec<Trailer>> for Trailers {
     fn from(trailers: Vec<Trailer>) -> Self {
-        Trailers {
+        Self {
             trailers,
             iterator_index: 0,
         }
@@ -140,7 +140,7 @@ impl From<Trailers> for String {
         trailers
             .trailers
             .into_iter()
-            .map(String::from)
+            .map(Self::from)
             .collect::<Vec<_>>()
             .join("\n")
     }

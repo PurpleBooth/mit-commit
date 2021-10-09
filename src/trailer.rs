@@ -37,8 +37,8 @@ impl Trailer {
     /// )
     /// ```
     #[must_use]
-    pub fn new(key: &str, value: &str) -> Trailer {
-        Trailer {
+    pub fn new(key: &str, value: &str) -> Self {
+        Self {
             key: String::from(key),
             value: String::from(value),
         }
@@ -100,7 +100,7 @@ impl From<Trailer> for String {
 impl From<Trailer> for Fragment {
     fn from(trailer: Trailer) -> Self {
         let trailer: String = trailer.into();
-        Fragment::Body(Body::from(trailer))
+        Self::Body(Body::from(trailer))
     }
 }
 
@@ -118,7 +118,7 @@ impl TryFrom<Body> for Trailer {
             .get(1)
             .ok_or_else(|| Error::new_not_a_trailer(&body))?;
 
-        Ok(Trailer::new(key, value))
+        Ok(Self::new(key, value))
     }
 }
 
@@ -133,9 +133,9 @@ pub enum Error {
 }
 
 impl Error {
-    fn new_not_a_trailer(body: &Body) -> Error {
+    fn new_not_a_trailer(body: &Body) -> Self {
         let text: String = body.clone().into();
-        Error::NotATrailer(text.clone(), (0, text.len()))
+        Self::NotATrailer(text.clone(), (0, text.len()))
     }
 }
 

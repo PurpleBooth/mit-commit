@@ -25,20 +25,20 @@ impl Comment {
     /// )
     /// ```
     #[must_use]
-    pub fn append(&self, additional: &Comment) -> Comment {
-        Comment::from(format!("{}\n{}", self.comment, additional.comment))
+    pub fn append(&self, additional: &Self) -> Self {
+        Self::from(format!("{}\n{}", self.comment, additional.comment))
     }
 }
 
 impl From<String> for Comment {
     fn from(comment: String) -> Self {
-        Comment { comment }
+        Self { comment }
     }
 }
 
 impl From<&str> for Comment {
     fn from(comment: &str) -> Self {
-        Comment {
+        Self {
             comment: String::from(comment),
         }
     }
