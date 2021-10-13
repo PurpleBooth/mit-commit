@@ -786,6 +786,19 @@ impl From<&str> for CommitMessage {
     ///     message.get_subject(),
     ///     Subject::from("Update bashrc to include kubernetes completions")
     /// )
+    /// ```
+    ///
+    ///  # Comment Character
+    ///
+    /// We load the comment character for the commit message
+    ///
+    /// Valid options are in [`LEGAL_CHARACTERS`], these are the 'auto" selection logic in the git codebase in the [`adjust_comment_line_char`](https://github.com/git/git/blob/master/builtin/commit.c#L667-L695) function.
+    ///
+    /// This does mean that we aren't making 100% of characters available, which
+    /// is technically possible, but given we don't have access to the users git
+    /// config this feels like a reasonable compromise, there are a lot of
+    /// non-whitespace characters as options otherwise, and we don't want to
+    /// confuse a genuine body with a comment
     fn from(message: &str) -> Self {
         let (rest, scissors) = Scissors::parse_sections(message);
         let comment_character = Self::guess_comment_character(&rest, scissors.clone());
@@ -846,16 +859,6 @@ pub enum Error {
 const LEGAL_CHARACTERS: [char; 10] = ['#', ';', '@', '!', '$', '%', '^', '&', '|', ':'];
 
 impl CommitMessage {
-    /// Guess the comment character for the commit message
-    ///
-    /// Valid options are in [`LEGAL_CHARACTERS`]
-    /// From the 'auto" selection logic in the git codebase in the [`adjust_comment_line_char`](https://github.com/git/git/blob/master/builtin/commit.c#L667-L695) function.
-    ///
-    /// This does mean that we aren't making 100% of characters available, which
-    /// is technically possible, but given we don't have access to the users git
-    /// config this feels like a reasonable compromise, given the number of
-    /// potential characters are available, given that the not whitespace causes
-    /// confusing behaviour when you are trying to make commits
     fn guess_comment_character(rest: &str, scissors: Option<Scissors>) -> Option<char> {
         match scissors {
             Some(scissors) => String::from(scissors).chars().next(),
