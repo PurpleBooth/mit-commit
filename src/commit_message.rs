@@ -843,6 +843,24 @@ pub enum Error {
     Io(#[from] io::Error),
 }
 
+lazy_static! {
+    static ref NOT_WHITESPACE_RE: Regex = Regex::new("^\\W$").unwrap();
+}
+
+impl CommitMessage {
+    fn guess_comment_character(rest: &str, scissors: Option<Scissors>) -> Option<char> {
+        match scissors {
+            Some(scissors) => String::from(scissors).chars().next(),
+            None => rest
+                .lines()
+                .rev()
+                .find(|line| !line.trim().is_empty())
+                .and_then(|line| line.chars().next())
+                .filter(|x| NOT_WHITESPACE_RE.is_match(x.to_string().trim())),
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use indoc::indoc;
@@ -2265,23 +2283,5 @@ mod tests {
     fn never_segfault(input: String) -> bool {
         CommitMessage::from(input);
         true
-    }
-}
-
-lazy_static! {
-    static ref NOT_WHITESPACE_RE: Regex = Regex::new("^\\W$").unwrap();
-}
-
-impl CommitMessage {
-    fn guess_comment_character(rest: &str, scissors: Option<Scissors>) -> Option<char> {
-        match scissors {
-            Some(scissors) => String::from(scissors).chars().next(),
-            None => rest
-                .lines()
-                .rev()
-                .find(|line| !line.trim().is_empty())
-                .and_then(|line| line.chars().next())
-                .filter(|x| NOT_WHITESPACE_RE.is_match(x.to_string().trim())),
-        }
     }
 }
