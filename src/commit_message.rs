@@ -915,6 +915,37 @@ mod tests {
     }
 
     #[test]
+    fn can_parse_when_there_is_no_gutter() {
+        let commit = CommitMessage::from(indoc!(
+            "
+            Example Commit Message
+            This is an example commit message for linting
+
+            This is another line
+            # Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+            # die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
+            # bricht den Commit ab.
+            #
+            # Auf Branch main
+            # Ihr Branch ist auf demselben Stand wie 'origin/main'.
+            #
+            # Zum Commit vorgemerkte \u{00E4}nderungen:
+            #	neue Datei:     file
+            #
+            "
+        ));
+
+        assert_eq!(
+            commit.get_subject(),
+            Subject::from("Example Commit Message\nThis is an example commit message for linting")
+        );
+        assert_eq!(
+            commit.get_body(),
+            Bodies::from(vec![Body::default(), Body::from("This is another line")])
+        );
+    }
+
+    #[test]
     fn can_add_trailers_to_a_normal_commit() {
         let commit = CommitMessage::from(indoc!(
             "
