@@ -2259,6 +2259,13 @@ mod tests {
 
         assert_eq!(message.get_trailers(), Trailers::from(trailers));
     }
+
+    #[allow(unused_must_use)]
+    #[quickcheck]
+    fn never_segfault(input: String) -> bool {
+        CommitMessage::from(input);
+        true
+    }
 }
 
 lazy_static! {

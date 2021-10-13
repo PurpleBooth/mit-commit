@@ -22,6 +22,8 @@ tokio = { version = "1", features = ["full"] }
 indoc = "1.0.3"
 regex = "1.4.3"
 criterion = "0.3.3"
+quickcheck = "1.0.3"
+quickcheck_macros = "1.0.0"
 
 [[bench]]
 name = "commit_message"
