@@ -834,6 +834,34 @@ impl CommitMessage {
 
         commit.with_subject(&existing_subject)
     }
+
+    /// Give you a new [`CommitMessage`] with the provided body
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::{CommitMessage, Subject};
+    /// let commit = CommitMessage::from("No comment\n\n# Some Comment");
+    ///
+    /// assert_eq!(commit.get_comment_char().unwrap(), '#');
+    /// ```
+    ///
+    /// We return none is there is no comments
+    ///
+    /// ```
+    /// use mit_commit::{CommitMessage, Subject};
+    /// let commit = CommitMessage::from("No comment");
+    ///
+    /// assert!(commit.get_comment_char().is_none());
+    /// ```
+    #[must_use]
+    pub fn get_comment_char(&self) -> Option<char> {
+        self.comments
+            .iter()
+            .next()
+            .map(|comment| -> String { comment.clone().into() })
+            .and_then(|comment| comment.chars().next())
+    }
 }
 
 impl From<CommitMessage> for String {
@@ -1399,6 +1427,12 @@ mod tests {
     }
 
     #[test]
+    fn can_get_comment_character_with_all_features() {
+        let commit_character = CommitMessage::from(COMMIT_WITH_ALL_FEATURES);
+        assert_eq!(commit_character.get_comment_char().unwrap(), '#');
+    }
+
+    #[test]
     fn can_get_ast_from_commit_with_all_features() {
         let message = CommitMessage::from(COMMIT_WITH_ALL_FEATURES);
         let ast: Vec<Fragment> = vec![
@@ -1630,6 +1664,12 @@ mod tests {
     }
 
     #[test]
+    fn can_get_comment_character_only_commit() {
+        let commit_character = CommitMessage::from(LONG_SUBJECT_ONLY_COMMIT);
+        assert_eq!(commit_character.get_comment_char().unwrap(), '#');
+    }
+
+    #[test]
     fn can_get_subject_from_subject_only_commit() {
         let message = CommitMessage::from(LONG_SUBJECT_ONLY_COMMIT);
 
@@ -1796,6 +1836,12 @@ mod tests {
     }
 
     #[test]
+    fn can_get_comment_character_not_verbose_commit() {
+        let commit_character = CommitMessage::from(NOT_VERBOSE_COMMIT);
+        assert_eq!(commit_character.get_comment_char().unwrap(), '#');
+    }
+
+    #[test]
     fn can_get_ast_from_not_verbose_commit() {
         let message = CommitMessage::from(NOT_VERBOSE_COMMIT);
         let ast: Vec<Fragment> = vec![
@@ -1903,6 +1949,12 @@ mod tests {
 
         assert_eq!(string_version_of_commit, NON_STANDARD_COMMENT_CHARACTER);
         assert_eq!(first_commit_message, second_commit_message);
+    }
+
+    #[test]
+    fn can_get_comment_character_non_standard_comment_char_commit() {
+        let commit_character = CommitMessage::from(NON_STANDARD_COMMENT_CHARACTER);
+        assert_eq!(commit_character.get_comment_char().unwrap(), ';');
     }
 
     #[test]
@@ -2563,8 +2615,14 @@ mod tests {
 
     #[allow(unused_must_use)]
     #[quickcheck]
-    fn never_segfault(input: String) -> bool {
+    fn never_panic(input: String) -> bool {
         CommitMessage::from(input);
         true
+    }
+
+    #[test]
+    fn can_get_comment_character_when_there_is_no_comments() {
+        let commit_character = CommitMessage::from("Example Commit Message");
+        assert!(commit_character.get_comment_char().is_none());
     }
 }
