@@ -765,7 +765,10 @@ impl CommitMessage {
     #[must_use]
     pub fn with_subject(self, subject: &str) -> Self {
         let mut ast = self.ast.clone();
-        ast.remove(0);
+
+        if !ast.is_empty() {
+            ast.remove(0);
+        }
         ast.insert(0, Fragment::Body(Body::from(subject)));
 
         Self {
@@ -2659,6 +2662,12 @@ mod tests {
         let commit: CommitMessage = "Some Subject".into();
         let actual: String = commit.with_subject(&input).get_subject().into();
         actual == input
+    }
+
+    #[test]
+    fn with_subject_on_default_commit() {
+        let commit = CommitMessage::default().with_subject("Subject");
+        assert_eq!(commit.get_subject(), Subject::from("Subject"));
     }
 
     #[allow(clippy::needless_pass_by_value)]
