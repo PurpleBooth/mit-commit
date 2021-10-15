@@ -16,7 +16,7 @@ use super::{
 use crate::{scissors::Scissors, Trailer};
 
 /// A [`CommitMessage`], the primary entry point to the library
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Default)]
 pub struct CommitMessage {
     scissors: Option<Scissors>,
     ast: Vec<Fragment>,
@@ -983,6 +983,14 @@ mod tests {
         trailers::Trailers,
         Fragment,
     };
+
+    #[test]
+    fn implements_default() {
+        let commit = CommitMessage::default();
+        let actual: String = commit.into();
+
+        assert_eq!(actual, String::new());
+    }
 
     #[test]
     fn can_check_if_it_matches_pattern() {

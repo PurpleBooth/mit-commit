@@ -3,7 +3,7 @@ use std::slice::Iter;
 use crate::{comment::Comment, fragment::Fragment};
 
 /// A collection of comments from a [`CommitMessage`]
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Default)]
 pub struct Comments {
     comments: Vec<Comment>,
 }

@@ -25,7 +25,7 @@ use crate::{body::Body, fragment::Fragment, trailer::Trailer};
 /// ];
 /// assert_eq!(Some(Body::from("First")), Bodies::from(bodies).first());
 /// ```
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Default)]
 pub struct Bodies {
     bodies: Vec<Body>,
 }

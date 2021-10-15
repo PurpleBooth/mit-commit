@@ -3,7 +3,7 @@ use std::{convert::TryFrom, slice::Iter};
 use crate::{fragment::Fragment, trailer::Trailer};
 
 /// A Collection of `Trailer`
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Default)]
 pub struct Trailers {
     trailers: Vec<Trailer>,
     iterator_index: usize,
