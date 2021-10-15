@@ -727,6 +727,113 @@ impl CommitMessage {
             .join("\n");
         re.is_match(&text)
     }
+
+    fn guess_comment_character(rest: &str, scissors: Option<Scissors>) -> Option<char> {
+        match scissors {
+            Some(scissors) => String::from(scissors).chars().next(),
+            None => rest
+                .lines()
+                .rev()
+                .find(|line| !line.trim().is_empty())
+                .and_then(|line| line.chars().next())
+                .filter(|x| LEGAL_CHARACTERS.contains(x)),
+        }
+    }
+
+    /// Give you a new [`CommitMessage`] with the provided subject
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use indoc::indoc;
+    /// use mit_commit::{CommitMessage, Subject};
+    /// use regex::Regex;
+    ///
+    /// let commit = CommitMessage::from(indoc!(
+    ///     "
+    ///     Example Commit Message
+    ///
+    ///     This is an example commit message
+    ///     "
+    /// ));
+    ///
+    /// assert_eq!(
+    ///     commit.with_subject("Subject").get_subject(),
+    ///     Subject::from("Subject")
+    /// );
+    /// ```
+    #[must_use]
+    pub fn with_subject(self, subject: &str) -> Self {
+        let mut ast = self.ast.clone();
+        ast.remove(0);
+        ast.insert(0, Fragment::Body(Body::from(subject)));
+
+        Self {
+            scissors: self.scissors,
+            ast,
+            subject: subject.into(),
+            trailers: self.trailers,
+            comments: self.comments,
+            bodies: self.bodies,
+        }
+    }
+
+    /// Give you a new [`CommitMessage`] with the provided body
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use indoc::indoc;
+    /// use mit_commit::{CommitMessage, Subject};
+    /// use regex::Regex;
+    ///
+    /// let commit = CommitMessage::from(indoc!(
+    ///     "
+    ///     Example Commit Message
+    ///
+    ///     This is an example commit message
+    ///     "
+    /// ));
+    /// let expected = CommitMessage::from(indoc!(
+    ///     "
+    ///     Example Commit Message
+    ///
+    ///     New body"
+    /// ));
+    ///
+    /// assert_eq!(commit.with_body_contents("New body"), expected);
+    /// ```
+    ///
+    /// A note on what we consider the body. The body is what falls after the
+    /// gutter. This means the following behaviour might happen
+    ///
+    /// ```
+    /// use indoc::indoc;
+    /// use mit_commit::{CommitMessage, Subject};
+    /// use regex::Regex;
+    /// let commit = CommitMessage::from(indoc!(
+    ///     "
+    ///     Example Commit Message
+    ///     without gutter"
+    /// ));
+    /// let expected = CommitMessage::from(indoc!(
+    ///     "
+    ///     Example Commit Message
+    ///     without gutter
+    ///
+    ///     New body"
+    /// ));
+    ///
+    /// assert_eq!(commit.with_body_contents("New body"), expected);
+    /// ```
+    #[must_use]
+    pub fn with_body_contents(self, contents: &str) -> Self {
+        let existing_subject: String = self.get_subject().into();
+        let body = format!("Unused\n\n{}", contents);
+        let commit = Self::from(body);
+
+        commit.with_subject(&existing_subject)
+    }
 }
 
 impl From<CommitMessage> for String {
@@ -858,23 +965,10 @@ pub enum Error {
 
 const LEGAL_CHARACTERS: [char; 10] = ['#', ';', '@', '!', '$', '%', '^', '&', '|', ':'];
 
-impl CommitMessage {
-    fn guess_comment_character(rest: &str, scissors: Option<Scissors>) -> Option<char> {
-        match scissors {
-            Some(scissors) => String::from(scissors).chars().next(),
-            None => rest
-                .lines()
-                .rev()
-                .find(|line| !line.trim().is_empty())
-                .and_then(|line| line.chars().next())
-                .filter(|x| LEGAL_CHARACTERS.contains(x)),
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use indoc::indoc;
+    use quickcheck::TestResult;
     use regex::Regex;
 
     use super::CommitMessage;
@@ -1188,6 +1282,55 @@ mod tests {
         );
     }
 
+    #[test]
+    fn insert_after_last_body() {
+        let ast: Vec<Fragment> = vec![
+            Fragment::Body(Body::from("Add file")),
+            Fragment::Body(Body::default()),
+            Fragment::Body(Body::from("Looks-like-a-trailer: But isn\'t")),
+            Fragment::Body(Body::default()),
+            Fragment::Body(Body::from("This adds file primarily for demonstration purposes. It might not be\nuseful as an actual commit, but it\'s very useful as a example to use in\ntests.")),
+            Fragment::Body(Body::default()),
+            Fragment::Body(Body::from("Relates-to: #128")),
+            Fragment::Body(Body::default()),
+            Fragment::Comment(Comment::from("# Short (50 chars or less) summary of changes\n#\n# More detailed explanatory text, if necessary.  Wrap it to\n# about 72 characters or so.  In some contexts, the first\n# line is treated as the subject of an email and the rest of\n# the text as the body.  The blank line separating the\n# summary from the body is critical (unless you omit the body\n# entirely); tools like rebase can get confused if you run\n# the two together.\n#\n# Further paragraphs come after blank lines.\n#\n#   - Bullet points are okay, too\n#\n#   - Typically a hyphen or asterisk is used for the bullet,\n#     preceded by a single space, with blank lines in\n#     between, but conventions vary here")),
+            Fragment::Body(Body::default()),
+            Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch main\n# Ihr Branch ist auf demselben Stand wie \'origin/main\'.\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     file\n#")),
+        ];
+        let commit = CommitMessage::from_fragments(ast, None);
+
+        assert_eq!(commit.insert_after_last_full_body(vec![Fragment::Body(Body::from("Relates-to: #656"))]).get_ast(), vec![
+            Fragment::Body(Body::from("Add file")),
+            Fragment::Body(Body::default()),
+            Fragment::Body(Body::from("Looks-like-a-trailer: But isn\'t")),
+            Fragment::Body(Body::default()),
+            Fragment::Body(Body::from("This adds file primarily for demonstration purposes. It might not be\nuseful as an actual commit, but it\'s very useful as a example to use in\ntests.")),
+            Fragment::Body(Body::default()),
+            Fragment::Body(Body::from("Relates-to: #128\nRelates-to: #656")),
+            Fragment::Body(Body::default()),
+            Fragment::Comment(Comment::from("# Short (50 chars or less) summary of changes\n#\n# More detailed explanatory text, if necessary.  Wrap it to\n# about 72 characters or so.  In some contexts, the first\n# line is treated as the subject of an email and the rest of\n# the text as the body.  The blank line separating the\n# summary from the body is critical (unless you omit the body\n# entirely); tools like rebase can get confused if you run\n# the two together.\n#\n# Further paragraphs come after blank lines.\n#\n#   - Bullet points are okay, too\n#\n#   - Typically a hyphen or asterisk is used for the bullet,\n#     preceded by a single space, with blank lines in\n#     between, but conventions vary here")),
+            Fragment::Body(Body::default()),
+            Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch main\n# Ihr Branch ist auf demselben Stand wie \'origin/main\'.\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     file\n#")),
+        ]);
+    }
+
+    #[test]
+    fn insert_after_last_body_with_no_body() {
+        let ast: Vec<Fragment> = vec![
+            Fragment::Comment(Comment::from("# Short (50 chars or less) summary of changes\n#\n# More detailed explanatory text, if necessary.  Wrap it to\n# about 72 characters or so.  In some contexts, the first\n# line is treated as the subject of an email and the rest of\n# the text as the body.  The blank line separating the\n# summary from the body is critical (unless you omit the body\n# entirely); tools like rebase can get confused if you run\n# the two together.\n#\n# Further paragraphs come after blank lines.\n#\n#   - Bullet points are okay, too\n#\n#   - Typically a hyphen or asterisk is used for the bullet,\n#     preceded by a single space, with blank lines in\n#     between, but conventions vary here")),
+            Fragment::Body(Body::default()),
+            Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch main\n# Ihr Branch ist auf demselben Stand wie \'origin/main\'.\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     file\n#")),
+        ];
+        let commit = CommitMessage::from_fragments(ast, None);
+
+        assert_eq!(commit.insert_after_last_full_body(vec![Fragment::Body(Body::from("Relates-to: #656"))]).get_ast(), vec![
+            Fragment::Body(Body::from("Relates-to: #656")),
+            Fragment::Comment(Comment::from("# Short (50 chars or less) summary of changes\n#\n# More detailed explanatory text, if necessary.  Wrap it to\n# about 72 characters or so.  In some contexts, the first\n# line is treated as the subject of an email and the rest of\n# the text as the body.  The blank line separating the\n# summary from the body is critical (unless you omit the body\n# entirely); tools like rebase can get confused if you run\n# the two together.\n#\n# Further paragraphs come after blank lines.\n#\n#   - Bullet points are okay, too\n#\n#   - Typically a hyphen or asterisk is used for the bullet,\n#     preceded by a single space, with blank lines in\n#     between, but conventions vary here")),
+            Fragment::Body(Body::default()),
+            Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch main\n# Ihr Branch ist auf demselben Stand wie \'origin/main\'.\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     file\n#")),
+        ]);
+    }
+
     const COMMIT_WITH_ALL_FEATURES: &str = indoc!(
         "
         Add file
@@ -1265,55 +1408,6 @@ mod tests {
         ];
 
         assert_eq!(message.get_ast(), ast);
-    }
-
-    #[test]
-    fn insert_after_last_body() {
-        let ast: Vec<Fragment> = vec![
-            Fragment::Body(Body::from("Add file")),
-            Fragment::Body(Body::default()),
-            Fragment::Body(Body::from("Looks-like-a-trailer: But isn\'t")),
-            Fragment::Body(Body::default()),
-            Fragment::Body(Body::from("This adds file primarily for demonstration purposes. It might not be\nuseful as an actual commit, but it\'s very useful as a example to use in\ntests.")),
-            Fragment::Body(Body::default()),
-            Fragment::Body(Body::from("Relates-to: #128")),
-            Fragment::Body(Body::default()),
-            Fragment::Comment(Comment::from("# Short (50 chars or less) summary of changes\n#\n# More detailed explanatory text, if necessary.  Wrap it to\n# about 72 characters or so.  In some contexts, the first\n# line is treated as the subject of an email and the rest of\n# the text as the body.  The blank line separating the\n# summary from the body is critical (unless you omit the body\n# entirely); tools like rebase can get confused if you run\n# the two together.\n#\n# Further paragraphs come after blank lines.\n#\n#   - Bullet points are okay, too\n#\n#   - Typically a hyphen or asterisk is used for the bullet,\n#     preceded by a single space, with blank lines in\n#     between, but conventions vary here")),
-            Fragment::Body(Body::default()),
-            Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch main\n# Ihr Branch ist auf demselben Stand wie \'origin/main\'.\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     file\n#")),
-        ];
-        let commit = CommitMessage::from_fragments(ast, None);
-
-        assert_eq!(commit.insert_after_last_full_body(vec![Fragment::Body(Body::from("Relates-to: #656"))]).get_ast(), vec![
-            Fragment::Body(Body::from("Add file")),
-            Fragment::Body(Body::default()),
-            Fragment::Body(Body::from("Looks-like-a-trailer: But isn\'t")),
-            Fragment::Body(Body::default()),
-            Fragment::Body(Body::from("This adds file primarily for demonstration purposes. It might not be\nuseful as an actual commit, but it\'s very useful as a example to use in\ntests.")),
-            Fragment::Body(Body::default()),
-            Fragment::Body(Body::from("Relates-to: #128\nRelates-to: #656")),
-            Fragment::Body(Body::default()),
-            Fragment::Comment(Comment::from("# Short (50 chars or less) summary of changes\n#\n# More detailed explanatory text, if necessary.  Wrap it to\n# about 72 characters or so.  In some contexts, the first\n# line is treated as the subject of an email and the rest of\n# the text as the body.  The blank line separating the\n# summary from the body is critical (unless you omit the body\n# entirely); tools like rebase can get confused if you run\n# the two together.\n#\n# Further paragraphs come after blank lines.\n#\n#   - Bullet points are okay, too\n#\n#   - Typically a hyphen or asterisk is used for the bullet,\n#     preceded by a single space, with blank lines in\n#     between, but conventions vary here")),
-            Fragment::Body(Body::default()),
-            Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch main\n# Ihr Branch ist auf demselben Stand wie \'origin/main\'.\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     file\n#")),
-        ]);
-    }
-
-    #[test]
-    fn insert_after_last_body_with_no_body() {
-        let ast: Vec<Fragment> = vec![
-            Fragment::Comment(Comment::from("# Short (50 chars or less) summary of changes\n#\n# More detailed explanatory text, if necessary.  Wrap it to\n# about 72 characters or so.  In some contexts, the first\n# line is treated as the subject of an email and the rest of\n# the text as the body.  The blank line separating the\n# summary from the body is critical (unless you omit the body\n# entirely); tools like rebase can get confused if you run\n# the two together.\n#\n# Further paragraphs come after blank lines.\n#\n#   - Bullet points are okay, too\n#\n#   - Typically a hyphen or asterisk is used for the bullet,\n#     preceded by a single space, with blank lines in\n#     between, but conventions vary here")),
-            Fragment::Body(Body::default()),
-            Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch main\n# Ihr Branch ist auf demselben Stand wie \'origin/main\'.\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     file\n#")),
-        ];
-        let commit = CommitMessage::from_fragments(ast, None);
-
-        assert_eq!(commit.insert_after_last_full_body(vec![Fragment::Body(Body::from("Relates-to: #656"))]).get_ast(), vec![
-            Fragment::Body(Body::from("Relates-to: #656")),
-            Fragment::Comment(Comment::from("# Short (50 chars or less) summary of changes\n#\n# More detailed explanatory text, if necessary.  Wrap it to\n# about 72 characters or so.  In some contexts, the first\n# line is treated as the subject of an email and the rest of\n# the text as the body.  The blank line separating the\n# summary from the body is critical (unless you omit the body\n# entirely); tools like rebase can get confused if you run\n# the two together.\n#\n# Further paragraphs come after blank lines.\n#\n#   - Bullet points are okay, too\n#\n#   - Typically a hyphen or asterisk is used for the bullet,\n#     preceded by a single space, with blank lines in\n#     between, but conventions vary here")),
-            Fragment::Body(Body::default()),
-            Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch main\n# Ihr Branch ist auf demselben Stand wie \'origin/main\'.\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     file\n#")),
-        ]);
     }
 
     #[test]
@@ -2423,6 +2517,40 @@ mod tests {
         ];
 
         assert_eq!(message.get_trailers(), Trailers::from(trailers));
+    }
+
+    #[allow(clippy::needless_pass_by_value)]
+    #[quickcheck]
+    fn with_subject(input: String) -> bool {
+        let commit: CommitMessage = "Some Subject".into();
+        let actual: String = commit.with_subject(&input).get_subject().into();
+        actual == input
+    }
+
+    #[allow(clippy::needless_pass_by_value)]
+    #[quickcheck]
+    fn with_body(input: String) -> TestResult {
+        if input.contains('\r') {
+            return TestResult::discard();
+        }
+
+        let commit: CommitMessage = "Some Subject\n\nSome Body".into();
+        let expected: String = format!("Some Subject\n\n{}", input);
+        let actual: String = commit.with_body_contents(&input).into();
+        TestResult::from_bool(actual == expected)
+    }
+
+    #[allow(clippy::needless_pass_by_value)]
+    #[quickcheck]
+    fn with_body_with_no_gutter(input: String) -> TestResult {
+        if input.contains('\r') {
+            return TestResult::discard();
+        }
+
+        let commit: CommitMessage = "Some Subject\nSome More Subject\n\nBody".into();
+        let expected: String = format!("Some Subject\nSome More Subject\n\n{}", input);
+        let actual: String = commit.with_body_contents(&input).into();
+        TestResult::from_bool(actual == expected)
     }
 
     #[allow(unused_must_use)]
