@@ -53,12 +53,30 @@ pub use trailer::{Error as TrailerError, Trailer};
 pub use trailers::Trailers;
 
 mod bodies;
+#[cfg(test)]
+mod bodies_test;
 mod body;
+#[cfg(test)]
+mod body_test;
 mod comment;
+#[cfg(test)]
+mod comment_test;
 mod comments;
+#[cfg(test)]
+mod comments_test;
 mod commit_message;
+#[cfg(test)]
+mod commit_message_test;
 mod fragment;
 mod scissors;
+#[cfg(test)]
+mod scissors_test;
 mod subject;
+#[cfg(test)]
+mod subject_test;
 mod trailer;
+#[cfg(test)]
+mod trailer_test;
 mod trailers;
+#[cfg(test)]
+mod trailers_test;
