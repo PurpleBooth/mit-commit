@@ -100,7 +100,7 @@ impl From<Trailer> for String {
 impl From<Trailer> for Fragment {
     fn from(trailer: Trailer) -> Self {
         let trailer: String = trailer.into();
-        Self::Body(Body::from(trailer))
+        Body::from(trailer).into()
     }
 }
 

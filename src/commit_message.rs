@@ -145,11 +145,11 @@ impl CommitMessage {
         let mut fragments = Vec::new();
 
         if self.bodies.iter().all(Body::is_empty) && self.trailers.is_empty() {
-            fragments.push(Fragment::Body(Body::default()));
+            fragments.push(Body::default().into());
         }
 
         if self.trailers.is_empty() {
-            fragments.push(Fragment::Body(Body::default()));
+            fragments.push(Body::default().into());
         }
 
         fragments.push(trailer.into());
@@ -229,12 +229,12 @@ impl CommitMessage {
             .map(|line| match comment_character {
                 Some(comment_character) => {
                     if line.starts_with(comment_character) {
-                        Fragment::Comment(Comment::from(line))
+                        Comment::from(line).into()
                     } else {
-                        Fragment::Body(Body::from(line))
+                        Body::from(line).into()
                     }
                 }
-                None => Fragment::Body(Body::from(line)),
+                None => Body::from(line).into(),
             })
             .collect()
     }
@@ -251,24 +251,24 @@ impl CommitMessage {
                     }
                     (Some(Fragment::Comment(existing)), Fragment::Comment(new)) => {
                         previous_fragments.truncate(acc.len() - 1);
-                        previous_fragments.push(Fragment::Comment(existing.append(new)));
+                        previous_fragments.push(existing.append(new).into());
                         previous_fragments
                     }
                     (Some(Fragment::Body(existing)), Fragment::Body(new)) => {
                         if new.is_empty() || existing.is_empty() {
-                            previous_fragments.push(Fragment::Body(new.clone()));
+                            previous_fragments.push(new.into());
                         } else {
                             previous_fragments.truncate(acc.len() - 1);
-                            previous_fragments.push(Fragment::Body(existing.append(new)));
+                            previous_fragments.push(existing.append(new).into());
                         }
                         previous_fragments
                     }
                     (Some(Fragment::Body(_)), Fragment::Comment(new)) => {
-                        previous_fragments.push(Fragment::Comment(new.clone()));
+                        previous_fragments.push(new.into());
                         previous_fragments
                     }
                     (Some(Fragment::Comment(_)), Fragment::Body(new)) => {
-                        previous_fragments.push(Fragment::Body(new.clone()));
+                        previous_fragments.push(new.into());
                         previous_fragments
                     }
                 }
@@ -771,7 +771,7 @@ impl CommitMessage {
         if !ast.is_empty() {
             ast.remove(0);
         }
-        ast.insert(0, Fragment::Body(Body::from(subject)));
+        ast.insert(0, Body::from(subject).into());
 
         Self {
             scissors: self.scissors,
@@ -947,7 +947,7 @@ impl From<&str> for CommitMessage {
         let mut ast: Vec<Fragment> = Self::group_ast(per_line_ast);
 
         if (scissors.clone(), message.chars().last()) == (None, Some('\n')) {
-            ast.push(Fragment::Body(Body::default()));
+            ast.push(Body::default().into());
         }
 
         let subject = Subject::from(ast.clone());

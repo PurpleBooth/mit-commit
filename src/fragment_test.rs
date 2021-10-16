@@ -1,4 +1,5 @@
 use std::borrow::Borrow;
+
 use crate::{Body, Comment, Fragment};
 
 #[test]
@@ -16,7 +17,6 @@ fn can_convert_reference_body_into_a_fragment() {
 
     assert_eq!(fragment, Fragment::Body(body));
 }
-
 
 #[test]
 fn can_convert_comment_into_a_fragment() {
