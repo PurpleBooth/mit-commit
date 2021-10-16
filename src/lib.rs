@@ -68,6 +68,8 @@ mod commit_message;
 #[cfg(test)]
 mod commit_message_test;
 mod fragment;
+#[cfg(test)]
+mod fragment_test;
 mod scissors;
 #[cfg(test)]
 mod scissors_test;
