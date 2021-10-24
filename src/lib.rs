@@ -82,3 +82,15 @@ mod trailer_test;
 mod trailers;
 #[cfg(test)]
 mod trailers_test;
+
+#[cfg(doctest)]
+mod test_readme {
+    macro_rules! external_doc_test {
+        ($x:expr) => {
+            #[doc = $x]
+            extern "C" {}
+        };
+    }
+
+    external_doc_test!(include_str!("../README.md"));
+}
