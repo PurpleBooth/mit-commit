@@ -111,7 +111,7 @@ fn can_add_trailers_to_a_normal_commit() {
         ));
 
     assert_eq!(
-        String::from(commit.add_trailer(Trailer::new("Co-authored-by", "Test Trailer <test@example.com>"))),
+        String::from(commit.add_trailer(Trailer::new("Co-authored-by".into(), "Test Trailer <test@example.com>".into()))),
         String::from(CommitMessage::from(indoc!(
             "
             Example Commit Message
@@ -178,8 +178,8 @@ fn can_add_trailers_to_a_commit_without_existing_trailers() {
         ));
     assert_eq!(
         String::from(commit.add_trailer(Trailer::new(
-            "Co-authored-by",
-            "Test Trailer <test@example.com>",
+            "Co-authored-by".into(),
+            "Test Trailer <test@example.com>".into(),
         ))),
         String::from(expected)
     );
@@ -223,8 +223,8 @@ fn can_add_trailers_to_an_empty_commit() {
         ));
     assert_eq!(
         String::from(commit.add_trailer(Trailer::new(
-            "Co-authored-by",
-            "Test Trailer <test@example.com>",
+            "Co-authored-by".into(),
+            "Test Trailer <test@example.com>".into(),
         ))),
         String::from(expected)
     );
@@ -272,8 +272,8 @@ fn can_add_trailers_to_an_empty_commit_with_single_trailer() {
         ));
     assert_eq!(
         String::from(commit.add_trailer(Trailer::new(
-            "Co-authored-by",
-            "Someone Else <someone@example.com>",
+            "Co-authored-by".into(),
+            "Someone Else <someone@example.com>".into(),
         ))),
         String::from(expected)
     );
@@ -372,13 +372,16 @@ fn insert_after_last_body_with_no_body() {
 #[quickcheck]
 fn with_subject(input: String) -> bool {
     let commit: CommitMessage = "Some Subject".into();
-    let actual: String = commit.with_subject(&input).get_subject().into();
+    let actual: String = commit
+        .with_subject(input.clone().into())
+        .get_subject()
+        .into();
     actual == input
 }
 
 #[test]
 fn with_subject_on_default_commit() {
-    let commit = CommitMessage::default().with_subject("Subject");
+    let commit = CommitMessage::default().with_subject("Subject".into());
     assert_eq!(commit.get_subject(), Subject::from("Subject"));
 }
 

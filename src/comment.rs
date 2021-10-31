@@ -1,10 +1,12 @@
+use std::borrow::Cow;
+
 /// A single comment from a `CommitMessage`
 #[derive(Debug, PartialEq, Clone)]
-pub struct Comment {
-    comment: String,
+pub struct Comment<'a> {
+    comment: Cow<'a, str>,
 }
 
-impl Comment {
+impl<'a> Comment<'a> {
     /// Append one [`Comment`] onto another
     ///
     /// This is for concatenating multiple [`Comment`] together
@@ -30,22 +32,30 @@ impl Comment {
     }
 }
 
-impl From<String> for Comment {
-    fn from(comment: String) -> Self {
+impl<'a> From<Cow<'a, str>> for Comment<'a> {
+    fn from(comment: Cow<'a, str>) -> Self {
         Self { comment }
     }
 }
 
-impl From<&str> for Comment {
-    fn from(comment: &str) -> Self {
+impl<'a> From<String> for Comment<'a> {
+    fn from(comment: String) -> Self {
         Self {
-            comment: String::from(comment),
+            comment: comment.into(),
         }
     }
 }
 
-impl From<Comment> for String {
-    fn from(comment: Comment) -> Self {
-        comment.comment
+impl<'a> From<&'a str> for Comment<'a> {
+    fn from(comment: &'a str) -> Self {
+        Self {
+            comment: comment.into(),
+        }
+    }
+}
+
+impl<'a> From<Comment<'a>> for String {
+    fn from(comment: Comment<'a>) -> Self {
+        comment.comment.into()
     }
 }

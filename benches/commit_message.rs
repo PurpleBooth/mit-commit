@@ -247,7 +247,9 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         c.bench_with_input(
             BenchmarkId::new("add_trailer", number),
             &CommitMessage::from(*message),
-            |b, message| b.iter(|| message.add_trailer(Trailer::new("Example", "Trailer"))),
+            |b, message| {
+                b.iter(|| message.add_trailer(Trailer::new("Example".into(), "Trailer".into())));
+            },
         );
     });
 }

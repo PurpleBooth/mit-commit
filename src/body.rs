@@ -1,15 +1,16 @@
 use std::{
+    borrow::Cow,
     fmt,
     fmt::{Display, Formatter},
 };
 
 /// A single contiguous block of [`CommitMessage`] text
 #[derive(Debug, PartialEq, Clone, Default)]
-pub struct Body {
-    text: String,
+pub struct Body<'a> {
+    text: Cow<'a, str>,
 }
 
-impl Body {
+impl<'a> Body<'a> {
     /// Append one [`Body`] onto another
     ///
     /// This is for concatenating multiple [`Bodies`] together
@@ -53,27 +54,36 @@ impl Body {
     }
 }
 
-impl From<&str> for Body {
-    fn from(body: &str) -> Self {
-        Self {
-            text: String::from(body),
-        }
-    }
-}
-
-impl From<String> for Body {
-    fn from(body: String) -> Self {
+impl<'a> From<Cow<'a, str>> for Body<'a> {
+    fn from(body: Cow<'a, str>) -> Self {
         Self { text: body }
     }
 }
+impl<'a> From<&'a str> for Body<'a> {
+    fn from(body: &'a str) -> Self {
+        Self::from(Cow::Borrowed(body))
+    }
+}
 
-impl From<Body> for String {
+impl<'a> From<String> for Body<'a> {
+    fn from(body: String) -> Self {
+        Self::from(Cow::from(body))
+    }
+}
+
+impl<'a> From<Body<'a>> for String {
     fn from(body: Body) -> Self {
+        body.text.into()
+    }
+}
+
+impl<'a> From<Body<'a>> for Cow<'a, str> {
+    fn from(body: Body<'a>) -> Self {
         body.text
     }
 }
 
-impl Display for Body {
+impl<'a> Display for Body<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", String::from(self.clone()))
     }

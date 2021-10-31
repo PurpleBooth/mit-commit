@@ -2,31 +2,19 @@ use crate::{Body, Comment};
 
 /// A `Fragment` from the [`CommitMessage`], either a comment or body
 #[derive(Clone, Debug, PartialEq)]
-pub enum Fragment {
-    Body(Body),
-    Comment(Comment),
+pub enum Fragment<'a> {
+    Body(Body<'a>),
+    Comment(Comment<'a>),
 }
 
-impl From<Body> for Fragment {
-    fn from(body: Body) -> Self {
+impl<'a> From<Body<'a>> for Fragment<'a> {
+    fn from(body: Body<'a>) -> Self {
         Self::Body(body)
     }
 }
 
-impl From<&Body> for Fragment {
-    fn from(body: &Body) -> Self {
-        body.clone().into()
-    }
-}
-
-impl From<Comment> for Fragment {
-    fn from(comment: Comment) -> Self {
+impl<'a> From<Comment<'a>> for Fragment<'a> {
+    fn from(comment: Comment<'a>) -> Self {
         Self::Comment(comment)
-    }
-}
-
-impl From<&Comment> for Fragment {
-    fn from(comment: &Comment) -> Self {
-        comment.clone().into()
     }
 }

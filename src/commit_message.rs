@@ -1,4 +1,4 @@
-use std::{convert::TryFrom, fs::File, io, io::Read, path::PathBuf};
+use std::{borrow::Cow, convert::TryFrom, fs::File, io, io::Read, path::PathBuf};
 
 use miette::Diagnostic;
 use regex::Regex;
@@ -19,16 +19,16 @@ const LEGAL_CHARACTERS: [char; 10] = ['#', ';', '@', '!', '$', '%', '^', '&', '|
 
 /// A [`CommitMessage`], the primary entry point to the library
 #[derive(Debug, PartialEq, Clone, Default)]
-pub struct CommitMessage {
-    scissors: Option<Scissors>,
-    ast: Vec<Fragment>,
-    subject: Subject,
-    trailers: Trailers,
-    comments: Comments,
-    bodies: Bodies,
+pub struct CommitMessage<'a> {
+    scissors: Option<Scissors<'a>>,
+    ast: Vec<Fragment<'a>>,
+    subject: Subject<'a>,
+    trailers: Trailers<'a>,
+    comments: Comments<'a>,
+    bodies: Bodies<'a>,
 }
 
-impl CommitMessage {
+impl<'a> CommitMessage<'a> {
     /// Convert from [`Fragment`] back into a full [`CommitMessage`]
     ///
     /// Get back to a [`CommitMessage`] from an ast, usually after you've been
@@ -114,8 +114,8 @@ impl CommitMessage {
     ///
     /// assert_eq!(
     ///     String::from(commit.add_trailer(Trailer::new(
-    ///         "Co-authored-by",
-    ///         "Test Trailer <test@example.com>"
+    ///         "Co-authored-by".into(),
+    ///         "Test Trailer <test@example.com>".into()
     ///     ))),
     ///     String::from(CommitMessage::from(indoc!(
     ///         "
@@ -224,22 +224,22 @@ impl CommitMessage {
         )
     }
 
-    fn convert_to_per_line_ast(comment_character: Option<char>, rest: &str) -> Vec<Fragment> {
+    fn convert_to_per_line_ast(comment_character: Option<char>, rest: &str) -> Vec<Fragment<'a>> {
         rest.lines()
             .map(|line| match comment_character {
                 Some(comment_character) => {
                     if line.starts_with(comment_character) {
-                        Comment::from(line).into()
+                        Comment::from(line.to_string()).into()
                     } else {
-                        Body::from(line).into()
+                        Body::from(line.to_string()).into()
                     }
                 }
-                None => Body::from(line).into(),
+                None => Body::from(line.to_string()).into(),
             })
             .collect()
     }
 
-    fn group_ast(ungrouped_ast: Vec<Fragment>) -> Vec<Fragment> {
+    fn group_ast(ungrouped_ast: Vec<Fragment<'a>>) -> Vec<Fragment<'a>> {
         ungrouped_ast
             .into_iter()
             .fold(vec![], |acc: Vec<Fragment>, new_fragment| {
@@ -256,7 +256,7 @@ impl CommitMessage {
                     }
                     (Some(Fragment::Body(existing)), Fragment::Body(new)) => {
                         if new.is_empty() || existing.is_empty() {
-                            previous_fragments.push(new.into());
+                            previous_fragments.push(Fragment::from(new.clone()));
                         } else {
                             previous_fragments.truncate(acc.len() - 1);
                             previous_fragments.push(existing.append(new).into());
@@ -264,11 +264,11 @@ impl CommitMessage {
                         previous_fragments
                     }
                     (Some(Fragment::Body(_)), Fragment::Comment(new)) => {
-                        previous_fragments.push(new.into());
+                        previous_fragments.push(Fragment::from(new.clone()));
                         previous_fragments
                     }
                     (Some(Fragment::Comment(_)), Fragment::Body(new)) => {
-                        previous_fragments.push(new.into());
+                        previous_fragments.push(Fragment::from(new.clone()));
                         previous_fragments
                     }
                 }
@@ -313,7 +313,7 @@ impl CommitMessage {
     /// )
     /// ```
     #[must_use]
-    pub fn get_subject(&self) -> Subject {
+    pub fn get_subject(&self) -> Subject<'a> {
         self.subject.clone()
     }
 
@@ -664,8 +664,8 @@ impl CommitMessage {
     ///     "
     /// ));
     /// let trailers = vec![
-    ///     Trailer::new("Relates-to", "#128"),
-    ///     Trailer::new("Relates-to", "#129"),
+    ///     Trailer::new("Relates-to".into(), "#128".into()),
+    ///     Trailer::new("Relates-to".into(), "#129".into()),
     /// ];
     /// assert_eq!(message.get_trailers(), Trailers::from(trailers))
     /// ```
@@ -730,7 +730,7 @@ impl CommitMessage {
         re.is_match(&text)
     }
 
-    fn guess_comment_character(rest: &str, scissors: Option<Scissors>) -> Option<char> {
+    fn guess_comment_character(rest: &str, scissors: Option<Scissors<'a>>) -> Option<char> {
         match scissors {
             Some(scissors) => String::from(scissors).chars().next(),
             None => rest
@@ -760,23 +760,23 @@ impl CommitMessage {
     /// ));
     ///
     /// assert_eq!(
-    ///     commit.with_subject("Subject").get_subject(),
+    ///     commit.with_subject("Subject".into()).get_subject(),
     ///     Subject::from("Subject")
     /// );
     /// ```
     #[must_use]
-    pub fn with_subject(self, subject: &str) -> Self {
-        let mut ast = self.ast.clone();
+    pub fn with_subject(self, subject: Subject<'a>) -> Self {
+        let mut ast: Vec<Fragment<'a>> = self.ast.clone();
 
         if !ast.is_empty() {
             ast.remove(0);
         }
-        ast.insert(0, Body::from(subject).into());
+        ast.insert(0, Body::from(subject.to_string()).into());
 
         Self {
             scissors: self.scissors,
             ast,
-            subject: subject.into(),
+            subject,
             trailers: self.trailers,
             comments: self.comments,
             bodies: self.bodies,
@@ -832,12 +832,12 @@ impl CommitMessage {
     /// assert_eq!(commit.with_body_contents("New body"), expected);
     /// ```
     #[must_use]
-    pub fn with_body_contents(self, contents: &str) -> Self {
-        let existing_subject: String = self.get_subject().into();
+    pub fn with_body_contents(self, contents: &'a str) -> Self {
+        let existing_subject: Subject<'a> = self.get_subject();
         let body = format!("Unused\n\n{}", contents);
         let commit = Self::from(body);
 
-        commit.with_subject(&existing_subject)
+        commit.with_subject(existing_subject)
     }
 
     /// Give you a new [`CommitMessage`] with the provided body
@@ -869,7 +869,7 @@ impl CommitMessage {
     }
 }
 
-impl From<CommitMessage> for String {
+impl<'a> From<CommitMessage<'a>> for String {
     fn from(commit_message: CommitMessage) -> Self {
         let basic_commit = commit_message
             .get_ast()
@@ -889,7 +889,7 @@ impl From<CommitMessage> for String {
     }
 }
 
-impl From<&str> for CommitMessage {
+impl<'a> From<Cow<'a, str>> for CommitMessage<'a> {
     /// Create a new [`CommitMessage`]
     ///
     /// Create a commit message from a string. It's expected that you'll be
@@ -939,8 +939,8 @@ impl From<&str> for CommitMessage {
     /// config this feels like a reasonable compromise, there are a lot of
     /// non-whitespace characters as options otherwise, and we don't want to
     /// confuse a genuine body with a comment
-    fn from(message: &str) -> Self {
-        let (rest, scissors) = Scissors::parse_sections(message);
+    fn from(message: Cow<'a, str>) -> CommitMessage<'a> {
+        let (rest, scissors) = Scissors::parse_sections(&message);
         let comment_character = Self::guess_comment_character(&rest, scissors.clone());
         let per_line_ast = Self::convert_to_per_line_ast(comment_character, &rest);
         let trailers = per_line_ast.clone().into();
@@ -965,7 +965,7 @@ impl From<&str> for CommitMessage {
     }
 }
 
-impl TryFrom<PathBuf> for CommitMessage {
+impl<'a> TryFrom<PathBuf> for CommitMessage<'a> {
     type Error = Error;
 
     fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
@@ -978,10 +978,15 @@ impl TryFrom<PathBuf> for CommitMessage {
     }
 }
 
-impl From<String> for CommitMessage {
+impl<'a> From<&'a str> for CommitMessage<'a> {
+    fn from(message: &'a str) -> CommitMessage<'a> {
+        CommitMessage::from(Cow::from(message))
+    }
+}
+
+impl<'a> From<String> for CommitMessage<'a> {
     fn from(message: String) -> Self {
-        let str: &str = &message;
-        Self::from(str)
+        Self::from(Cow::from(message))
     }
 }
 

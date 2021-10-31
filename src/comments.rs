@@ -4,11 +4,11 @@ use crate::{comment::Comment, fragment::Fragment};
 
 /// A collection of comments from a [`CommitMessage`]
 #[derive(Debug, PartialEq, Clone, Default)]
-pub struct Comments {
-    comments: Vec<Comment>,
+pub struct Comments<'a> {
+    comments: Vec<Comment<'a>>,
 }
 
-impl Comments {
+impl<'a> Comments<'a> {
     /// Iterate over the [`Comment`] in the [`Comments`]
     ///
     /// # Examples
@@ -34,9 +34,9 @@ impl Comments {
     }
 }
 
-impl IntoIterator for Comments {
-    type IntoIter = std::vec::IntoIter<Comment>;
-    type Item = Comment;
+impl<'a> IntoIterator for Comments<'a> {
+    type IntoIter = std::vec::IntoIter<Comment<'a>>;
+    type Item = Comment<'a>;
 
     /// Iterate over the [`Comment`] in the [`Comments`]
     ///
@@ -62,13 +62,13 @@ impl IntoIterator for Comments {
     }
 }
 
-impl From<Vec<Comment>> for Comments {
-    fn from(comments: Vec<Comment>) -> Self {
+impl<'a> From<Vec<Comment<'a>>> for Comments<'a> {
+    fn from(comments: Vec<Comment<'a>>) -> Self {
         Self { comments }
     }
 }
 
-impl From<Comments> for String {
+impl<'a> From<Comments<'a>> for String {
     fn from(comments: Comments) -> Self {
         comments
             .comments
@@ -79,8 +79,8 @@ impl From<Comments> for String {
     }
 }
 
-impl From<Vec<Fragment>> for Comments {
-    fn from(ast: Vec<Fragment>) -> Self {
+impl<'a> From<Vec<Fragment<'a>>> for Comments<'a> {
+    fn from(ast: Vec<Fragment<'a>>) -> Self {
         ast.iter()
             .filter_map(|values| {
                 if let Fragment::Comment(comment) = values {

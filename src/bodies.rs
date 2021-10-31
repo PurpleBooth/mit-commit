@@ -26,11 +26,11 @@ use crate::{body::Body, fragment::Fragment, trailer::Trailer};
 /// assert_eq!(Some(Body::from("First")), Bodies::from(bodies).first());
 /// ```
 #[derive(Debug, PartialEq, Clone, Default)]
-pub struct Bodies {
-    bodies: Vec<Body>,
+pub struct Bodies<'a> {
+    bodies: Vec<Body<'a>>,
 }
 
-impl Bodies {
+impl<'a> Bodies<'a> {
     /// Get the first [`Body`] in this list of [`Bodies`]
     ///
     /// # Examples
@@ -77,9 +77,9 @@ impl Bodies {
     }
 }
 
-impl IntoIterator for Bodies {
-    type IntoIter = IntoIter<Body>;
-    type Item = Body;
+impl<'a> IntoIterator for Bodies<'a> {
+    type IntoIter = IntoIter<Body<'a>>;
+    type Item = Body<'a>;
 
     /// Iterate over the [`Body`] in the [`Bodies`]
     ///
@@ -104,7 +104,7 @@ impl IntoIterator for Bodies {
     }
 }
 
-impl Display for Bodies {
+impl<'a> Display for Bodies<'a> {
     /// Render the [`Bodies`] as text
     ///
     /// # Examples
@@ -124,7 +124,7 @@ impl Display for Bodies {
     }
 }
 
-impl From<Vec<Body>> for Bodies {
+impl<'a> From<Vec<Body<'a>>> for Bodies<'a> {
     /// Combine a [`Vec`] of [`Body`] into [`Bodies`]
     ///
     /// # Examples
@@ -143,12 +143,12 @@ impl From<Vec<Body>> for Bodies {
     /// assert_eq!(iterator.next(), Some(Body::from("Body 3")));
     /// assert_eq!(iterator.next(), None);
     /// ```
-    fn from(bodies: Vec<Body>) -> Self {
+    fn from(bodies: Vec<Body<'a>>) -> Self {
         Self { bodies }
     }
 }
 
-impl From<Bodies> for String {
+impl<'a> From<Bodies<'a>> for String {
     fn from(bodies: Bodies) -> Self {
         bodies
             .bodies
@@ -159,8 +159,8 @@ impl From<Bodies> for String {
     }
 }
 
-impl From<Vec<Fragment>> for Bodies {
-    fn from(bodies: Vec<Fragment>) -> Self {
+impl<'a> From<Vec<Fragment<'a>>> for Bodies<'a> {
+    fn from(bodies: Vec<Fragment<'a>>) -> Self {
         let raw_body = bodies
             .iter()
             .filter_map(|values| {

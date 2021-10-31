@@ -9,22 +9,22 @@ use crate::{body::Body, Fragment};
 
 #[test]
 fn it_can_tell_me_its_key() {
-    let trailer = Trailer::new("Relates-to", "#128");
+    let trailer = Trailer::new("Relates-to".into(), "#128".into());
 
     assert_eq!(trailer.get_key(), String::from("Relates-to"));
 }
 
 #[test]
 fn it_can_tell_me_its_value() {
-    let trailer = Trailer::new("Relates-to", "#128");
+    let trailer = Trailer::new("Relates-to".into(), "#128".into());
 
     assert_eq!(trailer.get_value(), String::from("#128"));
 }
 
 #[test]
 fn it_does_not_take_trailing_whitespace_into_account_in_equality_checks() {
-    let a = Trailer::new("Relates-to", "#128\n");
-    let b = Trailer::new("Relates-to", "#128");
+    let a = Trailer::new("Relates-to".into(), "#128\n".into());
+    let b = Trailer::new("Relates-to".into(), "#128".into());
 
     assert_eq!(a, b);
 }
@@ -32,17 +32,17 @@ fn it_does_not_take_trailing_whitespace_into_account_in_equality_checks() {
 #[test]
 fn it_does_not_take_trailing_whitespace_into_account_in_hashing() {
     let mut hasher_a = DefaultHasher::new();
-    Trailer::new("Relates-to", "#128\n").hash(&mut hasher_a);
+    Trailer::new("Relates-to".into(), "#128\n".into()).hash(&mut hasher_a);
 
     let mut hasher_b = DefaultHasher::new();
-    Trailer::new("Relates-to", "#128").hash(&mut hasher_b);
+    Trailer::new("Relates-to".into(), "#128".into()).hash(&mut hasher_b);
 
     assert_eq!(hasher_a.finish(), hasher_b.finish());
 }
 
 #[test]
 fn it_can_give_me_itself_as_a_string() {
-    let trailer = Trailer::new("Relates-to", "#128");
+    let trailer = Trailer::new("Relates-to".into(), "#128".into());
 
     assert_eq!(String::from(trailer), String::from("Relates-to: #128"));
 }
@@ -69,7 +69,7 @@ fn it_preserves_preceding_whitespace() {
 
 #[test]
 fn can_generate_from_body() {
-    let trailer = Trailer::new("Relates-to", "#128");
+    let trailer = Trailer::new("Relates-to".into(), "#128".into());
     let body: Fragment = Fragment::from(trailer);
 
     assert_eq!(body, Fragment::Body(Body::from("Relates-to: #128")));

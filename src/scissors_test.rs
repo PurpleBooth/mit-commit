@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use indoc::indoc;
 
 use super::Scissors;
@@ -32,7 +34,7 @@ fn it_can_extract_itself_from_commit() {
     assert_eq!(
         sections,
         (
-            String::from("Some text\n"),
+            Cow::from("Some text\n"),
             Some(Scissors::from(indoc!(
                 "
                 # ------------------------ >8 ------------------------
@@ -60,7 +62,7 @@ fn it_can_extract_itself_from_commit_with_a_standard_commit() {
     assert_eq!(
         sections,
         (
-            String::from("Some text\n"),
+            Cow::from("Some text\n"),
             Some(Scissors::from(indoc!(
                 "
                 \u{00A3} ------------------------ >8 ------------------------

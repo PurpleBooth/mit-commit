@@ -1,4 +1,5 @@
 use std::{
+    borrow::Cow,
     fmt,
     fmt::{Display, Formatter},
     str::Chars,
@@ -8,11 +9,11 @@ use crate::{body::Body, fragment::Fragment};
 
 /// The [`Subject`] from the [`CommitMessage`]
 #[derive(Debug, PartialEq, Clone, Default)]
-pub struct Subject {
-    text: String,
+pub struct Subject<'a> {
+    text: Cow<'a, str>,
 }
 
-impl Subject {
+impl<'a> Subject<'a> {
     /// Count characters in [`Subject`]
     ///
     /// # Examples
@@ -65,40 +66,48 @@ impl Subject {
     }
 }
 
-impl From<&str> for Subject {
-    fn from(subject: &str) -> Self {
+impl<'a> From<&'a str> for Subject<'a> {
+    fn from(subject: &'a str) -> Self {
         Self {
             text: subject.into(),
         }
     }
 }
 
-impl From<String> for Subject {
+impl<'a> From<String> for Subject<'a> {
     fn from(subject: String) -> Self {
+        Self {
+            text: subject.into(),
+        }
+    }
+}
+
+impl<'a> From<Cow<'a, str>> for Subject<'a> {
+    fn from(subject: Cow<'a, str>) -> Self {
         Self { text: subject }
     }
 }
 
-impl From<Subject> for String {
+impl<'a> From<Subject<'a>> for String {
     fn from(subject: Subject) -> Self {
-        subject.text
+        subject.text.into_owned()
     }
 }
 
-impl Display for Subject {
+impl<'a> Display for Subject<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", String::from(self.clone()))
     }
 }
 
-impl From<Body> for Subject {
+impl<'a> From<Body<'a>> for Subject<'a> {
     fn from(body: Body) -> Self {
         Self::from(String::from(body))
     }
 }
 
-impl From<Vec<Fragment>> for Subject {
-    fn from(ast: Vec<Fragment>) -> Self {
+impl<'a> From<Vec<Fragment<'a>>> for Subject<'a> {
+    fn from(ast: Vec<Fragment<'a>>) -> Self {
         ast.iter()
             .find_map(|values| {
                 if let Fragment::Body(body) = values {

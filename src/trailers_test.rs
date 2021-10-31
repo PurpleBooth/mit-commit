@@ -6,35 +6,44 @@ use crate::{fragment::Fragment, trailer::Trailer, Body};
 #[test]
 fn implements_iterator() {
     let trailers = Trailers::from(vec![
-        Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
-        Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
-        Trailer::new("Relates-to", "#124"),
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Billie Thompson <billie@example.com>".into(),
+        ),
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Someone Else <someone@example.com>".into(),
+        ),
+        Trailer::new("Relates-to".into(), "#124".into()),
     ]);
     let mut iterator = trailers.iter();
 
     assert_eq!(
         iterator.next(),
         Some(&Trailer::new(
-            "Co-authored-by",
-            "Billie Thompson <billie@example.com>",
+            "Co-authored-by".into(),
+            "Billie Thompson <billie@example.com>".into(),
         ))
     );
     assert_eq!(
         iterator.next(),
         Some(&Trailer::new(
-            "Co-authored-by",
-            "Someone Else <someone@example.com>",
+            "Co-authored-by".into(),
+            "Someone Else <someone@example.com>".into(),
         ))
     );
-    assert_eq!(iterator.next(), Some(&Trailer::new("Relates-to", "#124")));
+    assert_eq!(
+        iterator.next(),
+        Some(&Trailer::new("Relates-to".into(), "#124".into()))
+    );
     assert_eq!(iterator.next(), None);
 }
 
 #[test]
 fn it_can_give_me_it_as_a_string() {
     let trailers = Trailers::from(vec![Trailer::new(
-        "Co-authored-by",
-        "Billie Thompson <billie@example.com>",
+        "Co-authored-by".into(),
+        "Billie Thompson <billie@example.com>".into(),
     )]);
 
     assert_eq!(
@@ -46,8 +55,14 @@ fn it_can_give_me_it_as_a_string() {
 #[test]
 fn it_can_give_me_the_length() {
     let trailers = Trailers::from(vec![
-        Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
-        Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Billie Thompson <billie@example.com>".into(),
+        ),
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Someone Else <someone@example.com>".into(),
+        ),
     ]);
 
     assert_eq!(trailers.len(), 2);
@@ -56,8 +71,14 @@ fn it_can_give_me_the_length() {
 #[test]
 fn it_can_tell_me_if_it_is_empty() {
     assert!(!Trailers::from(vec![
-        Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
-        Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Billie Thompson <billie@example.com>".into()
+        ),
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Someone Else <someone@example.com>".into()
+        ),
     ])
     .is_empty());
 
@@ -86,8 +107,14 @@ fn it_can_be_constructed_from_ast() {
     ];
 
     let expected: Trailers = vec![
-        Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
-        Trailer::new("Co-authored-by", "Somebody Else <somebody@example.com>"),
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Billie Thompson <billie@example.com>".into(),
+        ),
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Somebody Else <somebody@example.com>".into(),
+        ),
     ]
     .into();
 

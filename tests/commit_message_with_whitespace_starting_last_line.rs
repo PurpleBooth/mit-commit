@@ -97,8 +97,14 @@ fn can_get_comments_from_a_commit_message_with_trailing_whitespace() {
 fn can_get_trailers_from_a_commit_message_with_trailing_whitespace() {
     let message = CommitMessage::from(COMMIT_MESSAGE_WITH_WHITESPACE_STARTING_LAST_LINE);
     let trailers: Vec<Trailer> = vec![
-        Trailer::new("Co-authored-by", "Billie Thomposon <billie@example.com>"),
-        Trailer::new(" Co-authored-by", "Somebody Else <somebody@example.com>"),
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Billie Thomposon <billie@example.com>".into(),
+        ),
+        Trailer::new(
+            " Co-authored-by".into(),
+            "Somebody Else <somebody@example.com>".into(),
+        ),
     ];
 
     assert_eq!(message.get_trailers(), Trailers::from(trailers));

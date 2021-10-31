@@ -1,18 +1,20 @@
+use std::borrow::Cow;
+
 const SCISSORS_MARKER: &str = "------------------------ >8 ------------------------";
 
 /// The [`Scissors`] from a [`CommitMessage`]
 #[derive(Debug, PartialEq, Clone)]
-pub struct Scissors {
-    scissors: String,
+pub struct Scissors<'a> {
+    scissors: Cow<'a, str>,
 }
 
-impl Scissors {
-    pub(crate) fn parse_sections(message: &str) -> (String, Option<Self>) {
+impl<'a> Scissors<'a> {
+    pub(crate) fn parse_sections(message: &str) -> (Cow<'a, str>, Option<Scissors<'a>>) {
         message
             .lines()
             .position(|line| line.ends_with(SCISSORS_MARKER))
             .map_or_else(
-                || (message.to_string(), None),
+                || (message.to_string().into(), None),
                 |scissors_position| {
                     let lines = message.lines().collect::<Vec<_>>();
                     let body = lines
@@ -30,39 +32,39 @@ impl Scissors {
                     let scissors = if message.ends_with('\n') {
                         Self::from(format!("{}\n", scissors_string))
                     } else {
-                        Self::from(scissors_string)
+                        Self::from(scissors_string.clone())
                     };
 
-                    (body, Some(scissors))
+                    (body.into(), Some(scissors))
                 },
             )
     }
 }
 
-impl From<&str> for Scissors {
-    fn from(scissors: &str) -> Self {
-        Self {
-            scissors: String::from(scissors),
-        }
-    }
-}
-
-impl From<String> for Scissors {
-    fn from(scissors: String) -> Self {
+impl<'a> From<Cow<'a, str>> for Scissors<'a> {
+    fn from(scissors: Cow<'a, str>) -> Self {
         Self { scissors }
     }
 }
 
-impl From<&String> for Scissors {
-    fn from(scissors: &String) -> Self {
+impl<'a> From<&'a str> for Scissors<'a> {
+    fn from(scissors: &'a str) -> Self {
         Self {
-            scissors: scissors.clone(),
+            scissors: scissors.into(),
         }
     }
 }
 
-impl From<Scissors> for String {
-    fn from(scissors: Scissors) -> Self {
-        scissors.scissors
+impl<'a> From<String> for Scissors<'a> {
+    fn from(scissors: String) -> Self {
+        Self {
+            scissors: scissors.into(),
+        }
+    }
+}
+
+impl<'a> From<Scissors<'a>> for String {
+    fn from(scissors: Scissors<'a>) -> Self {
+        scissors.scissors.into()
     }
 }

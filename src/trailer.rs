@@ -1,4 +1,5 @@
 use std::{
+    borrow::Cow,
     convert::TryFrom,
     hash::{Hash, Hasher},
 };
@@ -11,12 +12,12 @@ use crate::{body::Body, Fragment};
 /// A [`Trailer`] you might see a in a [`CommitMessage`], for example
 /// 'Co-authored-by: Billie Thompson <billie@example.com>'
 #[derive(Debug, Clone, Eq, Ord, PartialOrd)]
-pub struct Trailer {
-    key: String,
-    value: String,
+pub struct Trailer<'a> {
+    key: Cow<'a, str>,
+    value: Cow<'a, str>,
 }
 
-impl Trailer {
+impl<'a> Trailer<'a> {
     /// Create a new [`Trailer`]
     ///
     /// This creates a new element that represents the sort of [`Trailers`] you
@@ -31,16 +32,16 @@ impl Trailer {
     ///
     /// use mit_commit::{Body, Trailer};
     /// assert_eq!(
-    ///     Trailer::new("Co-authored-by", "#124"),
+    ///     Trailer::new("Co-authored-by".into(), "#124".into()),
     ///     Trailer::try_from(Body::from("Co-authored-by: #124"))
     ///         .expect("There should have been a trailer in that body component")
     /// )
     /// ```
     #[must_use]
-    pub fn new(key: &str, value: &str) -> Self {
+    pub fn new(key: String, value: String) -> Trailer<'a> {
         Self {
-            key: String::from(key),
-            value: String::from(value),
+            key: Cow::from(key),
+            value: Cow::from(value),
         }
     }
 
@@ -53,13 +54,13 @@ impl Trailer {
     ///
     /// use mit_commit::{Body, Trailer};
     /// assert_eq!(
-    ///     Trailer::new("Co-authored-by", "#124").get_key(),
+    ///     Trailer::new("Co-authored-by".into(), "#124".into()).get_key(),
     ///     "Co-authored-by"
     /// )
     /// ```
     #[must_use]
     pub fn get_key(&self) -> String {
-        self.key.clone()
+        format!("{}", self.key)
     }
 
     /// Get the value of the [`Trailer`]
@@ -70,55 +71,59 @@ impl Trailer {
     /// use std::convert::TryFrom;
     ///
     /// use mit_commit::{Body, Trailer};
-    /// assert_eq!(Trailer::new("Co-authored-by", "#124").get_value(), "#124")
+    /// assert_eq!(
+    ///     Trailer::new("Co-authored-by".into(), "#124".into()).get_value(),
+    ///     "#124"
+    /// )
     /// ```
     #[must_use]
     pub fn get_value(&self) -> String {
-        self.value.clone()
+        self.value.to_string()
     }
 }
 
-impl PartialEq for Trailer {
+impl<'a> PartialEq for Trailer<'a> {
     fn eq(&self, other: &Self) -> bool {
         self.key == other.key && self.value.trim_end() == other.value.trim_end()
     }
 }
 
-impl Hash for Trailer {
+impl<'a> Hash for Trailer<'a> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.key.hash(state);
         self.value.trim_end().hash(state);
     }
 }
 
-impl From<Trailer> for String {
+impl<'a> From<Trailer<'a>> for String {
     fn from(trailer: Trailer) -> Self {
         format!("{}: {}", trailer.key, trailer.value)
     }
 }
 
-impl From<Trailer> for Fragment {
+impl<'a> From<Trailer<'a>> for Fragment<'a> {
     fn from(trailer: Trailer) -> Self {
         let trailer: String = trailer.into();
         Body::from(trailer).into()
     }
 }
 
-impl TryFrom<Body> for Trailer {
+impl<'a> TryFrom<Body<'a>> for Trailer<'a> {
     type Error = Error;
 
-    fn try_from(body: Body) -> Result<Self, Self::Error> {
-        let body_value = String::from(body.clone());
-        let value_and_key: Vec<&str> = body_value.split(": ").collect();
+    fn try_from(body: Body<'a>) -> Result<Trailer<'a>, Self::Error> {
+        let content: String = body.clone().into();
+        let mut value_and_key = content.split(": ").map(ToString::to_string);
 
-        let key = value_and_key
-            .get(0)
-            .ok_or_else(|| Error::new_not_a_trailer(&body))?;
-        let value = value_and_key
-            .get(1)
+        let key: String = value_and_key
+            .next()
             .ok_or_else(|| Error::new_not_a_trailer(&body))?;
 
-        Ok(Self::new(key, value))
+        let value: String = value_and_key
+            .next()
+            .ok_or_else(|| Error::new_not_a_trailer(&body))?;
+
+        Ok(Trailer::new(key, value))
     }
 }
 

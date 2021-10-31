@@ -192,6 +192,6 @@ fn can_get_trailers_from_commit_with_all_features() {
 
     assert_eq!(
         message.get_trailers(),
-        Trailers::from(vec![Trailer::new("Relates-to", "#128")])
+        Trailers::from(vec![Trailer::new("Relates-to".into(), "#128".into())])
     );
 }

@@ -126,8 +126,14 @@ fn can_get_comments_from_multiple_trailers() {
 fn can_get_trailers_from_multiple_trailers() {
     let message = CommitMessage::from(MULTIPLE_TRAILERS);
     let trailers: Vec<Trailer> = vec![
-        Trailer::new("Co-authored-by", "Billie Thomposon <billie@example.com>"),
-        Trailer::new("Co-authored-by", "Somebody Else <somebody@example.com>"),
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Billie Thomposon <billie@example.com>".into(),
+        ),
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Somebody Else <somebody@example.com>".into(),
+        ),
     ];
 
     assert_eq!(message.get_trailers(), Trailers::from(trailers));

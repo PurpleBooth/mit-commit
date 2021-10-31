@@ -93,8 +93,14 @@ fn can_get_comments_from_a_commit_message_without_commits() {
 fn can_get_trailers_from_a_commit_message_without_commits() {
     let message = CommitMessage::from(COMMIT_MESSAGE_WITH_NO_COMMENTS);
     let trailers: Vec<Trailer> = vec![
-        Trailer::new("Co-authored-by", "Billie Thomposon <billie@example.com>"),
-        Trailer::new("Co-authored-by", "Somebody Else <somebody@example.com>"),
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Billie Thomposon <billie@example.com>".into(),
+        ),
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Somebody Else <somebody@example.com>".into(),
+        ),
     ];
 
     assert_eq!(message.get_trailers(), Trailers::from(trailers));

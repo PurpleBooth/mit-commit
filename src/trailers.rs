@@ -4,12 +4,12 @@ use crate::{fragment::Fragment, trailer::Trailer};
 
 /// A Collection of `Trailer`
 #[derive(Debug, PartialEq, Clone, Default)]
-pub struct Trailers {
-    trailers: Vec<Trailer>,
+pub struct Trailers<'a> {
+    trailers: Vec<Trailer<'a>>,
     iterator_index: usize,
 }
 
-impl Trailers {
+impl<'a> Trailers<'a> {
     /// Iterate over the [`Trailers`]
     ///
     /// # Examples
@@ -17,27 +17,36 @@ impl Trailers {
     /// ```
     /// use mit_commit::{Trailer, Trailers};
     /// let trailers = Trailers::from(vec![
-    ///     Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
-    ///     Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
-    ///     Trailer::new("Relates-to", "#124"),
+    ///     Trailer::new(
+    ///         "Co-authored-by".into(),
+    ///         "Billie Thompson <billie@example.com>".into(),
+    ///     ),
+    ///     Trailer::new(
+    ///         "Co-authored-by".into(),
+    ///         "Someone Else <someone@example.com>".into(),
+    ///     ),
+    ///     Trailer::new("Relates-to".into(), "#124".into()),
     /// ]);
     /// let mut iterator = trailers.iter();
     ///
     /// assert_eq!(
     ///     iterator.next(),
     ///     Some(&Trailer::new(
-    ///         "Co-authored-by",
-    ///         "Billie Thompson <billie@example.com>"
+    ///         "Co-authored-by".into(),
+    ///         "Billie Thompson <billie@example.com>".into()
     ///     ))
     /// );
     /// assert_eq!(
     ///     iterator.next(),
     ///     Some(&Trailer::new(
-    ///         "Co-authored-by",
-    ///         "Someone Else <someone@example.com>"
+    ///         "Co-authored-by".into(),
+    ///         "Someone Else <someone@example.com>".into()
     ///     ))
     /// );
-    /// assert_eq!(iterator.next(), Some(&Trailer::new("Relates-to", "#124")));
+    /// assert_eq!(
+    ///     iterator.next(),
+    ///     Some(&Trailer::new("Relates-to".into(), "#124".into()))
+    /// );
     /// assert_eq!(iterator.next(), None);
     /// ```
     #[must_use]
@@ -52,8 +61,14 @@ impl Trailers {
     /// ```
     /// use mit_commit::{Trailer, Trailers};
     /// let trailers = Trailers::from(vec![
-    ///     Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
-    ///     Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
+    ///     Trailer::new(
+    ///         "Co-authored-by".into(),
+    ///         "Billie Thompson <billie@example.com>".into(),
+    ///     ),
+    ///     Trailer::new(
+    ///         "Co-authored-by".into(),
+    ///         "Someone Else <someone@example.com>".into(),
+    ///     ),
     /// ]);
     ///
     /// assert_eq!(trailers.len(), 2)
@@ -71,8 +86,14 @@ impl Trailers {
     /// use mit_commit::{Trailer, Trailers};
     /// assert_eq!(
     ///     Trailers::from(vec![
-    ///         Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
-    ///         Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
+    ///         Trailer::new(
+    ///             "Co-authored-by".into(),
+    ///             "Billie Thompson <billie@example.com>".into()
+    ///         ),
+    ///         Trailer::new(
+    ///             "Co-authored-by".into(),
+    ///             "Someone Else <someone@example.com>".into()
+    ///         ),
     ///     ])
     ///     .is_empty(),
     ///     false
@@ -87,9 +108,9 @@ impl Trailers {
     }
 }
 
-impl IntoIterator for Trailers {
-    type IntoIter = std::vec::IntoIter<Trailer>;
-    type Item = Trailer;
+impl<'a> IntoIterator for Trailers<'a> {
+    type IntoIter = std::vec::IntoIter<Trailer<'a>>;
+    type Item = Trailer<'a>;
 
     /// Iterate over the [`Trailers`]
     ///
@@ -98,27 +119,36 @@ impl IntoIterator for Trailers {
     /// ```
     /// use mit_commit::{Trailer, Trailers};
     /// let trailers = Trailers::from(vec![
-    ///     Trailer::new("Co-authored-by", "Billie Thompson <billie@example.com>"),
-    ///     Trailer::new("Co-authored-by", "Someone Else <someone@example.com>"),
-    ///     Trailer::new("Relates-to", "#124"),
+    ///     Trailer::new(
+    ///         "Co-authored-by".into(),
+    ///         "Billie Thompson <billie@example.com>".into(),
+    ///     ),
+    ///     Trailer::new(
+    ///         "Co-authored-by".into(),
+    ///         "Someone Else <someone@example.com>".into(),
+    ///     ),
+    ///     Trailer::new("Relates-to".into(), "#124".into()),
     /// ]);
     /// let mut iterator = trailers.into_iter();
     ///
     /// assert_eq!(
     ///     iterator.next(),
     ///     Some(Trailer::new(
-    ///         "Co-authored-by",
-    ///         "Billie Thompson <billie@example.com>"
+    ///         "Co-authored-by".into(),
+    ///         "Billie Thompson <billie@example.com>".into()
     ///     ))
     /// );
     /// assert_eq!(
     ///     iterator.next(),
     ///     Some(Trailer::new(
-    ///         "Co-authored-by",
-    ///         "Someone Else <someone@example.com>"
+    ///         "Co-authored-by".into(),
+    ///         "Someone Else <someone@example.com>".into()
     ///     ))
     /// );
-    /// assert_eq!(iterator.next(), Some(Trailer::new("Relates-to", "#124")));
+    /// assert_eq!(
+    ///     iterator.next(),
+    ///     Some(Trailer::new("Relates-to".into(), "#124".into()))
+    /// );
     /// assert_eq!(iterator.next(), None);
     /// ```
     fn into_iter(self) -> Self::IntoIter {
@@ -126,8 +156,8 @@ impl IntoIterator for Trailers {
     }
 }
 
-impl From<Vec<Trailer>> for Trailers {
-    fn from(trailers: Vec<Trailer>) -> Self {
+impl<'a> From<Vec<Trailer<'a>>> for Trailers<'a> {
+    fn from(trailers: Vec<Trailer<'a>>) -> Self {
         Self {
             trailers,
             iterator_index: 0,
@@ -135,8 +165,8 @@ impl From<Vec<Trailer>> for Trailers {
     }
 }
 
-impl From<Trailers> for String {
-    fn from(trailers: Trailers) -> Self {
+impl<'a> From<Trailers<'a>> for String {
+    fn from(trailers: Trailers<'a>) -> Self {
         trailers
             .trailers
             .into_iter()
@@ -146,8 +176,8 @@ impl From<Trailers> for String {
     }
 }
 
-impl From<Vec<Fragment>> for Trailers {
-    fn from(ast: Vec<Fragment>) -> Self {
+impl<'a> From<Vec<Fragment<'a>>> for Trailers<'a> {
+    fn from(ast: Vec<Fragment<'a>>) -> Self {
         ast.into_iter()
             .filter_map(|values| {
                 if let Fragment::Body(body) = values {
