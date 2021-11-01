@@ -72,7 +72,7 @@ impl<'a> From<String> for Body<'a> {
 }
 
 impl<'a> From<Body<'a>> for String {
-    fn from(body: Body) -> Self {
+    fn from(body: Body<'_>) -> Self {
         body.text.into()
     }
 }

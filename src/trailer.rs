@@ -96,13 +96,13 @@ impl<'a> Hash for Trailer<'a> {
 }
 
 impl<'a> From<Trailer<'a>> for String {
-    fn from(trailer: Trailer) -> Self {
+    fn from(trailer: Trailer<'_>) -> Self {
         format!("{}: {}", trailer.key, trailer.value)
     }
 }
 
 impl<'a> From<Trailer<'a>> for Fragment<'a> {
-    fn from(trailer: Trailer) -> Self {
+    fn from(trailer: Trailer<'_>) -> Self {
         let trailer: String = trailer.into();
         Body::from(trailer).into()
     }
@@ -127,8 +127,10 @@ impl<'a> TryFrom<Body<'a>> for Trailer<'a> {
     }
 }
 
+/// Errors in parsing potential trailers
 #[derive(Error, Debug, Diagnostic)]
 pub enum Error {
+    /// When the given fragment is not a trailer
     #[error("not a trailer")]
     #[diagnostic(url(docsrs), code(mit_commit::trailer::error::not_atrailer))]
     NotATrailer(
@@ -138,7 +140,7 @@ pub enum Error {
 }
 
 impl Error {
-    fn new_not_a_trailer(body: &Body) -> Self {
+    fn new_not_a_trailer(body: &Body<'_>) -> Self {
         let text: String = body.clone().into();
         Self::NotATrailer(text.clone(), (0, text.len()))
     }

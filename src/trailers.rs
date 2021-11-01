@@ -50,7 +50,7 @@ impl<'a> Trailers<'a> {
     /// assert_eq!(iterator.next(), None);
     /// ```
     #[must_use]
-    pub fn iter(&self) -> Iter<'_, Trailer> {
+    pub fn iter(&self) -> Iter<'_, Trailer<'_>> {
         self.trailers.iter()
     }
 
@@ -196,10 +196,10 @@ impl<'a> From<Vec<Fragment<'a>>> for Trailers<'a> {
             })
             .take_while(std::result::Result::is_ok)
             .flatten()
-            .collect::<Vec<Trailer>>()
+            .collect::<Vec<Trailer<'_>>>()
             .into_iter()
             .rev()
-            .collect::<Vec<Trailer>>()
+            .collect::<Vec<Trailer<'_>>>()
             .into()
     }
 }

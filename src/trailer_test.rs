@@ -70,7 +70,7 @@ fn it_preserves_preceding_whitespace() {
 #[test]
 fn can_generate_from_body() {
     let trailer = Trailer::new("Relates-to".into(), "#128".into());
-    let body: Fragment = Fragment::from(trailer);
+    let body: Fragment<'_> = Fragment::from(trailer);
 
     assert_eq!(body, Fragment::Body(Body::from("Relates-to: #128")));
 }

@@ -49,7 +49,7 @@ impl<'a> Bodies<'a> {
     /// assert_eq!(Some(Body::from("First")), Bodies::from(bodies).first());
     /// ```
     #[must_use]
-    pub fn first(&self) -> Option<Body> {
+    pub fn first(&self) -> Option<Body<'_>> {
         self.bodies.first().cloned()
     }
 
@@ -72,7 +72,7 @@ impl<'a> Bodies<'a> {
     /// assert_eq!(iterator.next(), None);
     /// ```
     #[must_use]
-    pub fn iter(&self) -> Iter<'_, Body> {
+    pub fn iter(&self) -> Iter<'_, Body<'_>> {
         self.bodies.iter()
     }
 }
@@ -149,7 +149,7 @@ impl<'a> From<Vec<Body<'a>>> for Bodies<'a> {
 }
 
 impl<'a> From<Bodies<'a>> for String {
-    fn from(bodies: Bodies) -> Self {
+    fn from(bodies: Bodies<'_>) -> Self {
         bodies
             .bodies
             .into_iter()
@@ -187,7 +187,7 @@ impl<'a> From<Vec<Fragment<'a>>> for Bodies<'a> {
             .skip(1)
             .take(non_trailer_item_count)
             .map(|(_, body)| body)
-            .collect::<Vec<Body>>()
+            .collect::<Vec<Body<'_>>>()
             .into()
     }
 }

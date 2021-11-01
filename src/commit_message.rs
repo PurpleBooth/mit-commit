@@ -67,7 +67,7 @@ impl<'a> CommitMessage<'a> {
     /// )
     /// ```
     #[must_use]
-    pub fn from_fragments(fragments: Vec<Fragment>, scissors: Option<Scissors>) -> Self {
+    pub fn from_fragments(fragments: Vec<Fragment<'_>>, scissors: Option<Scissors<'_>>) -> Self {
         let body = fragments
             .into_iter()
             .map(|x| match x {
@@ -141,7 +141,7 @@ impl<'a> CommitMessage<'a> {
     /// );
     /// ```
     #[must_use]
-    pub fn add_trailer(&self, trailer: Trailer) -> Self {
+    pub fn add_trailer(&self, trailer: Trailer<'_>) -> Self {
         let mut fragments = Vec::new();
 
         if self.bodies.iter().all(Body::is_empty) && self.trailers.is_empty() {
@@ -197,7 +197,7 @@ impl<'a> CommitMessage<'a> {
     ///         ])
     /// ```
     #[must_use]
-    pub fn insert_after_last_full_body(&self, fragment: Vec<Fragment>) -> Self {
+    pub fn insert_after_last_full_body(&self, fragment: Vec<Fragment<'_>>) -> Self {
         let position = self.ast.iter().rposition(|fragment| match fragment {
             Fragment::Body(body) => !body.is_empty(),
             Fragment::Comment(_) => false,
@@ -242,7 +242,7 @@ impl<'a> CommitMessage<'a> {
     fn group_ast(ungrouped_ast: Vec<Fragment<'a>>) -> Vec<Fragment<'a>> {
         ungrouped_ast
             .into_iter()
-            .fold(vec![], |acc: Vec<Fragment>, new_fragment| {
+            .fold(vec![], |acc: Vec<Fragment<'_>>, new_fragment| {
                 let mut previous_fragments = acc.clone();
                 match (acc.last(), &new_fragment) {
                     (None, fragment) => {
@@ -396,7 +396,7 @@ impl<'a> CommitMessage<'a> {
     /// assert_eq!(message.get_ast(), ast)
     /// ```
     #[must_use]
-    pub fn get_ast(&self) -> Vec<Fragment> {
+    pub fn get_ast(&self) -> Vec<Fragment<'_>> {
         self.ast.clone()
     }
 
@@ -457,7 +457,7 @@ impl<'a> CommitMessage<'a> {
     /// assert_eq!(message.get_body(), Bodies::from(bodies))
     /// ```
     #[must_use]
-    pub fn get_body(&self) -> Bodies {
+    pub fn get_body(&self) -> Bodies<'_> {
         self.bodies.clone()
     }
 
@@ -519,7 +519,7 @@ impl<'a> CommitMessage<'a> {
     /// assert_eq!(message.get_comments(), Comments::from(comments))
     /// ```
     #[must_use]
-    pub fn get_comments(&self) -> Comments {
+    pub fn get_comments(&self) -> Comments<'_> {
         self.comments.clone()
     }
 
@@ -596,7 +596,7 @@ impl<'a> CommitMessage<'a> {
     /// assert_eq!(message.get_scissors(), Some(scissors))
     /// ```
     #[must_use]
-    pub fn get_scissors(&self) -> Option<Scissors> {
+    pub fn get_scissors(&self) -> Option<Scissors<'_>> {
         self.scissors.clone()
     }
 
@@ -670,7 +670,7 @@ impl<'a> CommitMessage<'a> {
     /// assert_eq!(message.get_trailers(), Trailers::from(trailers))
     /// ```
     #[must_use]
-    pub fn get_trailers(&self) -> Trailers {
+    pub fn get_trailers(&self) -> Trailers<'_> {
         self.trailers.clone()
     }
 
@@ -870,7 +870,7 @@ impl<'a> CommitMessage<'a> {
 }
 
 impl<'a> From<CommitMessage<'a>> for String {
-    fn from(commit_message: CommitMessage) -> Self {
+    fn from(commit_message: CommitMessage<'_>) -> Self {
         let basic_commit = commit_message
             .get_ast()
             .iter()
@@ -944,7 +944,7 @@ impl<'a> From<Cow<'a, str>> for CommitMessage<'a> {
         let comment_character = Self::guess_comment_character(&rest, scissors.clone());
         let per_line_ast = Self::convert_to_per_line_ast(comment_character, &rest);
         let trailers = per_line_ast.clone().into();
-        let mut ast: Vec<Fragment> = Self::group_ast(per_line_ast);
+        let mut ast: Vec<Fragment<'_>> = Self::group_ast(per_line_ast);
 
         if (scissors.clone(), message.chars().last()) == (None, Some('\n')) {
             ast.push(Body::default().into());
@@ -990,8 +990,10 @@ impl<'a> From<String> for CommitMessage<'a> {
     }
 }
 
+/// Errors on reading c commits
 #[derive(Error, Debug, Diagnostic)]
 pub enum Error {
+    /// Failed to read a commit message
     #[error("failed to read commit file {0}")]
     #[diagnostic(
         url(docsrs),

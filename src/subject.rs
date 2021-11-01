@@ -89,7 +89,7 @@ impl<'a> From<Cow<'a, str>> for Subject<'a> {
 }
 
 impl<'a> From<Subject<'a>> for String {
-    fn from(subject: Subject) -> Self {
+    fn from(subject: Subject<'_>) -> Self {
         subject.text.into_owned()
     }
 }
@@ -101,7 +101,7 @@ impl<'a> Display for Subject<'a> {
 }
 
 impl<'a> From<Body<'a>> for Subject<'a> {
-    fn from(body: Body) -> Self {
+    fn from(body: Body<'_>) -> Self {
         Self::from(String::from(body))
     }
 }

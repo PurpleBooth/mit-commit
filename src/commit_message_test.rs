@@ -321,7 +321,7 @@ fn can_generate_a_commit_from_an_ast() {
 
 #[test]
 fn insert_after_last_body() {
-    let ast: Vec<Fragment> = vec![
+    let ast: Vec<Fragment<'_>> = vec![
         Fragment::Body(Body::from("Add file")),
         Fragment::Body(Body::default()),
         Fragment::Body(Body::from("Looks-like-a-trailer: But isn\'t")),
@@ -353,7 +353,7 @@ fn insert_after_last_body() {
 
 #[test]
 fn insert_after_last_body_with_no_body() {
-    let ast: Vec<Fragment> = vec![
+    let ast: Vec<Fragment<'_>> = vec![
         Fragment::Comment(Comment::from("# Short (50 chars or less) summary of changes\n#\n# More detailed explanatory text, if necessary.  Wrap it to\n# about 72 characters or so.  In some contexts, the first\n# line is treated as the subject of an email and the rest of\n# the text as the body.  The blank line separating the\n# summary from the body is critical (unless you omit the body\n# entirely); tools like rebase can get confused if you run\n# the two together.\n#\n# Further paragraphs come after blank lines.\n#\n#   - Bullet points are okay, too\n#\n#   - Typically a hyphen or asterisk is used for the bullet,\n#     preceded by a single space, with blank lines in\n#     between, but conventions vary here")),
         Fragment::Body(Body::default()),
         Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Auf Branch main\n# Ihr Branch ist auf demselben Stand wie \'origin/main\'.\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     file\n#")),
@@ -371,7 +371,7 @@ fn insert_after_last_body_with_no_body() {
 #[allow(clippy::needless_pass_by_value)]
 #[quickcheck]
 fn with_subject(input: String) -> bool {
-    let commit: CommitMessage = "Some Subject".into();
+    let commit: CommitMessage<'_> = "Some Subject".into();
     let actual: String = commit
         .with_subject(input.clone().into())
         .get_subject()
@@ -392,7 +392,7 @@ fn with_body(input: String) -> TestResult {
         return TestResult::discard();
     }
 
-    let commit: CommitMessage = "Some Subject\n\nSome Body".into();
+    let commit: CommitMessage<'_> = "Some Subject\n\nSome Body".into();
     let expected: String = format!("Some Subject\n\n{}", input);
     let actual: String = commit.with_body_contents(&input).into();
     TestResult::from_bool(actual == expected)
@@ -405,7 +405,7 @@ fn with_body_with_no_gutter(input: String) -> TestResult {
         return TestResult::discard();
     }
 
-    let commit: CommitMessage = "Some Subject\nSome More Subject\n\nBody".into();
+    let commit: CommitMessage<'_> = "Some Subject\nSome More Subject\n\nBody".into();
     let expected: String = format!("Some Subject\nSome More Subject\n\n{}", input);
     let actual: String = commit.with_body_contents(&input).into();
     TestResult::from_bool(actual == expected)

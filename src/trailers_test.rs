@@ -82,7 +82,7 @@ fn it_can_tell_me_if_it_is_empty() {
     ])
     .is_empty());
 
-    let trailers: Vec<Trailer> = Vec::new();
+    let trailers: Vec<Trailer<'_>> = Vec::new();
     assert!(Trailers::from(trailers).is_empty());
 }
 
@@ -106,7 +106,7 @@ fn it_can_be_constructed_from_ast() {
         )),
     ];
 
-    let expected: Trailers = vec![
+    let expected: Trailers<'_> = vec![
         Trailer::new(
             "Co-authored-by".into(),
             "Billie Thompson <billie@example.com>".into(),

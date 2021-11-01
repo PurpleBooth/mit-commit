@@ -29,7 +29,7 @@ impl<'a> Comments<'a> {
     /// assert_eq!(iterator.next(), None);
     /// ```
     #[must_use]
-    pub fn iter(&self) -> Iter<'_, Comment> {
+    pub fn iter(&self) -> Iter<'_, Comment<'_>> {
         self.comments.iter()
     }
 }
@@ -69,7 +69,7 @@ impl<'a> From<Vec<Comment<'a>>> for Comments<'a> {
 }
 
 impl<'a> From<Comments<'a>> for String {
-    fn from(comments: Comments) -> Self {
+    fn from(comments: Comments<'_>) -> Self {
         comments
             .comments
             .into_iter()
@@ -89,7 +89,7 @@ impl<'a> From<Vec<Fragment<'a>>> for Comments<'a> {
                     None
                 }
             })
-            .collect::<Vec<Comment>>()
+            .collect::<Vec<Comment<'_>>>()
             .into()
     }
 }
