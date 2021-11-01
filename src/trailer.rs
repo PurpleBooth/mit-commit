@@ -38,10 +38,10 @@ impl<'a> Trailer<'a> {
     /// )
     /// ```
     #[must_use]
-    pub fn new(key: String, value: String) -> Trailer<'a> {
+    pub fn new(key: Cow<'a, str>, value: Cow<'a, str>) -> Trailer<'a> {
         Self {
-            key: Cow::from(key),
-            value: Cow::from(value),
+            key: key,
+            value: value,
         }
     }
 
@@ -123,7 +123,7 @@ impl<'a> TryFrom<Body<'a>> for Trailer<'a> {
             .next()
             .ok_or_else(|| Error::new_not_a_trailer(&body))?;
 
-        Ok(Trailer::new(key, value))
+        Ok(Trailer::new(key.into(), value.into()))
     }
 }
 
