@@ -60,7 +60,6 @@ impl<'a> Subject<'a> {
     ///
     /// assert_eq!(None, chars.next());
     /// ```
-    #[must_use]
     pub fn chars(&self) -> Chars<'_> {
         self.text.chars()
     }
