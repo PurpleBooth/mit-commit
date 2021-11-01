@@ -38,11 +38,8 @@ impl<'a> Trailer<'a> {
     /// )
     /// ```
     #[must_use]
-    pub fn new(key: Cow<'a, str>, value: Cow<'a, str>) -> Trailer<'a> {
-        Self {
-            key: key,
-            value: value,
-        }
+    pub const fn new(key: Cow<'a, str>, value: Cow<'a, str>) -> Trailer<'a> {
+        Self { key, value }
     }
 
     /// Get the key of the [`Trailer`]
