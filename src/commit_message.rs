@@ -15,8 +15,6 @@ use super::{
 };
 use crate::{scissors::Scissors, Trailer};
 
-const LEGAL_CHARACTERS: [char; 10] = ['#', ';', '@', '!', '$', '%', '^', '&', '|', ':'];
-
 /// A [`CommitMessage`], the primary entry point to the library
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct CommitMessage<'a> {
@@ -738,7 +736,7 @@ impl<'a> CommitMessage<'a> {
                 .rev()
                 .find(|line| !line.trim().is_empty())
                 .and_then(|line| line.chars().next())
-                .filter(|x| LEGAL_CHARACTERS.contains(x)),
+                .filter(|character| Comment::is_legal_comment_char(*character)),
         }
     }
 

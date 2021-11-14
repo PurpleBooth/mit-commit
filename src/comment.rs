@@ -1,5 +1,7 @@
 use std::borrow::Cow;
 
+const LEGAL_CHARACTERS: [char; 10] = ['#', ';', '@', '!', '$', '%', '^', '&', '|', ':'];
+
 /// A single comment from a `CommitMessage`
 #[derive(Debug, PartialEq, Clone)]
 pub struct Comment<'a> {
@@ -29,6 +31,21 @@ impl<'a> Comment<'a> {
     #[must_use]
     pub fn append(&self, additional: &Self) -> Self {
         Self::from(format!("{}\n{}", self.comment, additional.comment))
+    }
+
+    /// Tells you if a given comment character is a potential comment character
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use mit_commit::Comment;
+    ///
+    /// assert!(!Comment::is_legal_comment_char('?'),);
+    /// assert!(Comment::is_legal_comment_char('#'),);
+    /// ```
+    #[must_use]
+    pub fn is_legal_comment_char(character: char) -> bool {
+        LEGAL_CHARACTERS.contains(&character)
     }
 }
 
