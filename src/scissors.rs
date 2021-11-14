@@ -1,5 +1,7 @@
 use std::borrow::Cow;
 
+use crate::Comment;
+
 const SCISSORS_MARKER: &str = "------------------------ >8 ------------------------";
 
 /// The [`Scissors`] from a [`CommitMessage`]
@@ -9,6 +11,41 @@ pub struct Scissors<'a> {
 }
 
 impl<'a> Scissors<'a> {
+    pub(crate) fn guess_comment_character(message: &str) -> Option<char> {
+        if let Some(scissors_guess) = Self::guess_comment_char_from_scissors(message) {
+            return Some(scissors_guess);
+        }
+
+        Self::guess_comment_char_from_last_possibility(message)
+    }
+
+    fn guess_comment_char_from_last_possibility(message: &str) -> Option<char> {
+        message
+            .lines()
+            .filter_map(|line| line.chars().next())
+            .filter(|first_letter| Comment::is_legal_comment_char(*first_letter))
+            .last()
+    }
+
+    fn guess_comment_char_from_scissors(message: &str) -> Option<char> {
+        message
+            .lines()
+            .filter(|line| match line.chars().next() {
+                None => false,
+                Some(first_letter) => Comment::is_legal_comment_char(first_letter),
+            })
+            .filter(|line| line.chars().count() == SCISSORS_MARKER.chars().count() + 2)
+            .filter(|line| {
+                line.chars()
+                    .nth(1)
+                    .filter(|second_letter| *second_letter == ' ')
+                    .is_some()
+            })
+            .filter(|line| line.ends_with(SCISSORS_MARKER))
+            .filter_map(|line| line.chars().next())
+            .last()
+    }
+
     pub(crate) fn parse_sections(message: &str) -> (Cow<'a, str>, Option<Scissors<'a>>) {
         message
             .lines()

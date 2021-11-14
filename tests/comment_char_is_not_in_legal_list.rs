@@ -18,10 +18,7 @@ const COMMENT_CHAR_IS_NOT_IN_LEGAL_LIST: &str = indoc!(
     This allows the server to respond to HTTPS requests, by correcting the port binding.
     We should see a nice speed increase from this
 
-    fixes:
-    #6436
-    #6437
-    #6438
+    fixes: #6436 #6437 #6438
 
     ? Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00C4}nderungen ein. Zeilen,
     ? die mit '?' beginnen, werden ignoriert, und eine leere Beschreibung
@@ -46,7 +43,7 @@ fn can_get_ast_from_comment_char_that_is_not_in_legal_list() {
         Fragment::Body(Body::default()),
         Fragment::Body(Body::from("This allows the server to respond to HTTPS requests, by correcting the port binding.\nWe should see a nice speed increase from this")),
         Fragment::Body(Body::default()),
-        Fragment::Body(Body::from("fixes:\n#6436\n#6437\n#6438")),
+        Fragment::Body(Body::from("fixes: #6436 #6437 #6438")),
         Fragment::Body(Body::default()),
         Fragment::Body(Body::from("? Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{c4}nderungen ein. Zeilen,\n? die mit \'?\' beginnen, werden ignoriert, und eine leere Beschreibung\n? bricht den Commit ab.")),
     ];
@@ -80,10 +77,7 @@ fn can_get_body_from_comment_char_that_is_not_in_legal_list() {
             Body::default(),
             Body::from(indoc!(
                     "
-                    fixes:
-                    #6436
-                    #6437
-                    #6438"
+                    fixes: #6436 #6437 #6438"
                 )),
             Body::default(),
             Body::from("? Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{c4}nderungen ein. Zeilen,\n? die mit \'?\' beginnen, werden ignoriert, und eine leere Beschreibung\n? bricht den Commit ab."),

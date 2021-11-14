@@ -728,16 +728,8 @@ impl<'a> CommitMessage<'a> {
         re.is_match(&text)
     }
 
-    fn guess_comment_character(rest: &str, scissors: Option<Scissors<'a>>) -> Option<char> {
-        match scissors {
-            Some(scissors) => String::from(scissors).chars().next(),
-            None => rest
-                .lines()
-                .rev()
-                .find(|line| !line.trim().is_empty())
-                .and_then(|line| line.chars().next())
-                .filter(|character| Comment::is_legal_comment_char(*character)),
-        }
+    fn guess_comment_character(message: &str) -> Option<char> {
+        Scissors::guess_comment_character(message)
     }
 
     /// Give you a new [`CommitMessage`] with the provided subject
@@ -939,7 +931,7 @@ impl<'a> From<Cow<'a, str>> for CommitMessage<'a> {
     /// confuse a genuine body with a comment
     fn from(message: Cow<'a, str>) -> CommitMessage<'a> {
         let (rest, scissors) = Scissors::parse_sections(&message);
-        let comment_character = Self::guess_comment_character(&rest, scissors.clone());
+        let comment_character = Self::guess_comment_character(&message);
         let per_line_ast = Self::convert_to_per_line_ast(comment_character, &rest);
         let trailers = per_line_ast.clone().into();
         let mut ast: Vec<Fragment<'_>> = Self::group_ast(per_line_ast);
