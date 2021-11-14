@@ -81,10 +81,10 @@ impl<'a> From<Comments<'a>> for String {
 
 impl<'a> From<Vec<Fragment<'a>>> for Comments<'a> {
     fn from(ast: Vec<Fragment<'a>>) -> Self {
-        ast.iter()
+        ast.into_iter()
             .filter_map(|values| {
                 if let Fragment::Comment(comment) = values {
-                    Some(comment.clone())
+                    Some(comment)
                 } else {
                     None
                 }
