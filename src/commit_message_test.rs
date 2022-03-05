@@ -421,13 +421,25 @@ fn can_get_comment_character_when_there_is_no_comments() {
 }
 
 #[test]
-fn can_read_from_file() {
+fn can_read_from_path_buf() {
     let temp_file = NamedTempFile::new().expect("failed to create temp file");
     write!(temp_file.as_file(), "Some Subject").expect("Failed to write file");
 
     let commit_character: CommitMessage<'_> = temp_file
         .path()
         .to_path_buf()
+        .try_into()
+        .expect("Could not read commit message");
+    assert_eq!(commit_character.get_subject().to_string(), "Some Subject");
+}
+
+#[test]
+fn can_read_from_path() {
+    let temp_file = NamedTempFile::new().expect("failed to create temp file");
+    write!(temp_file.as_file(), "Some Subject").expect("Failed to write file");
+
+    let commit_character: CommitMessage<'_> = temp_file
+        .path()
         .try_into()
         .expect("Could not read commit message");
     assert_eq!(commit_character.get_subject().to_string(), "Some Subject");

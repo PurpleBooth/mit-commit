@@ -1,4 +1,11 @@
-use std::{borrow::Cow, convert::TryFrom, fs::File, io, io::Read, path::PathBuf};
+use std::{
+    borrow::Cow,
+    convert::TryFrom,
+    fs::File,
+    io,
+    io::Read,
+    path::{Path, PathBuf},
+};
 
 use miette::Diagnostic;
 use regex::Regex;
@@ -959,6 +966,19 @@ impl<'a> TryFrom<PathBuf> for CommitMessage<'a> {
     type Error = Error;
 
     fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
+        let mut file = File::open(value)?;
+        let mut buffer = String::new();
+
+        file.read_to_string(&mut buffer)
+            .map_err(Error::from)
+            .map(move |_| Self::from(buffer))
+    }
+}
+
+impl<'a> TryFrom<&'a Path> for CommitMessage<'a> {
+    type Error = Error;
+
+    fn try_from(value: &'a Path) -> Result<Self, Self::Error> {
         let mut file = File::open(value)?;
         let mut buffer = String::new();
 
