@@ -11,16 +11,16 @@ readme = "README.md"
 repository = "https://github.com/PurpleBooth/mit-commit"
 
 [dependencies]
-indoc = "1.0.3"
-thiserror = "1.0.30"
-regex = "1.5.4"
-lazy_static = "1.4.0"
-miette = "4.0.1"
-nom = "7.1.0"
+indoc = "^1"
+thiserror = "^1"
+regex = "^1"
+lazy_static = "^1"
+miette = "^4"
+nom = "^7"
 
 [dev-dependencies]
-tokio = { version = "1.16.1", features = ["full"] }
-indoc = "1.0.3"
+tokio = { version = "1.17.0", features = ["full"] }
+indoc = "1.0.4"
 regex = "1.5.4"
 criterion = "0.3.5"
 quickcheck = "1.0.3"
