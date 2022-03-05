@@ -1,3 +1,7 @@
+# This help screen
+show-help:
+        just --list
+
 # Test it was built ok
 test:
   RUST_BACKTRACE=1 cargo test

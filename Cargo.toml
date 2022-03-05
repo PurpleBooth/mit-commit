@@ -25,6 +25,7 @@ regex = "1.5.4"
 criterion = "0.3.5"
 quickcheck = "1.0.3"
 quickcheck_macros = "1.0.0"
+tempfile = "3.3.0"
 
 [[bench]]
 name = "commit_message"
