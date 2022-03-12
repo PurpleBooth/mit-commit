@@ -21,7 +21,7 @@ nom = "^7"
 [dev-dependencies]
 tokio = { version = "1.17.0", features = ["full"] }
 indoc = "1.0.4"
-regex = "1.5.4"
+regex = "1.5.5"
 criterion = "0.3.5"
 quickcheck = "1.0.3"
 quickcheck_macros = "1.0.0"
