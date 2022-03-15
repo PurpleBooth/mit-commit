@@ -1,7 +1,8 @@
 use indoc::indoc;
 
-use super::Bodies;
 use crate::{body::Body, fragment::Fragment};
+
+use super::Bodies;
 
 #[test]
 fn implements_iterator() {

@@ -5,6 +5,15 @@ use std::{
 };
 
 use miette::Diagnostic;
+use nom::{
+    bytes::complete::{tag, take_till1, take_until1},
+    character::is_newline,
+    sequence::tuple,
+    AsChar,
+    Compare,
+    InputIter,
+    Parser,
+};
 use thiserror::Error;
 
 use crate::{body::Body, Fragment};
@@ -18,6 +27,26 @@ pub struct Trailer<'a> {
 }
 
 impl<'a> Trailer<'a> {
+    pub fn parser<I: nom::InputIter, E: nom::error::ParseError<I>>(
+        comment_char: I,
+    ) -> impl Parser<I, (I, I, I, I), E>
+    where
+        I: nom::Slice<std::ops::RangeFrom<usize>> + nom::FindSubstring<&'static str>,
+        I: nom::InputTake,
+        I: nom::InputLength,
+        I: nom::UnspecializedInput,
+        I: Clone,
+        I: nom::InputIter<Item = u8> + Compare<&'static str>,
+        <I as InputIter>::Item: AsChar,
+    {
+        return tuple::<_, _, _, _>((
+            tag(comment_char),
+            take_until1::<&'static str, _, _>(": "),
+            tag::<&'static str, _, _>(": "),
+            take_till1(is_newline),
+        ));
+    }
+
     /// Create a new [`Trailer`]
     ///
     /// This creates a new element that represents the sort of [`Trailers`] you

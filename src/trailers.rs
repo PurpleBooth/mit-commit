@@ -1,5 +1,7 @@
 use std::{convert::TryFrom, slice::Iter};
 
+use nom::{IResult, multi::many1};
+
 use crate::{fragment::Fragment, trailer::Trailer};
 
 /// A Collection of `Trailer`
@@ -10,6 +12,21 @@ pub struct Trailers<'a> {
 }
 
 impl<'a> Trailers<'a> {
+    pub fn parser<I, E>(comment_char: I) -> impl FnMut(I) -> IResult<I, Vec<(I, I, I, I)>, E>
+        where
+            I: Clone
+            + nom::InputLength
+            + nom::InputTake
+            + nom::InputIter<Item=u8>
+            + nom::Slice<std::ops::RangeFrom<usize>>
+            + nom::FindSubstring<&'static str>
+            + nom::UnspecializedInput
+            + nom::Compare<&'static str>,
+            E: nom::error::ParseError<I>,
+    {
+        many1::<_, _, _, _>(Trailer::parser::<I, E>(comment_char))
+    }
+
     /// Iterate over the [`Trailers`]
     ///
     /// # Examples

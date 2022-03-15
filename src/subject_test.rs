@@ -1,5 +1,6 @@
+use crate::{body::Body, Comment, fragment::Fragment};
+
 use super::Subject;
-use crate::{body::Body, fragment::Fragment, Comment};
 
 #[test]
 fn len() {

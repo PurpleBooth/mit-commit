@@ -4,6 +4,12 @@ use std::{
     fmt::{Display, Formatter},
 };
 
+use nom::{
+    bytes::complete::take_till1,
+    character::is_newline,
+    InputTakeAtPosition,
+};
+
 /// A single contiguous block of [`CommitMessage`] text
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct Body<'a> {
@@ -11,6 +17,14 @@ pub struct Body<'a> {
 }
 
 impl<'a> Body<'a> {
+    pub fn parser<I, F, E: nom::error::ParseError<I>>() -> impl FnMut(I) -> Result<(I, I), nom::Err<E>>
+        where
+            I: InputTakeAtPosition<Item=u8>,
+            F: Fn(<I as InputTakeAtPosition>::Item) -> bool,
+    {
+        take_till1(is_newline)
+    }
+
     /// Append one [`Body`] onto another
     ///
     /// This is for concatenating multiple [`Bodies`] together
@@ -59,6 +73,7 @@ impl<'a> From<Cow<'a, str>> for Body<'a> {
         Self { text: body }
     }
 }
+
 impl<'a> From<&'a str> for Body<'a> {
     fn from(body: &'a str) -> Self {
         Self::from(Cow::Borrowed(body))

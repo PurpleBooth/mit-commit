@@ -4,8 +4,9 @@ use std::{
     hash::{Hash, Hasher},
 };
 
-use super::Trailer;
 use crate::{body::Body, Fragment};
+
+use super::Trailer;
 
 #[test]
 fn it_can_tell_me_its_key() {

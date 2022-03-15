@@ -8,8 +8,11 @@ use std::{
 };
 
 use miette::Diagnostic;
+use nom::{branch::alt, combinator::opt, sequence::tuple};
 use regex::Regex;
 use thiserror::Error;
+
+use crate::{comment, scissors::Scissors, Trailer};
 
 use super::{
     bodies::Bodies,
@@ -20,7 +23,6 @@ use super::{
     subject::Subject,
     trailers::Trailers,
 };
-use crate::{scissors::Scissors, Trailer};
 
 /// A [`CommitMessage`], the primary entry point to the library
 #[derive(Debug, PartialEq, Clone, Default)]
@@ -224,7 +226,7 @@ impl<'a> CommitMessage<'a> {
                 fragment,
                 after.into_iter().map(|(_, x)| x).collect(),
             ]
-            .concat(),
+                .concat(),
             self.get_scissors(),
         )
     }
@@ -937,6 +939,18 @@ impl<'a> From<Cow<'a, str>> for CommitMessage<'a> {
     /// non-whitespace characters as options otherwise, and we don't want to
     /// confuse a genuine body with a comment
     fn from(message: Cow<'a, str>) -> CommitMessage<'a> {
+        let scissors_split: (Cow<'a, str>, Cow<'a, str>) = alt(comment::LEGAL_CHARACTERS_STR
+            .into_iter()
+            .map(|commend_character| {
+                tuple((
+                    Bodies::parser(*commend_character),
+                    Trailers::parser(*commend_character),
+                    opt(Scissors::parser(*commend_character)),
+                ))
+            })
+            .collect())(message)
+            .unwrap();
+
         let (rest, scissors) = Scissors::parse_sections(&message);
         let comment_character = Self::guess_comment_character(&message);
         let per_line_ast = Self::convert_to_per_line_ast(comment_character, &rest);
@@ -1006,9 +1020,9 @@ pub enum Error {
     /// Failed to read a commit message
     #[error("failed to read commit file {0}")]
     #[diagnostic(
-        url(docsrs),
-        code(mit_commit::commit_message::error::io),
-        help("check the file is readable")
+    url(docsrs),
+    code(mit_commit::commit_message::error::io),
+    help("check the file is readable")
     )]
     Io(#[from] io::Error),
 }

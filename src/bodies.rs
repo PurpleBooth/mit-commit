@@ -6,7 +6,20 @@ use std::{
     vec::IntoIter,
 };
 
-use crate::{body::Body, fragment::Fragment, trailer::Trailer};
+use nom::{
+    AsChar,
+    branch::alt,
+    combinator::map,
+    Compare,
+    InputIter,
+    InputLength,
+    InputTake,
+    InputTakeAtPosition,
+    multi::many1,
+    Parser,
+};
+
+use crate::{body::Body, Comment, fragment::Fragment, trailer::Trailer};
 
 /// A collection of user input [`CommitMessage`] text
 ///
@@ -31,6 +44,24 @@ pub struct Bodies<'a> {
 }
 
 impl<'a> Bodies<'a> {
+    pub fn parser<I, E: nom::error::ParseError<I>, T>(
+        comment_char: I,
+    ) -> impl FnMut(I) -> Result<(I, Vec<(Option<I>, I)>), nom::Err<E>>
+        where
+            I: InputTake + Compare<T> + nom::FindSubstring<&'static str> + nom::InputIter,
+            T: InputLength + Clone,
+            I: InputTakeAtPosition<Item=u8>,
+            I: Clone,
+            I: nom::InputLength,
+    {
+        many1::<I, _, _, _>(alt::<_, _, _, _>((
+            map(Comment::parser(comment_char), |(left, right)| {
+                (Some(left), right)
+            }),
+            map(Body::parser(), |result| (None, result)),
+        )))
+    }
+
     /// Get the first [`Body`] in this list of [`Bodies`]
     ///
     /// # Examples

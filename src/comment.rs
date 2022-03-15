@@ -1,6 +1,16 @@
 use std::borrow::Cow;
 
-const LEGAL_CHARACTERS: [char; 10] = ['#', ';', '@', '!', '$', '%', '^', '&', '|', ':'];
+use nom::{
+    bytes::complete::{tag, take_until1},
+    Compare,
+    InputLength,
+    InputTake,
+    sequence::pair,
+};
+
+pub(crate) const LEGAL_CHARACTERS: [char; 10] = ['#', ';', '@', '!', '$', '%', '^', '&', '|', ':'];
+pub(crate) const LEGAL_CHARACTERS_STR: [&'static str; 10] =
+    ["#", ";", "@", "!", "$", "%", "^", "&", "|", ":"];
 
 /// A single comment from a `CommitMessage`
 #[derive(Debug, PartialEq, Clone)]
@@ -9,6 +19,16 @@ pub struct Comment<'a> {
 }
 
 impl<'a> Comment<'a> {
+    pub fn parser<I, T, E: nom::error::ParseError<I>>(
+        comment_character: T,
+    ) -> impl FnMut(I) -> Result<(I, (I, I)), nom::Err<E>>
+        where
+            I: InputTake + Compare<T> + nom::FindSubstring<&'static str> + nom::InputIter,
+            T: InputLength + Clone,
+    {
+        pair(tag(comment_character), take_until1("\n"))
+    }
+
     /// Append one [`Comment`] onto another
     ///
     /// This is for concatenating multiple [`Comment`] together
