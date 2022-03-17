@@ -1,5 +1,7 @@
 use std::{convert::TryFrom, slice::Iter};
 
+use nom::{combinator::map, error::ParseError, multi::many1, IResult};
+
 use crate::{fragment::Fragment, trailer::Trailer};
 
 /// A Collection of `Trailer`
@@ -104,6 +106,14 @@ impl<'a> Trailers<'a> {
     #[must_use]
     pub fn is_empty(&self) -> bool {
         self.trailers.is_empty()
+    }
+
+    pub fn parser<E: 'a + ParseError<&'a str>>(
+        comment_char: char,
+    ) -> impl FnMut(&'a str) -> IResult<&'a str, Trailers<'a>, E> + 'a {
+        map(many1(Trailer::parser(comment_char)), |trailers| {
+            trailers.into()
+        })
     }
 }
 

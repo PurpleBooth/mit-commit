@@ -11,6 +11,7 @@ use mit_commit::{
     Trailer,
     Trailers,
 };
+
 const COMMIT_WITH_ALL_FEATURES: &str = indoc!(
     "
     Add file

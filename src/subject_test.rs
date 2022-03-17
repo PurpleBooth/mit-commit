@@ -2,6 +2,33 @@ use super::Subject;
 use crate::{body::Body, fragment::Fragment, Comment};
 
 #[test]
+fn can_read_subjects() {
+    let parsed: (&str, Subject<'_>) =
+        Subject::parser::<nom::error::Error<_>>('#')("Subject\n\nBody\n# Comment".into())
+            .expect("Parsing was not successful");
+
+    assert_eq!(parsed, ("Body\n# Comment", Subject::from("Subject\n\n"),));
+}
+
+#[test]
+fn can_read_multiline_subjects() {
+    let parsed: (&str, Subject<'_>) =
+        Subject::parser::<nom::error::Error<_>>('#')("Subject\nSecond Bit\n\nBody".into())
+            .expect("Parsing was not successful");
+
+    assert_eq!(parsed, ("Body", Subject::from("Subject\nSecond Bit\n\n"),));
+}
+
+#[test]
+fn skips_comments() {
+    let parsed: (&str, Subject<'_>) =
+        Subject::parser::<nom::error::Error<_>>('#')("# Comment\nSubject\n\nBody".into())
+            .expect("Parsing was not successful");
+
+    assert_eq!(parsed, ("Body", Subject::from("Subject\n\n"),));
+}
+
+#[test]
 fn len() {
     assert_eq!(Subject::from("hello, world!").len(), 13);
     assert_eq!(Subject::from("goodbye").len(), 7);

@@ -1,3 +1,5 @@
+use nom::{branch::alt, combinator::map, IResult};
+
 use crate::{Body, Comment};
 
 /// A `Fragment` from the [`CommitMessage`], either a comment or body
@@ -7,6 +9,21 @@ pub enum Fragment<'a> {
     Body(Body<'a>),
     /// A fragment that is a comment
     Comment(Comment<'a>),
+}
+
+impl<'a> Fragment<'a> {
+    /// Build a parser for both body and comment fragments
+    pub fn parser<E: nom::error::ParseError<&'a str> + 'a>(
+        comment_char: char,
+    ) -> impl FnMut(&'a str) -> IResult<&'a str, Fragment<'a>, E> + 'a
+    where
+        E: 'a,
+    {
+        return alt((
+            map(Comment::parser(comment_char), Fragment::Comment),
+            map(Body::parser(comment_char), Fragment::Body),
+        ));
+    }
 }
 
 impl<'a> From<Body<'a>> for Fragment<'a> {

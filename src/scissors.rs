@@ -1,5 +1,13 @@
 use std::borrow::Cow;
 
+use nom::{
+    bytes::complete::tag,
+    character::complete::char as char_parser,
+    combinator::{map, recognize, rest},
+    sequence::tuple,
+    IResult,
+};
+
 use crate::Comment;
 
 const SCISSORS_MARKER: &str = "------------------------ >8 ------------------------";
@@ -11,6 +19,25 @@ pub struct Scissors<'a> {
 }
 
 impl<'a> Scissors<'a> {
+    /// Build a parser for both bodies
+    pub fn parser<E: nom::error::ParseError<&'a str>>(
+        comment_char: char,
+    ) -> impl FnMut(&'a str) -> IResult<&'a str, Scissors<'a>, E> + 'a
+    where
+        E: 'a,
+    {
+        map(
+            recognize(tuple((
+                char_parser(comment_char),
+                tag(" "),
+                tag(SCISSORS_MARKER),
+                tag("\n"),
+                rest,
+            ))),
+            |raw_scissors| Scissors::from(raw_scissors),
+        )
+    }
+
     pub(crate) fn guess_comment_character(message: &str) -> Option<char> {
         if let Some(scissors_guess) = Self::guess_comment_char_from_scissors(message) {
             return Some(scissors_guess);

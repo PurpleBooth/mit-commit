@@ -1,5 +1,7 @@
 use std::slice::Iter;
 
+use nom::{combinator::map, error::ParseError, multi::many1, IResult};
+
 use crate::{comment::Comment, fragment::Fragment};
 
 /// A collection of comments from a [`CommitMessage`]
@@ -30,6 +32,14 @@ impl<'a> Comments<'a> {
     /// ```
     pub fn iter(&self) -> Iter<'_, Comment<'_>> {
         self.comments.iter()
+    }
+
+    pub fn parser<E: 'a + ParseError<&'a str>>(
+        comment_char: char,
+    ) -> impl FnMut(&'a str) -> IResult<&'a str, Comments<'a>, E> + 'a {
+        map(many1(Comment::parser(comment_char)), |comments| {
+            comments.into()
+        })
     }
 }
 

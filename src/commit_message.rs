@@ -8,6 +8,14 @@ use std::{
 };
 
 use miette::Diagnostic;
+use nom::{
+    branch::alt,
+    combinator::{map, opt, peek},
+    multi::many0,
+    sequence::tuple,
+    Finish,
+    IResult,
+};
 use regex::Regex;
 use thiserror::Error;
 
@@ -864,6 +872,54 @@ impl<'a> CommitMessage<'a> {
             .map(|comment| -> String { comment.clone().into() })
             .and_then(|comment| comment.chars().next())
     }
+
+    pub fn parser<E: nom::error::ParseError<&'a str> + 'a>(
+    ) -> impl FnMut(&'a str) -> IResult<&'a str, CommitMessage<'a>, E> + 'a {
+        let subject_parser = map(peek(Subject::parser('#')), |subject| {
+            (
+                subject,
+                Bodies::default(),
+                Comments::default(),
+                Trailers::default(),
+                None,
+                vec![],
+            )
+        });
+        let split_parser = tuple((
+            peek(Subject::parser('#')),
+            peek(Bodies::parser('#')),
+            peek(Comments::parser('#')),
+            peek(Trailers::parser('#')),
+            peek(opt(Scissors::parser('#'))),
+            many0(Fragment::parser('#')),
+        ));
+
+        let parser = alt::<
+            &'a str,
+            (
+                Subject<'a>,
+                Bodies<'a>,
+                Comments<'a>,
+                Trailers<'a>,
+                Option<Scissors<'a>>,
+                Vec<Fragment<'a>>,
+            ),
+            _,
+            _,
+        >((split_parser, subject_parser));
+
+        return map(
+            parser,
+            |(subject, bodies, comments, trailers, scissors, fragments)| CommitMessage {
+                subject,
+                bodies,
+                comments,
+                trailers,
+                scissors,
+                ast: fragments,
+            },
+        );
+    }
 }
 
 impl<'a> From<CommitMessage<'a>> for String {
@@ -883,6 +939,44 @@ impl<'a> From<CommitMessage<'a>> for String {
         } else {
             basic_commit
         }
+    }
+}
+
+impl<'a> TryFrom<PathBuf> for CommitMessage<'a> {
+    type Error = Error;
+
+    fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
+        let mut file = File::open(value)?;
+        let mut buffer = String::new();
+
+        file.read_to_string(&mut buffer)
+            .map_err(Error::from)
+            .map(move |_| Self::from(buffer))
+    }
+}
+
+impl<'a> TryFrom<&'a Path> for CommitMessage<'a> {
+    type Error = Error;
+
+    fn try_from(value: &'a Path) -> Result<Self, Self::Error> {
+        let mut file = File::open(value)?;
+        let mut buffer = String::new();
+
+        file.read_to_string(&mut buffer)
+            .map_err(Error::from)
+            .map(move |_| Self::from(buffer))
+    }
+}
+
+impl<'a> From<&'a str> for CommitMessage<'a> {
+    fn from(value: &'a str) -> Self {
+        CommitMessage::from(Cow::from(value))
+    }
+}
+
+impl<'a> From<String> for CommitMessage<'a> {
+    fn from(value: String) -> Self {
+        CommitMessage::from(Cow::from(value))
     }
 }
 
@@ -937,66 +1031,11 @@ impl<'a> From<Cow<'a, str>> for CommitMessage<'a> {
     /// non-whitespace characters as options otherwise, and we don't want to
     /// confuse a genuine body with a comment
     fn from(message: Cow<'a, str>) -> CommitMessage<'a> {
-        let (rest, scissors) = Scissors::parse_sections(&message);
-        let comment_character = Self::guess_comment_character(&message);
-        let per_line_ast = Self::convert_to_per_line_ast(comment_character, &rest);
-        let trailers = per_line_ast.clone().into();
-        let mut ast: Vec<Fragment<'_>> = Self::group_ast(per_line_ast);
+        let (_, commit) = CommitMessage::parser::<nom::error::Error<_>>()(message.trim())
+            .finish()
+            .unwrap_or_default();
 
-        if (scissors.clone(), message.chars().last()) == (None, Some('\n')) {
-            ast.push(Body::default().into());
-        }
-
-        let subject = Subject::from(ast.clone());
-        let comments = Comments::from(ast.clone());
-        let bodies = Bodies::from(ast.clone());
-
-        Self {
-            scissors,
-            ast,
-            subject,
-            trailers,
-            comments,
-            bodies,
-        }
-    }
-}
-
-impl<'a> TryFrom<PathBuf> for CommitMessage<'a> {
-    type Error = Error;
-
-    fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
-        let mut file = File::open(value)?;
-        let mut buffer = String::new();
-
-        file.read_to_string(&mut buffer)
-            .map_err(Error::from)
-            .map(move |_| Self::from(buffer))
-    }
-}
-
-impl<'a> TryFrom<&'a Path> for CommitMessage<'a> {
-    type Error = Error;
-
-    fn try_from(value: &'a Path) -> Result<Self, Self::Error> {
-        let mut file = File::open(value)?;
-        let mut buffer = String::new();
-
-        file.read_to_string(&mut buffer)
-            .map_err(Error::from)
-            .map(move |_| Self::from(buffer))
-    }
-}
-
-impl<'a> From<&'a str> for CommitMessage<'a> {
-    fn from(message: &'a str) -> CommitMessage<'a> {
-        CommitMessage::from(Cow::from(message))
-    }
-}
-
-impl<'a> From<String> for CommitMessage<'a> {
-    fn from(message: String) -> Self {
-        Self::from(Cow::from(message))
+        return commit.clone();
     }
 }
 
