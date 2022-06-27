@@ -15,7 +15,7 @@ indoc = "^1"
 thiserror = "^1"
 regex = "^1"
 lazy_static = "^1"
-miette = "^4"
+miette = "^5"
 nom = "^7"
 
 [dev-dependencies]
