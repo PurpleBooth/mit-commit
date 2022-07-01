@@ -3,7 +3,7 @@ use std::slice::Iter;
 use crate::{comment::Comment, fragment::Fragment};
 
 /// A collection of comments from a [`CommitMessage`]
-#[derive(Debug, PartialEq, Clone, Default)]
+#[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct Comments<'a> {
     comments: Vec<Comment<'a>>,
 }
@@ -28,7 +28,6 @@ impl<'a> Comments<'a> {
     /// assert_eq!(iterator.next(), Some(&Comment::from("# Comment 3")));
     /// assert_eq!(iterator.next(), None);
     /// ```
-    #[must_use]
     pub fn iter(&self) -> Iter<'_, Comment<'_>> {
         self.comments.iter()
     }

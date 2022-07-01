@@ -23,7 +23,7 @@ use super::{
 use crate::{scissors::Scissors, Trailer};
 
 /// A [`CommitMessage`], the primary entry point to the library
-#[derive(Debug, PartialEq, Clone, Default)]
+#[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct CommitMessage<'a> {
     scissors: Option<Scissors<'a>>,
     ast: Vec<Fragment<'a>>,

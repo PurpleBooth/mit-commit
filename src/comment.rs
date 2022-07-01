@@ -3,7 +3,7 @@ use std::borrow::Cow;
 const LEGAL_CHARACTERS: [char; 10] = ['#', ';', '@', '!', '$', '%', '^', '&', '|', ':'];
 
 /// A single comment from a `CommitMessage`
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Comment<'a> {
     comment: Cow<'a, str>,
 }

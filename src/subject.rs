@@ -8,7 +8,7 @@ use std::{
 use crate::{body::Body, fragment::Fragment};
 
 /// The [`Subject`] from the [`CommitMessage`]
-#[derive(Debug, PartialEq, Clone, Default)]
+#[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct Subject<'a> {
     text: Cow<'a, str>,
 }

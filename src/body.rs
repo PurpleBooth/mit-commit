@@ -5,7 +5,7 @@ use std::{
 };
 
 /// A single contiguous block of [`CommitMessage`] text
-#[derive(Debug, PartialEq, Clone, Default)]
+#[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct Body<'a> {
     text: Cow<'a, str>,
 }

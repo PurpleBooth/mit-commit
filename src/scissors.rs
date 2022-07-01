@@ -5,7 +5,7 @@ use crate::Comment;
 const SCISSORS_MARKER: &str = "------------------------ >8 ------------------------";
 
 /// The [`Scissors`] from a [`CommitMessage`]
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Scissors<'a> {
     scissors: Cow<'a, str>,
 }

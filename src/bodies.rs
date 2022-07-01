@@ -25,7 +25,7 @@ use crate::{body::Body, fragment::Fragment, trailer::Trailer};
 /// ];
 /// assert_eq!(Some(Body::from("First")), Bodies::from(bodies).first());
 /// ```
-#[derive(Debug, PartialEq, Clone, Default)]
+#[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct Bodies<'a> {
     bodies: Vec<Body<'a>>,
 }
@@ -71,7 +71,6 @@ impl<'a> Bodies<'a> {
     /// assert_eq!(iterator.next(), Some(&Body::from("Body 3")));
     /// assert_eq!(iterator.next(), None);
     /// ```
-    #[must_use]
     pub fn iter(&self) -> Iter<'_, Body<'_>> {
         self.bodies.iter()
     }
