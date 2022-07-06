@@ -13,7 +13,7 @@ repository = "https://github.com/PurpleBooth/mit-commit"
 [dependencies]
 indoc = "1.0.6"
 thiserror = "1.0.31"
-regex = "1.5.6"
+regex = "1.6.0"
 lazy_static = "1.4.0"
 miette = "5.1.0"
 nom = "7.1.1"
@@ -21,7 +21,7 @@ nom = "7.1.1"
 [dev-dependencies]
 tokio = { version = "1.19.2", features = ["full"] }
 indoc = "1.0.6"
-regex = "1.5.6"
+regex = "1.6.0"
 criterion = "0.3.5"
 quickcheck = "1.0.3"
 quickcheck_macros = "1.0.0"
