@@ -5,6 +5,14 @@ use std::{
 };
 
 use miette::Diagnostic;
+use nom::{
+    bytes::complete::{tag, take_until1},
+    character::complete::char,
+    combinator::{map, not, peek},
+    error::ParseError,
+    sequence::{preceded, separated_pair, terminated},
+    IResult,
+};
 use thiserror::Error;
 
 use crate::{body::Body, Fragment};
@@ -76,6 +84,24 @@ impl<'a> Trailer<'a> {
     #[must_use]
     pub fn get_value(&self) -> String {
         self.value.to_string()
+    }
+
+    pub fn parser<E: 'a + ParseError<&'a str>>(
+        comment_char: char,
+    ) -> impl FnMut(&'a str) -> IResult<&'a str, Trailer<'a>, E> + 'a {
+        map(
+            preceded::<&'a str, _, (&'a str, &'a str), _, _, _>(
+                peek(not(char(comment_char))),
+                separated_pair(
+                    take_until1(":"),
+                    tag(": "),
+                    terminated(take_until1("\n"), tag("\n")),
+                ),
+            ),
+            |(key, value): (&'a str, &'a str)| -> Trailer<'a> {
+                Trailer::<'a>::new(key.into(), value.into())
+            },
+        )
     }
 }
 

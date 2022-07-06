@@ -1,5 +1,14 @@
 use std::borrow::Cow;
 
+use nom::{
+    branch::alt,
+    bytes::complete::{tag, take_until1},
+    character::complete::char as char_parser,
+    combinator::{map, recognize, rest},
+    sequence::pair,
+    IResult,
+};
+
 const LEGAL_CHARACTERS: [char; 10] = ['#', ';', '@', '!', '$', '%', '^', '&', '|', ':'];
 
 /// A single comment from a `CommitMessage`
@@ -46,6 +55,24 @@ impl<'a> Comment<'a> {
     #[must_use]
     pub fn is_legal_comment_char(character: char) -> bool {
         LEGAL_CHARACTERS.contains(&character)
+    }
+
+    /// Build a parser for comments
+    pub fn parser<E: nom::error::ParseError<&'a str>>(
+        comment_char: char,
+    ) -> impl FnMut(&'a str) -> IResult<&'a str, Comment<'a>, E> + 'a
+    where
+        E: 'a,
+    {
+        map(
+            recognize(pair(
+                char_parser::<&'a str, _>(comment_char),
+                alt((recognize(pair(take_until1("\n"), tag("\n"))), rest)),
+            )),
+            |comment| Comment {
+                comment: comment.into(),
+            },
+        )
     }
 }
 

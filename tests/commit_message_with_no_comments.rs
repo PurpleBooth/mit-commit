@@ -10,6 +10,7 @@ use mit_commit::{
     Trailer,
     Trailers,
 };
+
 const COMMIT_MESSAGE_WITH_NO_COMMENTS: &str = indoc!(
     "
     Update bashrc to include kubernetes completions

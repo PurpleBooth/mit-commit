@@ -6,6 +6,8 @@ use std::{
     vec::IntoIter,
 };
 
+use nom::{combinator::map, error::ParseError, multi::many1, IResult};
+
 use crate::{body::Body, fragment::Fragment, trailer::Trailer};
 
 /// A collection of user input [`CommitMessage`] text
@@ -73,6 +75,12 @@ impl<'a> Bodies<'a> {
     /// ```
     pub fn iter(&self) -> Iter<'_, Body<'_>> {
         self.bodies.iter()
+    }
+
+    pub fn parser<E: 'a + ParseError<&'a str>>(
+        comment_char: char,
+    ) -> impl FnMut(&'a str) -> IResult<&'a str, Bodies<'a>, E> + 'a {
+        map(many1(Body::parser(comment_char)), |bodies| bodies.into())
     }
 }
 

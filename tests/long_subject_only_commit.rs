@@ -11,6 +11,7 @@ use mit_commit::{
     Trailer,
     Trailers,
 };
+
 const LONG_SUBJECT_ONLY_COMMIT: &str = indoc!(
     "
     Initial Commit

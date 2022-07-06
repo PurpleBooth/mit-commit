@@ -73,11 +73,11 @@ fn it_can_tell_me_if_it_is_empty() {
     assert!(!Trailers::from(vec![
         Trailer::new(
             "Co-authored-by".into(),
-            "Billie Thompson <billie@example.com>".into()
+            "Billie Thompson <billie@example.com>".into(),
         ),
         Trailer::new(
             "Co-authored-by".into(),
-            "Someone Else <someone@example.com>".into()
+            "Someone Else <someone@example.com>".into(),
         ),
     ])
     .is_empty());

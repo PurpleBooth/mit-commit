@@ -4,6 +4,16 @@ use std::{
     fmt::{Display, Formatter},
 };
 
+use nom::{
+    branch::alt,
+    bytes::complete::{tag, take, take_until, take_until1},
+    character::complete::char,
+    combinator::{map, not, peek, recognize, rest},
+    error::ParseError,
+    sequence::{pair, terminated},
+    IResult,
+};
+
 /// A single contiguous block of [`CommitMessage`] text
 #[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct Body<'a> {
@@ -52,6 +62,26 @@ impl<'a> Body<'a> {
     pub fn is_empty(&self) -> bool {
         self.text.is_empty()
     }
+
+    /// Build a parser for bodies
+    pub fn parser<E: 'a + ParseError<&'a str>>(
+        comment_char: char,
+    ) -> impl FnMut(&'a str) -> IResult<&'a str, Body<'a>, E> + 'a {
+        map(
+            recognize(pair(
+                recognize(not(char(comment_char))),
+                alt((
+                    terminated(
+                        recognize(pair(take_until1("\n"), tag("\n"))),
+                        peek(char(comment_char)),
+                    ),
+                    recognize(pair(take_until("\n\n"), tag("\n\n"))),
+                    recognize(pair(take(1_usize), rest)),
+                )),
+            )),
+            |raw_body: &'a str| -> Body<'a> { Cow::from(raw_body).into() },
+        )
+    }
 }
 
 impl<'a> From<Cow<'a, str>> for Body<'a> {
@@ -59,6 +89,7 @@ impl<'a> From<Cow<'a, str>> for Body<'a> {
         Self { text: body }
     }
 }
+
 impl<'a> From<&'a str> for Body<'a> {
     fn from(body: &'a str) -> Self {
         Self::from(Cow::Borrowed(body))

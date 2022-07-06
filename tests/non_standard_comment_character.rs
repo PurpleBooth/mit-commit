@@ -10,6 +10,7 @@ use mit_commit::{
     Trailer,
     Trailers,
 };
+
 const NON_STANDARD_COMMENT_CHARACTER: &str = indoc!(
     "
     Allow the server to respond to https

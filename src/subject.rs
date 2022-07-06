@@ -5,6 +5,15 @@ use std::{
     str::Chars,
 };
 
+use nom::{
+    branch::alt,
+    bytes::complete::{take, take_until1},
+    character::complete::char,
+    combinator::{map, not, peek, recognize, rest},
+    sequence::{pair, tuple},
+    IResult,
+};
+
 use crate::{body::Body, fragment::Fragment};
 
 /// The [`Subject`] from the [`CommitMessage`]
@@ -62,6 +71,22 @@ impl<'a> Subject<'a> {
     /// ```
     pub fn chars(&self) -> Chars<'_> {
         self.text.chars()
+    }
+
+    /// Create a parser for parsing the subject
+    pub fn parser<E: nom::error::ParseError<&'a str> + 'a>(
+        comment_char: char,
+    ) -> impl FnMut(&'a str) -> IResult<&'a str, Subject<'a>, E> + 'a
+    where
+        E: 'a,
+    {
+        map(
+            recognize(tuple((
+                peek(not(char::<&'a str, _>(comment_char))),
+                alt((recognize(pair(take_until1("\n\n"), take(2_usize))), rest)),
+            ))),
+            |raw_subject: &'a str| -> Subject<'a> { Cow::from(raw_subject).into() },
+        )
     }
 }
 
