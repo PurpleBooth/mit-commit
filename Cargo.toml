@@ -22,7 +22,7 @@ nom = "7.1.1"
 tokio = { version = "1.19.2", features = ["full"] }
 indoc = "1.0.6"
 regex = "1.6.0"
-criterion = "0.3.5"
+criterion = "0.4.0"
 quickcheck = "1.0.3"
 quickcheck_macros = "1.0.0"
 tempfile = "3.3.0"
