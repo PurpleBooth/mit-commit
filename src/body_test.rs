@@ -20,7 +20,7 @@ fn it_can_give_me_it_as_a_string_from_a_string() {
 fn it_implements_display() {
     let body = Body::from("Example Body");
 
-    assert_eq!(format!("{}", body), "Example Body");
+    assert_eq!(format!("{body}"), "Example Body");
 }
 
 #[test]

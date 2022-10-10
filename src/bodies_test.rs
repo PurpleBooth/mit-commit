@@ -44,7 +44,7 @@ fn it_can_be_formatted() {
     ]);
 
     assert_eq!(
-        format!("{}", bodies),
+        format!("{bodies}"),
         String::from(indoc!(
             "
             Message Body

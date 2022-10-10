@@ -396,7 +396,7 @@ fn with_body(input: String) -> TestResult {
     }
 
     let commit: CommitMessage<'_> = "Some Subject\n\nSome Body".into();
-    let expected: String = format!("Some Subject\n\n{}", input);
+    let expected: String = format!("Some Subject\n\n{input}");
     let actual: String = commit.with_body_contents(&input).into();
     TestResult::from_bool(actual == expected)
 }
@@ -409,7 +409,7 @@ fn with_body_with_no_gutter(input: String) -> TestResult {
     }
 
     let commit: CommitMessage<'_> = "Some Subject\nSome More Subject\n\nBody".into();
-    let expected: String = format!("Some Subject\nSome More Subject\n\n{}", input);
+    let expected: String = format!("Some Subject\nSome More Subject\n\n{input}");
     let actual: String = commit.with_body_contents(&input).into();
     TestResult::from_bool(actual == expected)
 }

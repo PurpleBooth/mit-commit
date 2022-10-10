@@ -30,9 +30,10 @@ impl<'a> Scissors<'a> {
     fn guess_comment_char_from_scissors(message: &str) -> Option<char> {
         message
             .lines()
-            .filter(|line| match line.chars().next() {
-                None => false,
-                Some(first_letter) => Comment::is_legal_comment_char(first_letter),
+            .filter(|line| {
+                line.chars().next().map_or(false, |first_letter| {
+                    Comment::is_legal_comment_char(first_letter)
+                })
             })
             .filter(|line| line.chars().count() == SCISSORS_MARKER.chars().count() + 2)
             .filter(|line| {
@@ -67,7 +68,7 @@ impl<'a> Scissors<'a> {
                         .join("\n");
 
                     let scissors = if message.ends_with('\n') {
-                        Self::from(format!("{}\n", scissors_string))
+                        Self::from(format!("{scissors_string}\n"))
                     } else {
                         Self::from(scissors_string.clone())
                     };

@@ -86,7 +86,7 @@ impl<'a> CommitMessage<'a> {
             .map(|contents| format!("\n{}", String::from(contents)))
             .unwrap_or_default();
 
-        Self::from(format!("{}{}", body, scissors))
+        Self::from(format!("{body}{scissors}"))
     }
 
     /// A helper method to let you insert [`Trailer`]
@@ -208,15 +208,16 @@ impl<'a> CommitMessage<'a> {
             Fragment::Comment(_) => false,
         });
 
-        let (before, after): (Vec<_>, Vec<_>) = match position {
-            Some(position) => self
-                .ast
-                .clone()
-                .into_iter()
-                .enumerate()
-                .partition(|(index, _)| index <= &position),
-            None => (vec![], self.ast.clone().into_iter().enumerate().collect()),
-        };
+        let (before, after): (Vec<_>, Vec<_>) = position.map_or_else(
+            || (vec![], self.ast.clone().into_iter().enumerate().collect()),
+            |position| {
+                self.ast
+                    .clone()
+                    .into_iter()
+                    .enumerate()
+                    .partition(|(index, _)| index <= &position)
+            },
+        );
 
         Self::from_fragments(
             [
@@ -231,15 +232,17 @@ impl<'a> CommitMessage<'a> {
 
     fn convert_to_per_line_ast(comment_character: Option<char>, rest: &str) -> Vec<Fragment<'a>> {
         rest.lines()
-            .map(|line| match comment_character {
-                Some(comment_character) => {
-                    if line.starts_with(comment_character) {
-                        Comment::from(line.to_string()).into()
-                    } else {
-                        Body::from(line.to_string()).into()
-                    }
-                }
-                None => Body::from(line.to_string()).into(),
+            .map(|line| {
+                comment_character.map_or_else(
+                    || Body::from(line.to_string()).into(),
+                    |comment_character| {
+                        if line.starts_with(comment_character) {
+                            Comment::from(line.to_string()).into()
+                        } else {
+                            Body::from(line.to_string()).into()
+                        }
+                    },
+                )
             })
             .collect()
     }
@@ -831,7 +834,7 @@ impl<'a> CommitMessage<'a> {
     #[must_use]
     pub fn with_body_contents(self, contents: &'a str) -> Self {
         let existing_subject: Subject<'a> = self.get_subject();
-        let body = format!("Unused\n\n{}", contents);
+        let body = format!("Unused\n\n{contents}");
         let commit = Self::from(body);
 
         commit.with_subject(existing_subject)
@@ -879,7 +882,7 @@ impl<'a> From<CommitMessage<'a>> for String {
             .join("\n");
 
         if let Some(scissors) = commit_message.get_scissors() {
-            format!("{}\n{}", basic_commit, Self::from(scissors))
+            format!("{basic_commit}\n{}", Self::from(scissors))
         } else {
             basic_commit
         }
