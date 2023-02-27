@@ -178,6 +178,7 @@ impl<'a> From<Trailers<'a>> for String {
 impl<'a> From<Vec<Fragment<'a>>> for Trailers<'a> {
     fn from(ast: Vec<Fragment<'a>>) -> Self {
         ast.into_iter()
+            .skip(1)
             .filter_map(|values| {
                 if let Fragment::Body(body) = values {
                     Some(body)

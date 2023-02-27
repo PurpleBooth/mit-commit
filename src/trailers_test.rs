@@ -120,3 +120,31 @@ fn it_can_be_constructed_from_ast() {
 
     assert_eq!(Trailers::from(trailers), expected);
 }
+
+#[test]
+fn it_can_be_constructed_from_ast_with_conventional_commits() {
+    let trailers = vec![
+        Fragment::Body(Body::from("feat: Example Commit")),
+        Fragment::Body(Body::default()),
+        Fragment::Body(Body::from(
+            "Co-authored-by: Billie Thompson <billie@example.com>",
+        )),
+        Fragment::Body(Body::from(
+            "Co-authored-by: Somebody Else <somebody@example.com>",
+        )),
+    ];
+
+    let expected: Trailers<'_> = vec![
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Billie Thompson <billie@example.com>".into(),
+        ),
+        Trailer::new(
+            "Co-authored-by".into(),
+            "Somebody Else <somebody@example.com>".into(),
+        ),
+    ]
+    .into();
+
+    assert_eq!(Trailers::from(trailers), expected);
+}

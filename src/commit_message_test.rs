@@ -139,6 +139,51 @@ fn can_add_trailers_to_a_normal_commit() {
 }
 
 #[test]
+fn can_add_trailers_to_a_conventional_commit() {
+    let commit = CommitMessage::from(indoc!(
+            "
+            feat: Example Commit Message
+
+            This is an example commit message for linting
+
+            # Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+            # die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
+            # bricht den Commit ab.
+            #
+            # Auf Branch main
+            # Ihr Branch ist auf demselben Stand wie 'origin/main'.
+            #
+            # Zum Commit vorgemerkte \u{00E4}nderungen:
+            #	neue Datei:     file
+            #
+            "
+        ));
+
+    assert_eq!(
+        String::from(commit.add_trailer(Trailer::new("Co-authored-by".into(), "Test Trailer <test@example.com>".into()))),
+        String::from(CommitMessage::from(indoc!(
+            "
+            feat: Example Commit Message
+
+            This is an example commit message for linting
+
+            Co-authored-by: Test Trailer <test@example.com>
+
+            # Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+            # die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
+            # bricht den Commit ab.
+            #
+            # Auf Branch main
+            # Ihr Branch ist auf demselben Stand wie 'origin/main'.
+            #
+            # Zum Commit vorgemerkte \u{00E4}nderungen:
+            #	neue Datei:     file
+            #
+            "
+        ))));
+}
+
+#[test]
 fn can_add_trailers_to_a_commit_without_existing_trailers() {
     let commit = CommitMessage::from(indoc!(
             "
