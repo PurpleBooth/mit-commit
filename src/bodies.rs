@@ -174,6 +174,7 @@ impl<'a> From<Vec<Fragment<'a>>> for Bodies<'a> {
         let trailer_count = raw_body
             .clone()
             .into_iter()
+            .skip(1)
             .rev()
             .take_while(|body| body.is_empty() || Trailer::try_from(body.clone()).is_ok())
             .count();
