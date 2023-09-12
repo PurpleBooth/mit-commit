@@ -1,5 +1,5 @@
 tag_prefix = "v"
-from_latest_tag = false
+from_latest_tag = true
 ignore_merge_commits = true
 branch_whitelist = ["main"]
 pre_bump_hooks = [
@@ -16,12 +16,3 @@ post_package_bump_hooks = []
 [git_hooks]
 
 [commit_types]
-
-[changelog]
-path = "CHANGELOG.md"
-template = "remote"
-remote = "github.com"
-repository = "mit-commit"
-owner = "PurpleBooth"
-
-authors = []
