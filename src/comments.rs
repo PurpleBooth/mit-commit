@@ -61,6 +61,37 @@ impl<'a> IntoIterator for Comments<'a> {
     }
 }
 
+impl<'a> IntoIterator for &'a Comments<'a> {
+    type IntoIter = Iter<'a, Comment<'a>>;
+    type Item = &'a Comment<'a>;
+
+    /// Iterate over the [`Comment`] in the [`Comments`]
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::borrow::Borrow;
+    ///
+    /// use mit_commit::{Comment, Comments};
+    ///
+    /// let comments = Comments::from(vec![
+    ///     Comment::from("# Comment 1"),
+    ///     Comment::from("# Comment 2"),
+    ///     Comment::from("# Comment 3"),
+    /// ]);
+    /// let comments_ref = comments.borrow();
+    /// let mut iterator = comments_ref.into_iter();
+    ///
+    /// assert_eq!(iterator.next(), Some(&Comment::from("# Comment 1")));
+    /// assert_eq!(iterator.next(), Some(&Comment::from("# Comment 2")));
+    /// assert_eq!(iterator.next(), Some(&Comment::from("# Comment 3")));
+    /// assert_eq!(iterator.next(), None);
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        self.comments.iter()
+    }
+}
+
 impl<'a> From<Vec<Comment<'a>>> for Comments<'a> {
     fn from(comments: Vec<Comment<'a>>) -> Self {
         Self { comments }

@@ -38,7 +38,7 @@ impl<'a> Trailer<'a> {
     /// )
     /// ```
     #[must_use]
-    pub const fn new(key: Cow<'a, str>, value: Cow<'a, str>) -> Trailer<'a> {
+    pub const fn new(key: Cow<'a, str>, value: Cow<'a, str>) -> Self {
         Self { key, value }
     }
 
@@ -108,7 +108,7 @@ impl<'a> From<Trailer<'a>> for Fragment<'a> {
 impl<'a> TryFrom<Body<'a>> for Trailer<'a> {
     type Error = Error;
 
-    fn try_from(body: Body<'a>) -> Result<Trailer<'a>, Self::Error> {
+    fn try_from(body: Body<'a>) -> Result<Self, Self::Error> {
         let content: String = body.clone().into();
         let mut value_and_key = content.split(": ").map(ToString::to_string);
 

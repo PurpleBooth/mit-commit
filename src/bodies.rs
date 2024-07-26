@@ -103,6 +103,36 @@ impl<'a> IntoIterator for Bodies<'a> {
     }
 }
 
+impl<'a> IntoIterator for &'a Bodies<'a> {
+    type IntoIter = Iter<'a, Body<'a>>;
+    type Item = &'a Body<'a>;
+
+    /// Iterate over the [`Body`] in the [`Bodies`]
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::borrow::Borrow;
+    ///
+    /// use mit_commit::{Bodies, Body};
+    /// let bodies = Bodies::from(vec![
+    ///     Body::from("Body 1"),
+    ///     Body::from("Body 2"),
+    ///     Body::from("Body 3"),
+    /// ]);
+    /// let bodies_ref = bodies.borrow();
+    /// let mut iterator = bodies_ref.into_iter();
+    ///
+    /// assert_eq!(iterator.next(), Some(&Body::from("Body 1")));
+    /// assert_eq!(iterator.next(), Some(&Body::from("Body 2")));
+    /// assert_eq!(iterator.next(), Some(&Body::from("Body 3")));
+    /// assert_eq!(iterator.next(), None);
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        self.bodies.iter()
+    }
+}
+
 impl<'a> Display for Bodies<'a> {
     /// Render the [`Bodies`] as text
     ///

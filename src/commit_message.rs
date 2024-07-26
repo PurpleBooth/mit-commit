@@ -939,7 +939,7 @@ impl<'a> From<Cow<'a, str>> for CommitMessage<'a> {
     /// config this feels like a reasonable compromise, there are a lot of
     /// non-whitespace characters as options otherwise, and we don't want to
     /// confuse a genuine body with a comment
-    fn from(message: Cow<'a, str>) -> CommitMessage<'a> {
+    fn from(message: Cow<'a, str>) -> Self {
         let (rest, scissors) = Scissors::parse_sections(&message);
         let comment_character = Self::guess_comment_character(&message);
         let per_line_ast = Self::convert_to_per_line_ast(comment_character, &rest);
@@ -992,7 +992,7 @@ impl<'a> TryFrom<&'a Path> for CommitMessage<'a> {
 }
 
 impl<'a> From<&'a str> for CommitMessage<'a> {
-    fn from(message: &'a str) -> CommitMessage<'a> {
+    fn from(message: &'a str) -> Self {
         CommitMessage::from(Cow::from(message))
     }
 }

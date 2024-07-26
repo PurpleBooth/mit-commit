@@ -154,6 +154,56 @@ impl<'a> IntoIterator for Trailers<'a> {
         self.trailers.into_iter()
     }
 }
+impl<'a> IntoIterator for &'a Trailers<'a> {
+    type IntoIter = Iter<'a, Trailer<'a>>;
+    type Item = &'a Trailer<'a>;
+
+    /// Iterate over the [`Trailers`]
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::borrow::Borrow;
+    ///
+    /// use mit_commit::{Trailer, Trailers};
+    /// let trailers = Trailers::from(vec![
+    ///     Trailer::new(
+    ///         "Co-authored-by".into(),
+    ///         "Billie Thompson <billie@example.com>".into(),
+    ///     ),
+    ///     Trailer::new(
+    ///         "Co-authored-by".into(),
+    ///         "Someone Else <someone@example.com>".into(),
+    ///     ),
+    ///     Trailer::new("Relates-to".into(), "#124".into()),
+    /// ]);
+    /// let trailer_ref = trailers.borrow();
+    /// let mut iterator = trailer_ref.into_iter();
+    ///
+    /// assert_eq!(
+    ///     iterator.next(),
+    ///     Some(&Trailer::new(
+    ///         "Co-authored-by".into(),
+    ///         "Billie Thompson <billie@example.com>".into()
+    ///     ))
+    /// );
+    /// assert_eq!(
+    ///     iterator.next(),
+    ///     Some(&Trailer::new(
+    ///         "Co-authored-by".into(),
+    ///         "Someone Else <someone@example.com>".into()
+    ///     ))
+    /// );
+    /// assert_eq!(
+    ///     iterator.next(),
+    ///     Some(&Trailer::new("Relates-to".into(), "#124".into()))
+    /// );
+    /// assert_eq!(iterator.next(), None);
+    /// ```
+    fn into_iter(self) -> Self::IntoIter {
+        self.trailers.iter()
+    }
+}
 
 impl<'a> From<Vec<Trailer<'a>>> for Trailers<'a> {
     fn from(trailers: Vec<Trailer<'a>>) -> Self {

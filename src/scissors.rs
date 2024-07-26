@@ -47,7 +47,7 @@ impl<'a> Scissors<'a> {
             .last()
     }
 
-    pub(crate) fn parse_sections(message: &str) -> (Cow<'a, str>, Option<Scissors<'a>>) {
+    pub(crate) fn parse_sections(message: &str) -> (Cow<'a, str>, Option<Self>) {
         message
             .lines()
             .position(|line| line.ends_with(SCISSORS_MARKER))
