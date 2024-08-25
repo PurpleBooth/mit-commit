@@ -55,6 +55,19 @@ impl<'a> Body<'a> {
 }
 
 impl<'a> From<Cow<'a, str>> for Body<'a> {
+    /// Create from a Cow<_, str>
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::borrow::Cow;
+    ///
+    /// use mit_commit::Body;
+    ///
+    /// let expected = "a string";
+    /// let input = Cow::from(expected);
+    /// assert_eq!(Body::from(input).to_string(), expected)
+    /// ```
     fn from(body: Cow<'a, str>) -> Self {
         Self { text: body }
     }
@@ -78,6 +91,19 @@ impl<'a> From<Body<'a>> for String {
 }
 
 impl<'a> From<Body<'a>> for Cow<'a, str> {
+    /// Convert to a Cow<_, str>
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::borrow::Cow;
+    ///
+    /// use mit_commit::Body;
+    ///
+    /// let expected = Cow::from("a string");
+    /// let input = Body::from(expected.clone());
+    /// assert_eq!(Cow::from(input), expected)
+    /// ```
     fn from(body: Body<'a>) -> Self {
         body.text
     }

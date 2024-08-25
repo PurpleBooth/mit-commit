@@ -74,6 +74,21 @@ impl<'a> From<&'a str> for Subject<'a> {
 }
 
 impl<'a> From<String> for Subject<'a> {
+    /// Convert from an owned string
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mit_commit::Subject;
+    ///
+    /// let subject = Subject::from("y\u{306}".to_string());
+    ///
+    /// let mut chars = subject.chars();
+    ///
+    /// assert_eq!(Some('y'), chars.next());
+    /// assert_eq!(Some('\u{0306}'), chars.next());
+    /// assert_eq!(None, chars.next());
+    /// ```
     fn from(subject: String) -> Self {
         Self {
             text: subject.into(),
