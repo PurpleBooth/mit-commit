@@ -19,6 +19,40 @@ fn it_can_be_created_from_a_string() {
 }
 
 #[test]
+fn it_can_guess_the_comment_character_from_scissors_with_required_space() {
+    let comment_char = Scissors::guess_comment_character(indoc!(
+        "
+        Some text
+
+        #------------------------ >8 ------------------------
+        ; ------------------------ >8 ------------------------
+        ; \u{00E4}ndern oder entfernen Sie nicht die obige Zeile.
+        ; Alles unterhalb von ihr wird ignoriert.
+        diff --git a/file b/file
+        "
+    ));
+
+    assert_eq!(comment_char, Some(';'));
+}
+
+#[test]
+fn it_can_guess_the_comment_character_from_scissors_without_comment() {
+    let comment_char = Scissors::guess_comment_character(indoc!(
+        "
+        Some text
+
+          ------------------------ >8 ------------------------
+        ; ------------------------ >8 ------------------------
+        ; \u{00E4}ndern oder entfernen Sie nicht die obige Zeile.
+        ; Alles unterhalb von ihr wird ignoriert.
+        diff --git a/file b/file
+        "
+    ));
+
+    assert_eq!(comment_char, Some(';'));
+}
+
+#[test]
 fn it_can_extract_itself_from_commit() {
     let sections = Scissors::parse_sections(indoc!(
         "
