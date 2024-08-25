@@ -2,6 +2,22 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v3.2.1 - 2024-08-25
+#### Bug Fixes
+- Rewrite scissors guessing algorithm to be cleaner - (3e52e37) - Billie Thompson
+#### Continuous Integration
+- Update pipeline to not push every commit - (512544e) - Billie Thompson
+- Add renovate.json (#120) - (d0f1bd4) - renovate[bot]
+#### Miscellaneous Chores
+- **(deps)** update rust crate tempfile to 3.12.0 - (26928c3) - renovate[bot]
+- add mutation testing files to ignore - (70d1bd8) - Billie Thompson
+#### Tests
+- Demonstate guess comment character not matching - (41d9041) - Billie Thompson
+- Additional confidence around scissors - (b8b4746) - Billie Thompson
+- Cover some test cases - (b2f79f5) - Billie Thompson
+
+- - -
+
 ## v3.2.0 - 2024-07-26
 #### Bug Fixes
 - Bump versions - (6bbd45b) - Billie Thompson
