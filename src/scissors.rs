@@ -12,38 +12,36 @@ pub struct Scissors<'a> {
 
 impl<'a> Scissors<'a> {
     pub(crate) fn guess_comment_character(message: &str) -> Option<char> {
-        if let Some(scissors_guess) = Self::guess_comment_char_from_scissors(message) {
-            return Some(scissors_guess);
-        }
-
-        Self::guess_comment_char_from_last_possibility(message)
+        Self::guess_comment_char_from_scissors(message)
+            .or_else(|| Self::guess_comment_char_from_last_possibility(message))
     }
 
     fn guess_comment_char_from_last_possibility(message: &str) -> Option<char> {
         message
             .lines()
-            .filter_map(|line| line.chars().next())
-            .filter(|first_letter| Comment::is_legal_comment_char(*first_letter))
+            .filter_map(|line| {
+                line.chars()
+                    .next()
+                    .filter(|first_letter| Comment::is_legal_comment_char(*first_letter))
+            })
             .last()
     }
 
     fn guess_comment_char_from_scissors(message: &str) -> Option<char> {
         message
             .lines()
-            .filter(|line| {
-                line.chars().next().map_or(false, |first_letter| {
-                    Comment::is_legal_comment_char(first_letter)
-                })
+            .filter_map(|line| {
+                let mut line_chars = line.chars();
+                let first_character = line_chars.next();
+                first_character.filter(|cc| Comment::is_legal_comment_char(*cc))?;
+                line_chars.next().filter(|cc| *cc == ' ')?;
+
+                if SCISSORS_MARKER != line_chars.as_str() {
+                    return None;
+                }
+
+                first_character
             })
-            .filter(|line| line.chars().count() == SCISSORS_MARKER.chars().count() + 2)
-            .filter(|line| {
-                line.chars()
-                    .nth(1)
-                    .filter(|second_letter| *second_letter == ' ')
-                    .is_some()
-            })
-            .filter(|line| line.ends_with(SCISSORS_MARKER))
-            .filter_map(|line| line.chars().next())
             .last()
     }
 

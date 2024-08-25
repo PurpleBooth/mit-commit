@@ -28,6 +28,20 @@ fn it_does_not_take_trailing_whitespace_into_account_in_equality_checks() {
 
     assert_eq!(a, b);
 }
+#[test]
+fn it_does_not_match_on_differing_vales() {
+    let a = Trailer::new("Relates-to".into(), "#129".into());
+    let b = Trailer::new("Relates-to".into(), "#128".into());
+
+    assert_ne!(a, b);
+}
+#[test]
+fn it_does_not_match_on_differing_names() {
+    let a = Trailer::new("Another".into(), "#128".into());
+    let b = Trailer::new("Relates-to".into(), "#128".into());
+
+    assert_ne!(a, b);
+}
 
 #[test]
 fn it_does_not_take_trailing_whitespace_into_account_in_hashing() {
@@ -38,6 +52,28 @@ fn it_does_not_take_trailing_whitespace_into_account_in_hashing() {
     Trailer::new("Relates-to".into(), "#128".into()).hash(&mut hasher_b);
 
     assert_eq!(hasher_a.finish(), hasher_b.finish());
+}
+
+#[test]
+fn it_differing_relates_headers_do_not_match_hashes() {
+    let mut hasher_a = DefaultHasher::new();
+    Trailer::new("Relates".into(), "#128".into()).hash(&mut hasher_a);
+
+    let mut hasher_b = DefaultHasher::new();
+    Trailer::new("Relates-to".into(), "#128".into()).hash(&mut hasher_b);
+
+    assert_ne!(hasher_a.finish(), hasher_b.finish());
+}
+
+#[test]
+fn it_differing_relates_values_do_not_match_hashes() {
+    let mut hasher_a = DefaultHasher::new();
+    Trailer::new("Relates-to".into(), "#129".into()).hash(&mut hasher_a);
+
+    let mut hasher_b = DefaultHasher::new();
+    Trailer::new("Relates-to".into(), "#128".into()).hash(&mut hasher_b);
+
+    assert_ne!(hasher_a.finish(), hasher_b.finish());
 }
 
 #[test]

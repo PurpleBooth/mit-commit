@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use super::Subject;
 use crate::{body::Body, fragment::Fragment, Comment};
 
@@ -59,6 +61,13 @@ fn it_can_be_created_from_a_body() {
 #[test]
 fn it_can_be_created_from_fragments() {
     let subject = Subject::from(vec![Fragment::Body(Body::from("hello, world!"))]);
+
+    assert_eq!(subject, Subject::from("hello, world!"));
+}
+
+#[test]
+fn it_can_be_created_from_a_cow() {
+    let subject = Subject::from(Cow::from("hello, world!"));
 
     assert_eq!(subject, Subject::from("hello, world!"));
 }
