@@ -53,6 +53,17 @@ fn it_can_guess_the_comment_character_from_scissors_without_comment() {
 }
 
 #[test]
+fn it_returns_none_on_a_failure_to_find_the_comment_char_from_scissors() {
+    let comment_char = Scissors::guess_comment_character(indoc!(
+        "
+        Some text
+        "
+    ));
+
+    assert_eq!(comment_char, None);
+}
+
+#[test]
 fn it_can_extract_itself_from_commit() {
     let sections = Scissors::parse_sections(indoc!(
         "
