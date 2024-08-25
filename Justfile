@@ -14,6 +14,10 @@ build:
 bench:
   cargo bench
 
+# Check tests
+mutate:
+  cargo mutants
+
 # Lint it
 lint:
   cargo +nightly fmt --all -- --check
