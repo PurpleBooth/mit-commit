@@ -8,7 +8,7 @@ pub struct Comments<'a> {
     comments: Vec<Comment<'a>>,
 }
 
-impl<'a> Comments<'a> {
+impl Comments<'_> {
     /// Iterate over the [`Comment`] in the [`Comments`]
     ///
     /// # Examples
@@ -98,7 +98,7 @@ impl<'a> From<Vec<Comment<'a>>> for Comments<'a> {
     }
 }
 
-impl<'a> From<Comments<'a>> for String {
+impl From<Comments<'_>> for String {
     fn from(comments: Comments<'_>) -> Self {
         comments
             .comments

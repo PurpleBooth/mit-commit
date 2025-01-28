@@ -13,7 +13,7 @@ pub struct Subject<'a> {
     text: Cow<'a, str>,
 }
 
-impl<'a> Subject<'a> {
+impl Subject<'_> {
     /// Count characters in [`Subject`]
     ///
     /// # Examples
@@ -73,7 +73,7 @@ impl<'a> From<&'a str> for Subject<'a> {
     }
 }
 
-impl<'a> From<String> for Subject<'a> {
+impl From<String> for Subject<'_> {
     /// Convert from an owned string
     ///
     /// # Examples
@@ -102,13 +102,13 @@ impl<'a> From<Cow<'a, str>> for Subject<'a> {
     }
 }
 
-impl<'a> From<Subject<'a>> for String {
+impl From<Subject<'_>> for String {
     fn from(subject: Subject<'_>) -> Self {
         subject.text.into_owned()
     }
 }
 
-impl<'a> Display for Subject<'a> {
+impl Display for Subject<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", String::from(self.clone()))
     }

@@ -79,20 +79,20 @@ impl<'a> Trailer<'a> {
     }
 }
 
-impl<'a> PartialEq for Trailer<'a> {
+impl PartialEq for Trailer<'_> {
     fn eq(&self, other: &Self) -> bool {
         self.key == other.key && self.value.trim_end() == other.value.trim_end()
     }
 }
 
-impl<'a> Hash for Trailer<'a> {
+impl Hash for Trailer<'_> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.key.hash(state);
         self.value.trim_end().hash(state);
     }
 }
 
-impl<'a> From<Trailer<'a>> for String {
+impl From<Trailer<'_>> for String {
     fn from(trailer: Trailer<'_>) -> Self {
         format!("{}: {}", trailer.key, trailer.value)
     }

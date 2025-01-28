@@ -9,7 +9,7 @@ pub struct Trailers<'a> {
     iterator_index: usize,
 }
 
-impl<'a> Trailers<'a> {
+impl Trailers<'_> {
     /// Iterate over the [`Trailers`]
     ///
     /// # Examples
@@ -244,7 +244,7 @@ impl<'a> From<Vec<Fragment<'a>>> for Trailers<'a> {
                     Some(Trailer::try_from(body))
                 }
             })
-            .take_while(std::result::Result::is_ok)
+            .take_while(Result::is_ok)
             .flatten()
             .collect::<Vec<Trailer<'_>>>()
             .into_iter()

@@ -10,7 +10,7 @@ pub struct Body<'a> {
     text: Cow<'a, str>,
 }
 
-impl<'a> Body<'a> {
+impl Body<'_> {
     /// Append one [`Body`] onto another
     ///
     /// This is for concatenating multiple [`Bodies`] together
@@ -78,13 +78,13 @@ impl<'a> From<&'a str> for Body<'a> {
     }
 }
 
-impl<'a> From<String> for Body<'a> {
+impl From<String> for Body<'_> {
     fn from(body: String) -> Self {
         Self::from(Cow::from(body))
     }
 }
 
-impl<'a> From<Body<'a>> for String {
+impl From<Body<'_>> for String {
     fn from(body: Body<'_>) -> Self {
         body.text.into()
     }
@@ -109,7 +109,7 @@ impl<'a> From<Body<'a>> for Cow<'a, str> {
     }
 }
 
-impl<'a> Display for Body<'a> {
+impl Display for Body<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", String::from(self.clone()))
     }

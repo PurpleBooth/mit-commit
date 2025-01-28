@@ -30,7 +30,7 @@ pub struct Bodies<'a> {
     bodies: Vec<Body<'a>>,
 }
 
-impl<'a> Bodies<'a> {
+impl Bodies<'_> {
     /// Get the first [`Body`] in this list of [`Bodies`]
     ///
     /// # Examples
@@ -133,7 +133,7 @@ impl<'a> IntoIterator for &'a Bodies<'a> {
     }
 }
 
-impl<'a> Display for Bodies<'a> {
+impl Display for Bodies<'_> {
     /// Render the [`Bodies`] as text
     ///
     /// # Examples
@@ -177,7 +177,7 @@ impl<'a> From<Vec<Body<'a>>> for Bodies<'a> {
     }
 }
 
-impl<'a> From<Bodies<'a>> for String {
+impl From<Bodies<'_>> for String {
     fn from(bodies: Bodies<'_>) -> Self {
         bodies
             .bodies

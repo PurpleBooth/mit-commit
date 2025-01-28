@@ -869,7 +869,7 @@ impl<'a> CommitMessage<'a> {
     }
 }
 
-impl<'a> From<CommitMessage<'a>> for String {
+impl From<CommitMessage<'_>> for String {
     fn from(commit_message: CommitMessage<'_>) -> Self {
         let basic_commit = commit_message
             .get_ast()
@@ -965,7 +965,7 @@ impl<'a> From<Cow<'a, str>> for CommitMessage<'a> {
     }
 }
 
-impl<'a> TryFrom<PathBuf> for CommitMessage<'a> {
+impl TryFrom<PathBuf> for CommitMessage<'_> {
     type Error = Error;
 
     fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
@@ -997,7 +997,7 @@ impl<'a> From<&'a str> for CommitMessage<'a> {
     }
 }
 
-impl<'a> From<String> for CommitMessage<'a> {
+impl From<String> for CommitMessage<'_> {
     fn from(message: String) -> Self {
         Self::from(Cow::from(message))
     }

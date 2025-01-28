@@ -8,7 +8,7 @@ pub struct Comment<'a> {
     comment: Cow<'a, str>,
 }
 
-impl<'a> Comment<'a> {
+impl Comment<'_> {
     /// Append one [`Comment`] onto another
     ///
     /// This is for concatenating multiple [`Comment`] together
@@ -55,7 +55,7 @@ impl<'a> From<Cow<'a, str>> for Comment<'a> {
     }
 }
 
-impl<'a> From<String> for Comment<'a> {
+impl From<String> for Comment<'_> {
     fn from(comment: String) -> Self {
         Self {
             comment: comment.into(),

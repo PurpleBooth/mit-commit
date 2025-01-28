@@ -24,7 +24,7 @@ impl<'a> Scissors<'a> {
                     .next()
                     .filter(|first_letter| Comment::is_legal_comment_char(*first_letter))
             })
-            .last()
+            .next_back()
     }
 
     fn guess_comment_char_from_scissors(message: &str) -> Option<char> {
@@ -42,7 +42,7 @@ impl<'a> Scissors<'a> {
 
                 first_character
             })
-            .last()
+            .next_back()
     }
 
     pub(crate) fn parse_sections(message: &str) -> (Cow<'a, str>, Option<Self>) {
@@ -91,7 +91,7 @@ impl<'a> From<&'a str> for Scissors<'a> {
     }
 }
 
-impl<'a> From<String> for Scissors<'a> {
+impl From<String> for Scissors<'_> {
     fn from(scissors: String) -> Self {
         Self {
             scissors: scissors.into(),
