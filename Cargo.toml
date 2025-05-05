@@ -12,9 +12,9 @@ repository = "https://github.com/PurpleBooth/mit-commit"
 
 [dependencies]
 indoc = "2.0.5"
-thiserror = "2.0.11"
+thiserror = "2.0.12"
 regex = "1.11.1"
-miette = "7.4.0"
+miette = "7.6.0"
 
 [dev-dependencies]
 indoc = "2.0.5"

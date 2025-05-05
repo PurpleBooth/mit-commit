@@ -1,7 +1,7 @@
 use indoc::indoc;
 
 use super::Trailers;
-use crate::{fragment::Fragment, trailer::Trailer, Body};
+use crate::{Body, fragment::Fragment, trailer::Trailer};
 
 #[test]
 fn implements_iterator() {
@@ -70,17 +70,19 @@ fn it_can_give_me_the_length() {
 
 #[test]
 fn it_can_tell_me_if_it_is_empty() {
-    assert!(!Trailers::from(vec![
-        Trailer::new(
-            "Co-authored-by".into(),
-            "Billie Thompson <billie@example.com>".into()
-        ),
-        Trailer::new(
-            "Co-authored-by".into(),
-            "Someone Else <someone@example.com>".into()
-        ),
-    ])
-    .is_empty());
+    assert!(
+        !Trailers::from(vec![
+            Trailer::new(
+                "Co-authored-by".into(),
+                "Billie Thompson <billie@example.com>".into()
+            ),
+            Trailer::new(
+                "Co-authored-by".into(),
+                "Someone Else <someone@example.com>".into()
+            ),
+        ])
+        .is_empty()
+    );
 
     let trailers: Vec<Trailer<'_>> = Vec::new();
     assert!(Trailers::from(trailers).is_empty());

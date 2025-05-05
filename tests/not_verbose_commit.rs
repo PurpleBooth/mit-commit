@@ -1,14 +1,6 @@
 use indoc::indoc;
 use mit_commit::{
-    Bodies,
-    Body,
-    Comment,
-    Comments,
-    CommitMessage,
-    Fragment,
-    Subject,
-    Trailer,
-    Trailers,
+    Bodies, Body, Comment, Comments, CommitMessage, Fragment, Subject, Trailer, Trailers,
 };
 const NOT_VERBOSE_COMMIT: &str = indoc!(
     "
@@ -52,11 +44,17 @@ fn can_get_comment_character_not_verbose_commit() {
 fn can_get_ast_from_not_verbose_commit() {
     let message = CommitMessage::from(NOT_VERBOSE_COMMIT);
     let ast: Vec<Fragment> = vec![
-        Fragment::Body(Body::from("Update bashrc to include kubernetes completions")),
+        Fragment::Body(Body::from(
+            "Update bashrc to include kubernetes completions",
+        )),
         Fragment::Body(Body::default()),
-        Fragment::Body(Body::from("This should make it easier to deploy things for the developers.\nBenchmarked with Hyperfine, no noticable performance decrease.")),
+        Fragment::Body(Body::from(
+            "This should make it easier to deploy things for the developers.\nBenchmarked with Hyperfine, no noticable performance decrease.",
+        )),
         Fragment::Body(Body::default()),
-        Fragment::Comment(Comment::from("# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Datum:            Sat Jun 27 21:40:14 2020 +0200\n#\n# Auf Branch master\n#\n# Initialer Commit\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     .bashrc\n#")),
+        Fragment::Comment(Comment::from(
+            "# Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{e4}nderungen ein. Zeilen,\n# die mit \'#\' beginnen, werden ignoriert, und eine leere Beschreibung\n# bricht den Commit ab.\n#\n# Datum:            Sat Jun 27 21:40:14 2020 +0200\n#\n# Auf Branch master\n#\n# Initialer Commit\n#\n# Zum Commit vorgemerkte \u{e4}nderungen:\n#\tneue Datei:     .bashrc\n#",
+        )),
     ];
 
     assert_eq!(message.get_ast(), ast);

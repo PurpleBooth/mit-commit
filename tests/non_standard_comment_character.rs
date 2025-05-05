@@ -1,14 +1,6 @@
 use indoc::indoc;
 use mit_commit::{
-    Bodies,
-    Body,
-    Comment,
-    Comments,
-    CommitMessage,
-    Fragment,
-    Subject,
-    Trailer,
-    Trailers,
+    Bodies, Body, Comment, Comments, CommitMessage, Fragment, Subject, Trailer, Trailers,
 };
 const NON_STANDARD_COMMENT_CHARACTER: &str = indoc!(
     "
@@ -49,11 +41,15 @@ fn can_get_ast_from_non_standard_comment_char_commit() {
     let ast: Vec<Fragment> = vec![
         Fragment::Body(Body::from("Allow the server to respond to https")),
         Fragment::Body(Body::default()),
-        Fragment::Body(Body::from("This allows the server to respond to HTTPS requests, by correcting the port binding.\nWe should see a nice speed increase from this")),
+        Fragment::Body(Body::from(
+            "This allows the server to respond to HTTPS requests, by correcting the port binding.\nWe should see a nice speed increase from this",
+        )),
         Fragment::Body(Body::default()),
         Fragment::Body(Body::from("fixes:\n#6436\n#6437\n#6438")),
         Fragment::Body(Body::default()),
-        Fragment::Comment(Comment::from("; Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{c4}nderungen ein. Zeilen,\n; die mit \';\' beginnen, werden ignoriert, und eine leere Beschreibung\n; bricht den Commit ab.")),
+        Fragment::Comment(Comment::from(
+            "; Bitte geben Sie eine Commit-Beschreibung f\u{fc}r Ihre \u{c4}nderungen ein. Zeilen,\n; die mit \';\' beginnen, werden ignoriert, und eine leere Beschreibung\n; bricht den Commit ab.",
+        )),
     ];
 
     assert_eq!(message.get_ast(), ast);

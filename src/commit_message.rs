@@ -12,15 +12,10 @@ use regex::Regex;
 use thiserror::Error;
 
 use super::{
-    bodies::Bodies,
-    body::Body,
-    comment::Comment,
-    comments::Comments,
-    fragment::Fragment,
-    subject::Subject,
-    trailers::Trailers,
+    bodies::Bodies, body::Body, comment::Comment, comments::Comments, fragment::Fragment,
+    subject::Subject, trailers::Trailers,
 };
-use crate::{scissors::Scissors, Trailer};
+use crate::{Trailer, scissors::Scissors};
 
 /// A [`CommitMessage`], the primary entry point to the library
 #[derive(Debug, PartialEq, Eq, Clone, Default)]

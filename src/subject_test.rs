@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use super::Subject;
-use crate::{body::Body, fragment::Fragment, Comment};
+use crate::{Comment, body::Body, fragment::Fragment};
 
 #[test]
 fn len() {

@@ -7,7 +7,7 @@ use std::{
 use miette::Diagnostic;
 use thiserror::Error;
 
-use crate::{body::Body, Fragment};
+use crate::{Fragment, body::Body};
 
 /// A [`Trailer`] you might see a in a [`CommitMessage`], for example
 /// 'Co-authored-by: Billie Thompson <billie@example.com>'

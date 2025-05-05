@@ -35,16 +35,25 @@
 //! )
 //! ```
 
-#![warn(
-    rust_2018_idioms,
+#![warn(clippy::nursery)]
+#![deny(
     unused,
-    rust_2021_compatibility,
     nonstandard_style,
     future_incompatible,
     missing_copy_implementations,
     missing_debug_implementations,
-    missing_docs
+    missing_docs,
+    clippy::pedantic,
+    clippy::cargo,
+    clippy::complexity,
+    clippy::correctness,
+    clippy::pedantic,
+    clippy::perf,
+    clippy::style,
+    clippy::suspicious,
+    non_fmt_panics
 )]
+#![allow(clippy::multiple_crate_versions)]
 
 #[cfg(test)]
 extern crate quickcheck;
@@ -99,7 +108,7 @@ mod test_readme {
     macro_rules! external_doc_test {
         ($x:expr) => {
             #[doc = $x]
-            extern "C" {}
+            unsafe extern "C" {}
         };
     }
 

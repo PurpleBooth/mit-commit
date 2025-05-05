@@ -1,14 +1,6 @@
 use indoc::indoc;
 use mit_commit::{
-    Bodies,
-    Body,
-    Comment,
-    Comments,
-    CommitMessage,
-    Fragment,
-    Subject,
-    Trailer,
-    Trailers,
+    Bodies, Body, Comment, Comments, CommitMessage, Fragment, Subject, Trailer, Trailers,
 };
 const COMMIT_MESSAGE_WITH_NO_COMMENTS: &str = indoc!(
     "
@@ -36,11 +28,17 @@ fn can_reliably_parse_from_a_commit_message_without_commits() {
 fn can_get_ast_from_a_commit_message_without_commits() {
     let message = CommitMessage::from(COMMIT_MESSAGE_WITH_NO_COMMENTS);
     let ast: Vec<Fragment> = vec![
-        Fragment::Body(Body::from("Update bashrc to include kubernetes completions")),
+        Fragment::Body(Body::from(
+            "Update bashrc to include kubernetes completions",
+        )),
         Fragment::Body(Body::default()),
-        Fragment::Body(Body::from("This should make it easier to deploy things for the developers.\nBenchmarked with Hyperfine, no noticable performance decrease.")),
+        Fragment::Body(Body::from(
+            "This should make it easier to deploy things for the developers.\nBenchmarked with Hyperfine, no noticable performance decrease.",
+        )),
         Fragment::Body(Body::default()),
-        Fragment::Body(Body::from("Co-authored-by: Billie Thomposon <billie@example.com>\nCo-authored-by: Somebody Else <somebody@example.com>")),
+        Fragment::Body(Body::from(
+            "Co-authored-by: Billie Thomposon <billie@example.com>\nCo-authored-by: Somebody Else <somebody@example.com>",
+        )),
         Fragment::Body(Body::default()),
     ];
 

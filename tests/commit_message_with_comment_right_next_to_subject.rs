@@ -1,14 +1,6 @@
 use indoc::indoc;
 use mit_commit::{
-    Bodies,
-    Body,
-    Comment,
-    Comments,
-    CommitMessage,
-    Fragment,
-    Subject,
-    Trailer,
-    Trailers,
+    Bodies, Body, Comment, Comments, CommitMessage, Fragment, Subject, Trailer, Trailers,
 };
 
 const COMMIT_MESSAGE_WITH_COMMENT_RIGHT_NEXT_TO_SUBJECT: &str = indoc!(

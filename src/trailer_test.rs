@@ -5,7 +5,7 @@ use std::{
 };
 
 use super::Trailer;
-use crate::{body::Body, Fragment};
+use crate::{Fragment, body::Body};
 
 #[test]
 fn it_can_tell_me_its_key() {
