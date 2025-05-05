@@ -2,7 +2,7 @@
 name = "mit-commit"
 version = "3.2.1"
 authors = [ "Billie Thompson <billie+mit-commit@billiecodes.com>" ]
-edition = "2018"
+edition = "2024"
 license = "CC0-1.0"
 description = "For building commit linters. This makes it eas."
 categories = [ "parser-implementations", "parsing", "text-editors" ]
