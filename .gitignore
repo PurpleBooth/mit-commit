@@ -2,3 +2,4 @@
 Cargo.lock
 /.versio-paused
 mutants.out*
+.aider*
