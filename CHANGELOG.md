@@ -2,6 +2,24 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v3.2.2 - 2025-05-10
+#### Bug Fixes
+- upgrade to the latest rust version - (c1327a7) - Billie Thompson
+- bump versions - (50ac581) - Billie Thompson
+#### Continuous Integration
+- enable mutation testing - (2d4584c) - Billie Thompson
+#### Miscellaneous Chores
+- **(deps)** update rust crate tokio to 1.40.0 - (63129fe) - renovate[bot]
+- Remove unused `quickcheck` crate import - (396cc31) - Billie Thompson
+- update renovate config to preserve semver ranges - (0cb8d41) - Billie Thompson
+- Update .gitignore and renovate.json config - (6c4b993) - Billie Thompson
+- Add mutation testing to dev tools - (dd02e1c) - Billie Thompson
+#### Refactoring
+- formatting - (0416568) - Billie Thompson
+- Refactor lifetimes to use implicit '_ where applicable - (f984b66) - Billie Thompson
+
+- - -
+
 ## v3.2.1 - 2024-08-25
 #### Bug Fixes
 - Rewrite scissors guessing algorithm to be cleaner - (3e52e37) - Billie Thompson
