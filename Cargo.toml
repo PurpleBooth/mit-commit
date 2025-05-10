@@ -17,12 +17,12 @@ regex = "1.11.1"
 miette = "7.6.0"
 
 [dev-dependencies]
-indoc = "2.0.5"
-regex = "1.11.1"
-criterion = "0.5.1"
-quickcheck = "1.0.3"
-quickcheck_macros = "1.0.0"
-tempfile = "3.15.0"
+indoc = "=2.0.5"
+regex = "=1.11.1"
+criterion = "=0.5.1"
+quickcheck = "=1.0.3"
+quickcheck_macros = "=1.0.0"
+tempfile = "=3.15.0"
 
 [[bench]]
 name = "commit_message"
