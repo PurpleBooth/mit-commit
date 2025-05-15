@@ -4,11 +4,11 @@ version = "3.2.2"
 authors = [ "Billie Thompson <billie+mit-commit@billiecodes.com>" ]
 edition = "2024"
 license = "CC0-1.0"
-description = "For building commit linters. This makes it eas."
+description = "For building commit linters. This makes it easy."
 categories = [ "parser-implementations", "parsing", "text-editors" ]
 keywords = [ "git", "git-hooks" ]
 readme = "README.md"
-repository = "https://github.com/PurpleBooth/mit-commit"
+repository = "https://codeberg.org/PurpleBooth/mit-commit"
 
 [dependencies]
 indoc = "2.0.5"

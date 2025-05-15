@@ -33,4 +33,4 @@ assert_eq!(
 )
 ```
 
-Read more at [Docs.rs](https://docs.rs/mit-commit/)
+Read more at [Docs.rs](https://docs.rs/mit-commit/) or visit the [Codeberg repository](https://codeberg.org/PurpleBooth/mit-commit)
