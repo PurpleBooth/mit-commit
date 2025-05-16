@@ -21,7 +21,7 @@ indoc = "=2.0.6"
 regex = "=1.11.1"
 criterion = "=0.5.1"
 quickcheck = "=1.0.3"
-quickcheck_macros = "=1.0.0"
+quickcheck_macros = "=1.1.0"
 tempfile = "=3.15.0"
 
 [[bench]]
