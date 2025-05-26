@@ -73,7 +73,7 @@ impl Trailers<'_> {
     /// assert_eq!(trailers.len(), 2)
     /// ```
     #[must_use]
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         self.trailers.len()
     }
 
@@ -102,7 +102,7 @@ impl Trailers<'_> {
     /// assert_eq!(Trailers::from(trailers).is_empty(), true)
     /// ```
     #[must_use]
-    pub fn is_empty(&self) -> bool {
+    pub const fn is_empty(&self) -> bool {
         self.trailers.is_empty()
     }
 }

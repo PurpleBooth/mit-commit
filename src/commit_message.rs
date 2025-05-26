@@ -34,6 +34,15 @@ impl<'a> CommitMessage<'a> {
     /// Get back to a [`CommitMessage`] from an ast, usually after you've been
     /// editing the text.
     ///
+    /// # Arguments
+    ///
+    /// * `fragments` - Vector of Fragment objects representing the abstract syntax tree
+    /// * `scissors` - Optional Scissors section to include in the commit message
+    ///
+    /// # Returns
+    ///
+    /// A new `CommitMessage` instance constructed from the provided fragments and scissors
+    ///
     /// # Examples
     ///
     /// ```
@@ -85,6 +94,14 @@ impl<'a> CommitMessage<'a> {
     }
 
     /// A helper method to let you insert [`Trailer`]
+    ///
+    /// # Arguments
+    ///
+    /// * `trailer` - The trailer to add to the commit message
+    ///
+    /// # Returns
+    ///
+    /// A new `CommitMessage` with the trailer added in the appropriate location
     ///
     /// # Examples
     ///
@@ -161,6 +178,14 @@ impl<'a> CommitMessage<'a> {
     ///
     /// In the case you don't have any full [`Body`] in there, it inserts it at
     /// the top of the commit, in the [`Subject`] line.
+    ///
+    /// # Arguments
+    ///
+    /// * `fragment` - Vector of Fragment objects to insert after the last non-empty body
+    ///
+    /// # Returns
+    ///
+    /// A new `CommitMessage` with the fragments inserted after the last non-empty body
     ///
     /// # Examples
     ///
@@ -283,6 +308,10 @@ impl<'a> CommitMessage<'a> {
     /// It's possible to get this from the ast, but it's a bit of a faff, so
     /// this is a convenience method
     ///
+    /// # Returns
+    ///
+    /// The Subject of the commit message
+    ///
     /// # Examples
     ///
     /// ```
@@ -327,6 +356,10 @@ impl<'a> CommitMessage<'a> {
     /// [`CommitMessage`] to your liking.
     ///
     /// Notice how it doesn't include the [`Scissors`] section.
+    ///
+    /// # Returns
+    ///
+    /// A vector of Fragment objects representing the abstract syntax tree of the commit message
     ///
     /// # Examples
     ///
@@ -413,6 +446,10 @@ impl<'a> CommitMessage<'a> {
     /// after it (as is recommended by the manual), the [`Bodies`] will
     /// start with a new empty [`Body`].
     ///
+    /// # Returns
+    ///
+    /// The Bodies of the commit message, containing all body paragraphs
+    ///
     /// # Examples
     ///
     /// ```
@@ -472,6 +509,10 @@ impl<'a> CommitMessage<'a> {
     ///
     /// If there's [`Comment`] mixed in with the body, it'll return those too,
     /// but not any of the [`Body`] around them.
+    ///
+    /// # Returns
+    ///
+    /// The Comments from the commit message, excluding those in the Scissors section
     ///
     /// # Examples
     ///
@@ -533,6 +574,9 @@ impl<'a> CommitMessage<'a> {
     /// --verbose`, that contains the diffs, and is not preserved when you
     /// save the commit.
     ///
+    /// # Returns
+    ///
+    /// An optional Scissors section if present in the commit message, or None if not present
     ///
     /// # Examples
     ///
@@ -603,13 +647,15 @@ impl<'a> CommitMessage<'a> {
         self.scissors.clone()
     }
 
-    /// Get the [`Scissors`] from the [`CommitMessage`]
+    /// Get the [`Trailers`] from the [`CommitMessage`]
     ///
-    /// We this will get you all the comments in the [`Scissors`] section. The
-    /// [`Scissors`] section is the bit that appears when you run `git commit
-    /// --verbose`, that contains the diffs, and is not preserved when you
-    /// save the commit.
+    /// This will get you all the trailers in the commit message. Trailers are
+    /// special metadata lines at the end of the commit message, like "Signed-off-by:"
+    /// or "Relates-to:".
     ///
+    /// # Returns
+    ///
+    /// The Trailers found in the commit message
     ///
     /// # Examples
     ///
@@ -677,10 +723,18 @@ impl<'a> CommitMessage<'a> {
         self.trailers.clone()
     }
 
-    /// Does the [`CommitMessage`] the saved portions of the commit
+    /// Checks if the [`CommitMessage`] matches a given pattern in the saved portions
     ///
     /// This takes a regex and matches it to the visible portions of the
     /// commits, so it excludes comments, and everything after the scissors.
+    ///
+    /// # Arguments
+    ///
+    /// * `re` - The regex pattern to match against the commit message
+    ///
+    /// # Returns
+    ///
+    /// `true` if the pattern matches any part of the visible commit message, `false` otherwise
     ///
     /// # Examples
     ///
@@ -739,6 +793,14 @@ impl<'a> CommitMessage<'a> {
 
     /// Give you a new [`CommitMessage`] with the provided subject
     ///
+    /// # Arguments
+    ///
+    /// * `subject` - The new Subject to use for the commit message
+    ///
+    /// # Returns
+    ///
+    /// A new `CommitMessage` with the updated subject
+    ///
     /// # Examples
     ///
     /// ```
@@ -779,6 +841,14 @@ impl<'a> CommitMessage<'a> {
     }
 
     /// Give you a new [`CommitMessage`] with the provided body
+    ///
+    /// # Arguments
+    ///
+    /// * `contents` - The new body content to use for the commit message
+    ///
+    /// # Returns
+    ///
+    /// A new `CommitMessage` with the updated body contents
     ///
     /// # Examples
     ///
@@ -835,7 +905,11 @@ impl<'a> CommitMessage<'a> {
         commit.with_subject(existing_subject)
     }
 
-    /// Give you a new [`CommitMessage`] with the provided body
+    /// Get the comment character used in the commit message
+    ///
+    /// # Returns
+    ///
+    /// The character used for comments in the commit message, or None if there are no comments
     ///
     /// # Examples
     ///
@@ -963,6 +1037,37 @@ impl<'a> From<Cow<'a, str>> for CommitMessage<'a> {
 impl TryFrom<PathBuf> for CommitMessage<'_> {
     type Error = Error;
 
+    /// Creates a `CommitMessage` from a file path.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The path to the file containing the commit message
+    ///
+    /// # Returns
+    ///
+    /// A `CommitMessage` parsed from the file contents
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::path::PathBuf;
+    /// use std::convert::TryFrom;
+    /// use std::io::Write;
+    /// use mit_commit::CommitMessage;
+    ///
+    /// // Create a temporary file for the example
+    /// let mut temp_file = tempfile::NamedTempFile::new().unwrap();
+    /// write!(temp_file.as_file(), "Example commit message").unwrap();
+    ///
+    /// // Use the temporary file path
+    /// let path = temp_file.path().to_path_buf();
+    /// let commit_message = CommitMessage::try_from(path).expect("Failed to read commit message");
+    /// assert_eq!(commit_message.get_subject().to_string(), "Example commit message");
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns an Error if the file cannot be read or if the file contents cannot be parsed as UTF-8
     fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
         let mut file = File::open(value)?;
         let mut buffer = String::new();
@@ -976,6 +1081,37 @@ impl TryFrom<PathBuf> for CommitMessage<'_> {
 impl<'a> TryFrom<&'a Path> for CommitMessage<'a> {
     type Error = Error;
 
+    /// Creates a `CommitMessage` from a file path reference.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - The path reference to the file containing the commit message
+    ///
+    /// # Returns
+    ///
+    /// A `CommitMessage` parsed from the file contents
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::path::Path;
+    /// use std::convert::TryFrom;
+    /// use std::io::Write;
+    /// use mit_commit::CommitMessage;
+    ///
+    /// // Create a temporary file for the example
+    /// let mut temp_file = tempfile::NamedTempFile::new().unwrap();
+    /// write!(temp_file.as_file(), "Example commit message").unwrap();
+    ///
+    /// // Use the temporary file path
+    /// let path = temp_file.path();
+    /// let commit_message = CommitMessage::try_from(path).expect("Failed to read commit message");
+    /// assert_eq!(commit_message.get_subject().to_string(), "Example commit message");
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns an Error if the file cannot be read or if the file contents cannot be parsed as UTF-8
     fn try_from(value: &'a Path) -> Result<Self, Self::Error> {
         let mut file = File::open(value)?;
         let mut buffer = String::new();
