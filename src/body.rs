@@ -13,9 +13,15 @@ pub struct Body<'a> {
 impl Body<'_> {
     /// Append one [`Body`] onto another
     ///
-    /// This is for concatenating multiple [`Bodies`] together
+    /// # Arguments
     ///
-    /// # Example
+    /// * `additional` - The body to append to this one
+    ///
+    /// # Returns
+    ///
+    /// A new body with the content of both bodies separated by a newline
+    ///
+    /// # Examples
     ///
     /// ```
     /// use indoc::indoc;
@@ -35,18 +41,19 @@ impl Body<'_> {
         Self::from(format!("{}\n{}", self.text, additional.text))
     }
 
-    /// Is this [`Body`] empty
+    /// Checks if this [`Body`] is empty
     ///
-    /// An empty [`Body`] usually indicate a paragraph break in a
-    /// [`CommitMessage`] so it's handy to be able to see them.
+    /// # Returns
     ///
-    /// # Example
+    /// `true` if the body is empty, `false` otherwise
+    ///
+    /// # Examples
     ///
     /// ```
-    /// use indoc::indoc;
     /// use mit_commit::Body;
     ///
-    /// assert_eq!(Body::from("").is_empty(), true)
+    /// assert_eq!(Body::from("").is_empty(), true);
+    /// assert_eq!(Body::from("not empty").is_empty(), false);
     /// ```
     #[must_use]
     pub fn is_empty(&self) -> bool {
@@ -55,9 +62,17 @@ impl Body<'_> {
 }
 
 impl<'a> From<Cow<'a, str>> for Body<'a> {
-    /// Create from a Cow<_, str>
+    /// Create a Body from a Cow<_, str>
     ///
-    /// # Example
+    /// # Arguments
+    ///
+    /// * `body` - The string content to create the body from
+    ///
+    /// # Returns
+    ///
+    /// A new Body containing the provided string
+    ///
+    /// # Examples
     ///
     /// ```
     /// use std::borrow::Cow;
@@ -72,28 +87,64 @@ impl<'a> From<Cow<'a, str>> for Body<'a> {
         Self { text: body }
     }
 }
+
 impl<'a> From<&'a str> for Body<'a> {
+    /// Create a Body from a string slice
+    ///
+    /// # Arguments
+    ///
+    /// * `body` - The string slice to create the body from
+    ///
+    /// # Returns
+    ///
+    /// A new Body containing the provided string
     fn from(body: &'a str) -> Self {
         Self::from(Cow::Borrowed(body))
     }
 }
 
 impl From<String> for Body<'_> {
+    /// Create a Body from a String
+    ///
+    /// # Arguments
+    ///
+    /// * `body` - The string to create the body from
+    ///
+    /// # Returns
+    ///
+    /// A new Body containing the provided string
     fn from(body: String) -> Self {
         Self::from(Cow::from(body))
     }
 }
 
 impl From<Body<'_>> for String {
+    /// Convert a Body to a String
+    ///
+    /// # Arguments
+    ///
+    /// * `body` - The body to convert
+    ///
+    /// # Returns
+    ///
+    /// A String containing the body's text
     fn from(body: Body<'_>) -> Self {
         body.text.into()
     }
 }
 
 impl<'a> From<Body<'a>> for Cow<'a, str> {
-    /// Convert to a Cow<_, str>
+    /// Convert a Body to a Cow<_, str>
     ///
-    /// # Example
+    /// # Arguments
+    ///
+    /// * `body` - The body to convert
+    ///
+    /// # Returns
+    ///
+    /// A Cow<_, str> containing the body's text
+    ///
+    /// # Examples
     ///
     /// ```
     /// use std::borrow::Cow;
@@ -110,7 +161,85 @@ impl<'a> From<Body<'a>> for Cow<'a, str> {
 }
 
 impl Display for Body<'_> {
+    /// Format the Body for display
+    ///
+    /// # Arguments
+    ///
+    /// * `f` - The formatter to write to
+    ///
+    /// # Returns
+    ///
+    /// A Result indicating whether the operation succeeded
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "{}", String::from(self.clone()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use indoc::indoc;
+
+    use super::*;
+
+    #[test]
+    fn test_string_conversion_from_str() {
+        let body = Body::from("Example Body");
+
+        assert_eq!(
+            String::from(body),
+            String::from("Example Body"),
+            "Body should convert to the correct string when created from a str"
+        );
+    }
+
+    #[test]
+    fn test_string_conversion_from_string() {
+        let body = Body::from(String::from("Example Body"));
+
+        assert_eq!(
+            String::from(body),
+            String::from("Example Body"),
+            "Body should convert to the correct string when created from a String"
+        );
+    }
+
+    #[test]
+    fn test_display_implementation() {
+        let body = Body::from("Example Body");
+
+        assert_eq!(
+            format!("{body}"),
+            "Example Body",
+            "Display implementation should format the body correctly"
+        );
+    }
+
+    #[test]
+    fn test_append_body_fragments() {
+        assert_eq!(
+            Body::from(indoc!(
+                "
+                Example 1
+                Example 2"
+            )),
+            Body::from("Example 1").append(&Body::from("Example 2")),
+            "Appending bodies should create a new body with content separated by newline"
+        );
+    }
+
+    #[test]
+    fn test_is_empty_with_empty_body() {
+        assert!(
+            Body::from("").is_empty(),
+            "Empty body should be identified as empty"
+        );
+    }
+
+    #[test]
+    fn test_is_empty_with_non_empty_body() {
+        assert!(
+            !Body::from("something").is_empty(),
+            "Non-empty body should not be identified as empty"
+        );
     }
 }
