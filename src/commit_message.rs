@@ -267,39 +267,34 @@ impl<'a> CommitMessage<'a> {
             .collect()
     }
 
+    /// Group consecutive fragments of the same type
     fn group_ast(ungrouped_ast: Vec<Fragment<'a>>) -> Vec<Fragment<'a>> {
+        // Using a more functional approach with fold
         ungrouped_ast
             .into_iter()
-            .fold(vec![], |acc: Vec<Fragment<'_>>, new_fragment| {
-                let mut previous_fragments = acc.clone();
-                match (acc.last(), &new_fragment) {
-                    (None, fragment) => {
-                        previous_fragments.push(fragment.clone());
-                        previous_fragments
-                    }
+            .fold(Vec::new(), |mut acc, fragment| {
+                match (acc.last_mut(), fragment) {
+                    // Consecutive Comment fragments
                     (Some(Fragment::Comment(existing)), Fragment::Comment(new)) => {
-                        previous_fragments.truncate(acc.len() - 1);
-                        previous_fragments.push(existing.append(new).into());
-                        previous_fragments
+                        *existing = existing.append(&new);
                     }
+
+                    // Consecutive Body fragments
                     (Some(Fragment::Body(existing)), Fragment::Body(new)) => {
                         if new.is_empty() || existing.is_empty() {
-                            previous_fragments.push(Fragment::from(new.clone()));
+                            acc.push(Fragment::from(new));
                         } else {
-                            previous_fragments.truncate(acc.len() - 1);
-                            previous_fragments.push(existing.append(new).into());
+                            *existing = existing.append(&new);
                         }
-                        previous_fragments
                     }
-                    (Some(Fragment::Body(_)), Fragment::Comment(new)) => {
-                        previous_fragments.push(Fragment::from(new.clone()));
-                        previous_fragments
-                    }
-                    (Some(Fragment::Comment(_)), Fragment::Body(new)) => {
-                        previous_fragments.push(Fragment::from(new.clone()));
-                        previous_fragments
+
+                    // First fragment or different fragment types
+                    (_, fragment) => {
+                        acc.push(fragment);
                     }
                 }
+
+                acc
             })
     }
 
@@ -958,6 +953,46 @@ impl From<CommitMessage<'_>> for String {
     }
 }
 
+/// Parse a commit message using nom parsers
+impl CommitMessage<'_> {
+    fn parse_commit_message(message: &str) -> Self {
+        // Step 1: Split the message into body and scissors sections
+        let (rest, scissors) = Scissors::parse_sections(message);
+
+        // Step 2: Guess the comment character
+        let comment_character = Self::guess_comment_character(message);
+
+        // Step 3: Convert the body to a per-line AST
+        let per_line_ast = Self::convert_to_per_line_ast(comment_character, &rest);
+
+        // Step 4: Extract trailers
+        let trailers = per_line_ast.clone().into();
+
+        // Step 5: Group consecutive fragments of the same type
+        let mut ast: Vec<Fragment<'_>> = Self::group_ast(per_line_ast);
+
+        // Step 6: Handle trailing newline case
+        if (scissors.clone(), message.chars().last()) == (None, Some('\n')) {
+            ast.push(Body::default().into());
+        }
+
+        // Step 7: Create subject, comments, and bodies from the AST
+        let subject = Subject::from(ast.clone());
+        let comments = Comments::from(ast.clone());
+        let bodies = Bodies::from(ast.clone());
+
+        // Step 8: Create and return the CommitMessage
+        Self {
+            scissors,
+            ast,
+            subject,
+            trailers,
+            comments,
+            bodies,
+        }
+    }
+}
+
 impl<'a> From<Cow<'a, str>> for CommitMessage<'a> {
     /// Create a new [`CommitMessage`]
     ///
@@ -1009,28 +1044,8 @@ impl<'a> From<Cow<'a, str>> for CommitMessage<'a> {
     /// non-whitespace characters as options otherwise, and we don't want to
     /// confuse a genuine body with a comment
     fn from(message: Cow<'a, str>) -> Self {
-        let (rest, scissors) = Scissors::parse_sections(&message);
-        let comment_character = Self::guess_comment_character(&message);
-        let per_line_ast = Self::convert_to_per_line_ast(comment_character, &rest);
-        let trailers = per_line_ast.clone().into();
-        let mut ast: Vec<Fragment<'_>> = Self::group_ast(per_line_ast);
-
-        if (scissors.clone(), message.chars().last()) == (None, Some('\n')) {
-            ast.push(Body::default().into());
-        }
-
-        let subject = Subject::from(ast.clone());
-        let comments = Comments::from(ast.clone());
-        let bodies = Bodies::from(ast.clone());
-
-        Self {
-            scissors,
-            ast,
-            subject,
-            trailers,
-            comments,
-            bodies,
-        }
+        // Parse the commit message using nom
+        Self::parse_commit_message(&message)
     }
 }
 

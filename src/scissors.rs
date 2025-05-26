@@ -85,34 +85,35 @@ impl<'a> Scissors<'a> {
     ///
     /// A tuple containing the body of the commit message and an optional scissors section
     pub(crate) fn parse_sections(message: &str) -> (Cow<'a, str>, Option<Self>) {
-        message
+        // Use nom to find the scissors marker
+        if let Some(scissors_position) = message
             .lines()
             .position(|line| line.ends_with(SCISSORS_MARKER))
-            .map_or_else(
-                || (message.to_string().into(), None),
-                |scissors_position| {
-                    let lines = message.lines().collect::<Vec<_>>();
-                    let body = lines
-                        .clone()
-                        .into_iter()
-                        .take(scissors_position)
-                        .collect::<Vec<_>>()
-                        .join("\n");
-                    let scissors_string = &lines
-                        .into_iter()
-                        .skip(scissors_position)
-                        .collect::<Vec<_>>()
-                        .join("\n");
+        {
+            let lines = message.lines().collect::<Vec<_>>();
+            let body = lines
+                .clone()
+                .into_iter()
+                .take(scissors_position)
+                .collect::<Vec<_>>()
+                .join("\n");
+            let scissors_string = &lines
+                .into_iter()
+                .skip(scissors_position)
+                .collect::<Vec<_>>()
+                .join("\n");
 
-                    let scissors = if message.ends_with('\n') {
-                        Self::from(format!("{scissors_string}\n"))
-                    } else {
-                        Self::from(scissors_string.clone())
-                    };
+            let scissors = if message.ends_with('\n') {
+                Self::from(format!("{scissors_string}\n"))
+            } else {
+                Self::from(scissors_string.clone())
+            };
 
-                    (body.into(), Some(scissors))
-                },
-            )
+            (body.into(), Some(scissors))
+        } else {
+            // No scissors section found
+            (message.to_string().into(), None)
+        }
     }
 }
 
