@@ -168,6 +168,7 @@ impl<'a> CommitMessage<'a> {
 
         if needs_empty_body {
             fragments.push(Body::default().into());
+            fragments.push(Body::default().into());
         } else if self.trailers.is_empty() {
             // Only add a separator if we have non-empty bodies but no trailers
             fragments.push(Body::default().into());
@@ -235,22 +236,19 @@ impl<'a> CommitMessage<'a> {
         // Preallocate with capacity to avoid reallocations
         let mut new_ast = Vec::with_capacity(self.ast.len() + fragment.len());
 
-        match position {
-            Some(position) => {
-                // Copy elements up to and including the position
-                new_ast.extend_from_slice(&self.ast[..=position]);
-                // Add the new fragments
-                new_ast.extend(fragment);
-                // Add the remaining elements
-                if position + 1 < self.ast.len() {
-                    new_ast.extend_from_slice(&self.ast[position + 1..]);
-                }
+        if let Some(position) = position {
+            // Copy elements up to and including the position
+            new_ast.extend_from_slice(&self.ast[..=position]);
+            // Add the new fragments
+            new_ast.extend(fragment);
+            // Add the remaining elements
+            if position + 1 < self.ast.len() {
+                new_ast.extend_from_slice(&self.ast[position + 1..]);
             }
-            None => {
-                // If no non-empty body found, add fragments at the beginning
-                new_ast.extend(fragment);
-                new_ast.extend_from_slice(&self.ast);
-            }
+        } else {
+            // If no non-empty body found, add fragments at the beginning
+            new_ast.extend(fragment);
+            new_ast.extend_from_slice(&self.ast);
         }
 
         Self::from_fragments(new_ast, self.get_scissors())
