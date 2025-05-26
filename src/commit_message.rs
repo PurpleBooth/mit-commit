@@ -159,13 +159,17 @@ impl<'a> CommitMessage<'a> {
     /// ```
     #[must_use]
     pub fn add_trailer(&self, trailer: Trailer<'_>) -> Self {
-        let mut fragments = Vec::new();
+        // Preallocate with capacity to avoid reallocations
+        let mut fragments = Vec::with_capacity(2);
 
-        if self.bodies.iter().all(Body::is_empty) && self.trailers.is_empty() {
+        // Only add an empty body if we have no bodies or all bodies are empty,
+        // and we have no trailers
+        let needs_empty_body = self.bodies.iter().all(Body::is_empty) && self.trailers.is_empty();
+
+        if needs_empty_body {
             fragments.push(Body::default().into());
-        }
-
-        if self.trailers.is_empty() {
+        } else if self.trailers.is_empty() {
+            // Only add a separator if we have non-empty bodies but no trailers
             fragments.push(Body::default().into());
         }
 
@@ -228,26 +232,28 @@ impl<'a> CommitMessage<'a> {
             Fragment::Comment(_) => false,
         });
 
-        let (before, after): (Vec<_>, Vec<_>) = position.map_or_else(
-            || (vec![], self.ast.clone().into_iter().enumerate().collect()),
-            |position| {
-                self.ast
-                    .clone()
-                    .into_iter()
-                    .enumerate()
-                    .partition(|(index, _)| index <= &position)
-            },
-        );
+        // Preallocate with capacity to avoid reallocations
+        let mut new_ast = Vec::with_capacity(self.ast.len() + fragment.len());
 
-        Self::from_fragments(
-            [
-                before.into_iter().map(|(_, x)| x).collect(),
-                fragment,
-                after.into_iter().map(|(_, x)| x).collect(),
-            ]
-            .concat(),
-            self.get_scissors(),
-        )
+        match position {
+            Some(position) => {
+                // Copy elements up to and including the position
+                new_ast.extend_from_slice(&self.ast[..=position]);
+                // Add the new fragments
+                new_ast.extend(fragment);
+                // Add the remaining elements
+                if position + 1 < self.ast.len() {
+                    new_ast.extend_from_slice(&self.ast[position + 1..]);
+                }
+            }
+            None => {
+                // If no non-empty body found, add fragments at the beginning
+                new_ast.extend(fragment);
+                new_ast.extend_from_slice(&self.ast);
+            }
+        }
+
+        Self::from_fragments(new_ast, self.get_scissors())
     }
 
     fn convert_to_per_line_ast(comment_character: Option<char>, rest: &str) -> Vec<Fragment<'a>> {
@@ -965,18 +971,19 @@ impl CommitMessage<'_> {
         // Step 3: Convert the body to a per-line AST
         let per_line_ast = Self::convert_to_per_line_ast(comment_character, &rest);
 
-        // Step 4: Extract trailers
-        let trailers = per_line_ast.clone().into();
+        // Step 4: Extract trailers before grouping to avoid cloning the entire AST
+        let trailers = Trailers::from(per_line_ast.clone());
 
         // Step 5: Group consecutive fragments of the same type
         let mut ast: Vec<Fragment<'_>> = Self::group_ast(per_line_ast);
 
         // Step 6: Handle trailing newline case
-        if (scissors.clone(), message.chars().last()) == (None, Some('\n')) {
+        if message.ends_with('\n') && scissors.is_none() {
             ast.push(Body::default().into());
         }
 
         // Step 7: Create subject, comments, and bodies from the AST
+        // We need to clone here because the From implementations require owned vectors
         let subject = Subject::from(ast.clone());
         let comments = Comments::from(ast.clone());
         let bodies = Bodies::from(ast.clone());
