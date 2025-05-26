@@ -957,7 +957,7 @@ impl From<CommitMessage<'_>> for String {
     }
 }
 
-/// Parse a commit message using nom parsers
+/// Parse a commit message using parsers
 impl CommitMessage<'_> {
     fn parse_commit_message(message: &str) -> Self {
         // Step 1: Split the message into body and scissors sections
@@ -1049,7 +1049,6 @@ impl<'a> From<Cow<'a, str>> for CommitMessage<'a> {
     /// non-whitespace characters as options otherwise, and we don't want to
     /// confuse a genuine body with a comment
     fn from(message: Cow<'a, str>) -> Self {
-        // Parse the commit message using nom
         Self::parse_commit_message(&message)
     }
 }

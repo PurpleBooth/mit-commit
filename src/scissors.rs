@@ -85,7 +85,6 @@ impl<'a> Scissors<'a> {
     ///
     /// A tuple containing the body of the commit message and an optional scissors section
     pub(crate) fn parse_sections(message: &str) -> (Cow<'a, str>, Option<Self>) {
-        // Use nom to find the scissors marker
         if let Some(scissors_position) = message
             .lines()
             .position(|line| line.ends_with(SCISSORS_MARKER))
