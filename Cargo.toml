@@ -1,6 +1,6 @@
 [package]
 name = "mit-commit"
-version = "3.2.2"
+version = "3.2.3"
 authors = [ "Billie Thompson <billie+mit-commit@billiecodes.com>" ]
 edition = "2024"
 license = "CC0-1.0"

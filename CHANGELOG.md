@@ -2,6 +2,30 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v3.2.3 - 2025-05-26
+#### Bug Fixes
+- **(deps)** update rust crate nom to v8 - (d0973f3) - Solace System Renovate Fox
+- add extra empty body fragment and refactor position matching - (2ad9d5e) - Billie Thompson
+#### Continuous Integration
+- migrate workflow from GitHub to Forgejo - (d056926) - Billie Thompson
+#### Documentation
+- improve documentation and move tests to inline modules - (67637f3) - Billie Thompson
+#### Miscellaneous Chores
+- **(deps)** update rust crate criterion to v0.6.0 - (461bc2c) - Solace System Renovate Fox
+- **(deps)** update rust crate tempfile to v3.20.0 - (734e460) - Solace System Renovate Fox
+- **(deps)** update rust crate quickcheck_macros to v1.1.0 - (45b4172) - Solace System Renovate Fox
+- **(deps)** update rust crate indoc to v2.0.6 - (c4acf73) - Solace System Renovate Fox
+- **(deps)** pin dependencies - (786570e) - Solace System Renovate Fox
+- update dependencies and improve documentation with const methods - (9aed17b) - Billie Thompson
+- Update repository links to Codeberg and bump version - (03b18f4) - Billie Thompson (aider)
+#### Performance Improvements
+- optimize memory allocations in commit message parsing - (87deaf0) - Billie Thompson
+#### Refactoring
+- remove nom dependency and update related comments - (7f9de3f) - Billie Thompson
+- simplify commit message parsing with nom-based approach - (6ab8bf2) - Billie Thompson
+
+- - -
+
 ## v3.2.2 - 2025-05-10
 #### Bug Fixes
 - upgrade to the latest rust version - (c1327a7) - Billie Thompson
