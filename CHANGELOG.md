@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v3.3.0 - 2025-05-27
+#### Features
+- add `From<&CommitMessage<'_>>` trait implementation with tests - (15fccbd) - Billie Thompson
+#### Refactoring
+- optimize CommitMessage to String conversion without cloning - (f710b27) - Billie Thompson
+- optimize CommitMessage to String conversion without cloning - (54499fc) - Billie Thompson
+
+- - -
+
 ## v3.2.3 - 2025-05-26
 #### Bug Fixes
 - **(deps)** update rust crate nom to v8 - (d0973f3) - Solace System Renovate Fox
