@@ -958,6 +958,26 @@ impl From<CommitMessage<'_>> for String {
     }
 }
 
+impl From<&CommitMessage<'_>> for String {
+    fn from(commit_message: &CommitMessage<'_>) -> Self {
+        let basic_commit = commit_message
+            .get_ast()
+            .iter()
+            .map(|item| match item {
+                Fragment::Body(contents) => Self::from(contents.clone()),
+                Fragment::Comment(contents) => Self::from(contents.clone()),
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        if let Some(scissors) = commit_message.get_scissors() {
+            format!("{basic_commit}\n{}", Self::from(scissors))
+        } else {
+            basic_commit
+        }
+    }
+}
+
 /// Parse a commit message using parsers
 impl CommitMessage<'_> {
     fn parse_commit_message(message: &str) -> Self {
@@ -1743,6 +1763,88 @@ mod tests {
             commit_character.get_subject().to_string(),
             "Some Subject",
             "Reading from Path should correctly parse the file contents into a CommitMessage"
+        );
+    }
+
+    #[test]
+    fn test_from_reference_produces_same_output_as_from_owned() {
+        let commit = CommitMessage::from(indoc!(
+            "
+            Example Commit Message
+
+            This is an example commit message for linting
+
+            Relates-to: #153
+
+            # Bitte geben Sie eine Commit-Beschreibung f\u{00FC}r Ihre \u{00E4}nderungen ein. Zeilen,
+            # die mit '#' beginnen, werden ignoriert, und eine leere Beschreibung
+            # bricht den Commit ab.
+            #
+            # Auf Branch main
+            # Ihr Branch ist auf demselben Stand wie 'origin/main'.
+            #
+            # Zum Commit vorgemerkte \u{00E4}nderungen:
+            #	neue Datei:     file
+            #
+            "
+        ));
+
+        let from_ref = String::from(&commit);
+        let from_owned = String::from(commit.clone());
+
+        assert_eq!(
+            from_ref, from_owned,
+            "String::from(&commit) should produce the same result as String::from(commit)"
+        );
+    }
+
+    #[test]
+    fn test_from_reference_preserves_original() {
+        let commit = CommitMessage::from(indoc!(
+            "
+            Example Commit Message
+
+            This is an example commit message for linting
+            "
+        ));
+
+        // Create a string from a reference to the commit
+        let _string = String::from(&commit);
+
+        // Verify we can still use the commit after creating a string from it
+        assert_eq!(
+            commit.get_subject(),
+            Subject::from("Example Commit Message"),
+            "Original CommitMessage should still be usable after String::from(&commit)"
+        );
+    }
+
+    #[test]
+    fn test_from_reference_with_scissors() {
+        let commit = CommitMessage::from(indoc!(
+            "
+            Example Commit Message
+
+            This is an example commit message
+
+            # ------------------------ >8 ------------------------
+            # Do not modify or remove the line above.
+            # Everything below it will be ignored.
+            diff --git a/file b/file
+            new file mode 100644
+            index 0000000..e69de29
+            "
+        ));
+
+        let from_ref = String::from(&commit);
+        
+        assert!(
+            from_ref.contains("# ------------------------ >8 ------------------------"),
+            "String created from reference should include scissors section"
+        );
+        assert!(
+            from_ref.contains("diff --git"),
+            "String created from reference should include content after scissors"
         );
     }
 }
