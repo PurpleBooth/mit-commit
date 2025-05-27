@@ -937,7 +937,6 @@ impl<'a> CommitMessage<'a> {
     }
 }
 
-// Is there a way I can do this without taking ownership of the commit message, I want to be able to create a string of the commit message without having to clone it. I want to keep the same public interface, is this possible? AI?
 impl From<CommitMessage<'_>> for String {
     fn from(commit_message: CommitMessage<'_>) -> Self {
         let basic_commit = commit_message
@@ -1837,7 +1836,7 @@ mod tests {
         ));
 
         let from_ref = String::from(&commit);
-        
+
         assert!(
             from_ref.contains("# ------------------------ >8 ------------------------"),
             "String created from reference should include scissors section"
