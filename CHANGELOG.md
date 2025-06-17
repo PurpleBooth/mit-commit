@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v3.3.1 - 2025-06-17
+#### Bug Fixes
+- len isn't available as a const fn - (5d061cd) - Billie Thompson
+
+- - -
+
 ## v3.3.0 - 2025-05-27
 #### Features
 - add `From<&CommitMessage<'_>>` trait implementation with tests - (15fccbd) - Billie Thompson
