@@ -73,7 +73,7 @@ impl Trailers<'_> {
     /// assert_eq!(trailers.len(), 2)
     /// ```
     #[must_use]
-    pub const fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.trailers.len()
     }
 
