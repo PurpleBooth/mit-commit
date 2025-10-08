@@ -138,9 +138,8 @@ jobs:
         file: task/concourse/tasks/trufflehog-git/task.yaml
         input_mapping:
           src: repo-main
-      - task: grype
-        file: task/concourse/tasks/grype-filesystem/task.yaml
-        image: ci-runtime-env
+      - task: trivy
+        file: task/concourse/tasks/trivy-filesystem/task.yaml
         input_mapping:
           src: repo-main
         vars:
@@ -462,13 +461,11 @@ jobs:
         input_mapping:
           src: pr
       - task: trufflehog-git
-        image: ci-runtime-env
         file: task/concourse/tasks/trufflehog-git/task.yaml
         input_mapping:
           src: pr
-      - task: grype
-        file: task/concourse/tasks/grype-filesystem/task.yaml
-        image: ci-runtime-env
+      - task: trivy
+        file: task/concourse/tasks/trivy-filesystem/task.yaml
         input_mapping:
           src: pr
         vars:
