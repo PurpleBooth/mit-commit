@@ -136,7 +136,6 @@ jobs:
           src: repo-main
       - task: trufflehog
         file: task/concourse/tasks/trufflehog-git/task.yaml
-        image: ci-runtime-env
         input_mapping:
           src: repo-main
       - task: grype
