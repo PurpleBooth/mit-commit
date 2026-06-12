@@ -261,15 +261,34 @@ mod tests {
 
     #[test]
     fn it_preserves_value_containing_colon_space() {
-        let trailer =
-            Trailer::try_from(Body::from("See: ticket: #123 for details")).expect(
-                "Should parse a trailer whose value contains ': '",
-            );
+        let trailer = Trailer::try_from(Body::from(
+            "See: fix crash in http://example.com:8080 handler",
+        ))
+        .expect("Should parse as a trailer");
 
         assert_eq!(
             String::from(trailer),
-            String::from("See: ticket: #123 for details"),
-            "Trailer value should not be truncated when it contains ': '"
+            String::from("See: fix crash in http://example.com:8080 handler"),
+            "Trailer value containing ': ' should be preserved in full"
+        );
+    }
+
+    #[test]
+    fn it_preserves_value_with_multiple_colon_spaces() {
+        let trailer = Trailer::try_from(Body::from(
+            "Co-authored-by: Someone <someone@example.com>: extra",
+        ))
+        .expect("Should parse as a trailer");
+
+        assert_eq!(
+            trailer.get_key(),
+            "Co-authored-by",
+            "Key should only be the part before the first ': '"
+        );
+        assert_eq!(
+            trailer.get_value(),
+            "Someone <someone@example.com>: extra",
+            "Value should include everything after the first ': ', including subsequent ': '"
         );
     }
 }
