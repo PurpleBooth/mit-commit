@@ -91,23 +91,14 @@ impl<'a> Scissors<'a> {
             .map_or_else(
                 || (message.to_string().into(), None),
                 |scissors_position| {
-                    let lines = message.lines().collect::<Vec<_>>();
-                    let body = lines
-                        .clone()
-                        .into_iter()
-                        .take(scissors_position)
-                        .collect::<Vec<_>>()
-                        .join("\n");
-                    let scissors_string = &lines
-                        .into_iter()
-                        .skip(scissors_position)
-                        .collect::<Vec<_>>()
-                        .join("\n");
+                    let lines: Vec<&str> = message.lines().collect();
+                    let body = lines[..scissors_position].join("\n");
+                    let scissors_string = lines[scissors_position..].join("\n");
 
                     let scissors = if message.ends_with('\n') {
                         Self::from(format!("{scissors_string}\n"))
                     } else {
-                        Self::from(scissors_string.clone())
+                        Self::from(scissors_string)
                     };
 
                     (body.into(), Some(scissors))

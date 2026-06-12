@@ -774,7 +774,6 @@ impl<'a> CommitMessage<'a> {
     #[must_use]
     pub fn matches_pattern(&self, re: &Regex) -> bool {
         let text = self
-            .clone()
             .get_ast()
             .into_iter()
             .filter_map(|fragment| match fragment {
@@ -941,43 +940,33 @@ impl<'a> CommitMessage<'a> {
     }
 }
 
+fn commit_message_to_string(commit_message: &CommitMessage<'_>) -> String {
+    let basic_commit = commit_message
+        .get_ast()
+        .iter()
+        .map(|item| match item {
+            Fragment::Body(contents) => String::from(contents.clone()),
+            Fragment::Comment(contents) => String::from(contents.clone()),
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    if let Some(scissors) = commit_message.get_scissors() {
+        format!("{basic_commit}\n{}", String::from(scissors))
+    } else {
+        basic_commit
+    }
+}
+
 impl From<CommitMessage<'_>> for String {
     fn from(commit_message: CommitMessage<'_>) -> Self {
-        let basic_commit = commit_message
-            .get_ast()
-            .iter()
-            .map(|item| match item {
-                Fragment::Body(contents) => Self::from(contents.clone()),
-                Fragment::Comment(contents) => Self::from(contents.clone()),
-            })
-            .collect::<Vec<_>>()
-            .join("\n");
-
-        if let Some(scissors) = commit_message.get_scissors() {
-            format!("{basic_commit}\n{}", Self::from(scissors))
-        } else {
-            basic_commit
-        }
+        commit_message_to_string(&commit_message)
     }
 }
 
 impl From<&CommitMessage<'_>> for String {
     fn from(commit_message: &CommitMessage<'_>) -> Self {
-        let basic_commit = commit_message
-            .get_ast()
-            .iter()
-            .map(|item| match item {
-                Fragment::Body(contents) => Self::from(contents.clone()),
-                Fragment::Comment(contents) => Self::from(contents.clone()),
-            })
-            .collect::<Vec<_>>()
-            .join("\n");
-
-        if let Some(scissors) = commit_message.get_scissors() {
-            format!("{basic_commit}\n{}", Self::from(scissors))
-        } else {
-            basic_commit
-        }
+        commit_message_to_string(commit_message)
     }
 }
 

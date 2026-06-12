@@ -109,16 +109,16 @@ impl<'a> TryFrom<Body<'a>> for Trailer<'a> {
     type Error = Error;
 
     fn try_from(body: Body<'a>) -> Result<Self, Self::Error> {
-        let content: String = body.clone().into();
+        let content: String = body.into();
         let mut value_and_key = content.splitn(2, ": ").map(ToString::to_string);
 
         let key: String = value_and_key
             .next()
-            .ok_or_else(|| Error::new_not_a_trailer(&body))?;
+            .ok_or_else(|| Error::new_not_a_trailer(&content))?;
 
         let value: String = value_and_key
             .next()
-            .ok_or_else(|| Error::new_not_a_trailer(&body))?;
+            .ok_or_else(|| Error::new_not_a_trailer(&content))?;
 
         Ok(Trailer::new(key.into(), value.into()))
     }
@@ -137,9 +137,8 @@ pub enum Error {
 }
 
 impl Error {
-    fn new_not_a_trailer(body: &Body<'_>) -> Self {
-        let text: String = body.clone().into();
-        Self::NotATrailer(text.clone(), (0, text.len()))
+    fn new_not_a_trailer(text: &str) -> Self {
+        Self::NotATrailer(text.to_string(), (0, text.len()))
     }
 }
 

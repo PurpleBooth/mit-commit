@@ -110,7 +110,7 @@ impl From<Subject<'_>> for String {
 
 impl Display for Subject<'_> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", String::from(self.clone()))
+        write!(f, "{}", self.text)
     }
 }
 

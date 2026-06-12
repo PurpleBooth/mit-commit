@@ -171,7 +171,7 @@ impl Display for Body<'_> {
     ///
     /// A Result indicating whether the operation succeeded
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", String::from(self.clone()))
+        write!(f, "{}", self.text)
     }
 }
 
