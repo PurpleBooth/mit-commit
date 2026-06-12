@@ -26,7 +26,7 @@ impl Subject<'_> {
     /// ```
     #[must_use]
     pub fn len(&self) -> usize {
-        self.text.len()
+        self.text.chars().count()
     }
 
     /// Is the [`Self`] empty
