@@ -829,13 +829,17 @@ impl<'a> CommitMessage<'a> {
         }
         ast.insert(0, Body::from(subject.to_string()).into());
 
+        let comments = Comments::from(ast.clone());
+        let bodies = Bodies::from(ast.clone());
+        let trailers = Trailers::from(ast.clone());
+
         Self {
             scissors: self.scissors,
             ast,
             subject,
-            trailers: self.trailers,
-            comments: self.comments,
-            bodies: self.bodies,
+            trailers,
+            comments,
+            bodies,
         }
     }
 
@@ -1692,6 +1696,47 @@ mod tests {
             commit.get_subject(),
             Subject::from("Subject"),
             "Setting subject on default commit should update the subject correctly"
+        );
+    }
+
+    #[test]
+    fn test_with_subject_recomputes_derived_fields_from_new_ast() {
+        // A message where the first fragment is a comment, not a body
+        let commit = CommitMessage::from("# Comment\nOriginal Subject");
+
+        // The original string contains the comment
+        let original_string: String = commit.clone().into();
+        assert!(original_string.contains("# Comment"));
+
+        let updated = commit.with_subject("New Subject".into());
+
+        // The new subject should be correct
+        assert_eq!(updated.get_subject(), Subject::from("New Subject"));
+
+        // The string representation should not contain the old comment
+        let as_string: String = updated.clone().into();
+        assert!(
+            !as_string.contains("# Comment"),
+            "Old comment should not appear in string representation: {as_string}"
+        );
+
+        // BUG: get_comments() returns stale data from the old commit message
+        // because with_subject copies self.comments without recomputing from new AST
+        assert!(
+            updated.get_comments().iter().next().is_none(),
+            "Comments should be recomputed from new AST, but got stale data: {:?}",
+            updated.get_comments().iter().collect::<Vec<_>>()
+        );
+
+        // BUG: get_bodies() returns stale data
+        // After replacing the comment with a subject body, the old subject body
+        // should now appear in bodies
+        assert!(
+            updated
+                .get_body()
+                .into_iter()
+                .any(|b| b.to_string() == "Original Subject"),
+            "Bodies should be recomputed from new AST, but got stale data"
         );
     }
 
