@@ -156,6 +156,25 @@ mod tests {
     }
 
     #[test]
+    fn test_subject_length_counts_unicode_characters_not_bytes() {
+        assert_eq!(
+            Subject::from("café").len(),
+            4,
+            "Subject length should count Unicode characters, not bytes"
+        );
+        assert_eq!(
+            Subject::from("über").len(),
+            4,
+            "Subject length should count Unicode characters, not bytes"
+        );
+        assert_eq!(
+            Subject::from("日本語").len(),
+            3,
+            "Subject length should count Unicode characters, not bytes"
+        );
+    }
+
+    #[test]
     fn test_chars_iterator_returns_correct_unicode_characters() {
         let subject = Subject::from("y\u{306}");
 
