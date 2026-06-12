@@ -110,7 +110,7 @@ impl<'a> TryFrom<Body<'a>> for Trailer<'a> {
 
     fn try_from(body: Body<'a>) -> Result<Self, Self::Error> {
         let content: String = body.clone().into();
-        let mut value_and_key = content.split(": ").map(ToString::to_string);
+        let mut value_and_key = content.splitn(2, ": ").map(ToString::to_string);
 
         let key: String = value_and_key
             .next()
@@ -256,7 +256,20 @@ mod tests {
     fn can_generate_from_body() {
         let trailer = Trailer::new("Relates-to".into(), "#128".into());
         let body: Fragment<'_> = Fragment::from(trailer);
-
         assert_eq!(body, Fragment::Body(Body::from("Relates-to: #128")));
+    }
+
+    #[test]
+    fn it_preserves_value_containing_colon_space() {
+        let trailer =
+            Trailer::try_from(Body::from("See: ticket: #123 for details")).expect(
+                "Should parse a trailer whose value contains ': '",
+            );
+
+        assert_eq!(
+            String::from(trailer),
+            String::from("See: ticket: #123 for details"),
+            "Trailer value should not be truncated when it contains ': '"
+        );
     }
 }
