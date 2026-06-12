@@ -901,10 +901,16 @@ impl<'a> CommitMessage<'a> {
     #[must_use]
     pub fn with_body_contents(self, contents: &'a str) -> Self {
         let existing_subject: Subject<'a> = self.get_subject();
+        let scissors = self.scissors.map(|s| {
+            let string: String = s.into();
+            Scissors::from(string)
+        });
         let body = format!("Unused\n\n{contents}");
         let commit = Self::from(body);
 
-        commit.with_subject(existing_subject)
+        let mut result = commit.with_subject(existing_subject);
+        result.scissors = scissors;
+        result
     }
 
     /// Get the comment character used in the commit message
@@ -1849,6 +1855,40 @@ mod tests {
             commit.get_subject(),
             Subject::from("Example Commit Message"),
             "Original CommitMessage should still be usable after String::from(&commit)"
+        );
+    }
+
+    #[test]
+    fn test_with_body_contents_preserves_scissors() {
+        let commit = CommitMessage::from(indoc!(
+            "
+            Example Commit Message
+
+            This is an example commit message
+
+            # ------------------------ >8 ------------------------
+            # Do not modify or remove the line above.
+            # Everything below it will be ignored.
+            diff --git a/file b/file
+            new file mode 100644
+            index 0000000..e69de29
+            "
+        ));
+
+        let updated = commit.with_body_contents("New body content");
+        let result: String = updated.into();
+
+        assert!(
+            result.contains("# ------------------------ >8 ------------------------"),
+            "with_body_contents should preserve scissors section, got: {result}"
+        );
+        assert!(
+            result.contains("New body content"),
+            "with_body_contents should contain the new body, got: {result}"
+        );
+        assert!(
+            result.contains("Example Commit Message"),
+            "with_body_contents should preserve the subject, got: {result}"
         );
     }
 
