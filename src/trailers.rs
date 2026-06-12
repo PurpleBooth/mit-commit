@@ -6,7 +6,6 @@ use crate::{fragment::Fragment, trailer::Trailer};
 #[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct Trailers<'a> {
     trailers: Vec<Trailer<'a>>,
-    iterator_index: usize,
 }
 
 impl Trailers<'_> {
@@ -207,10 +206,7 @@ impl<'a> IntoIterator for &'a Trailers<'a> {
 
 impl<'a> From<Vec<Trailer<'a>>> for Trailers<'a> {
     fn from(trailers: Vec<Trailer<'a>>) -> Self {
-        Self {
-            trailers,
-            iterator_index: 0,
-        }
+        Self { trailers }
     }
 }
 

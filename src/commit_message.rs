@@ -502,7 +502,7 @@ impl<'a> CommitMessage<'a> {
 
     /// Get the [`Comments`] from the [`CommitMessage`]
     ///
-    /// We this will get you all the comments before the `Scissors` section. The
+    /// This will get you all the comments before the `Scissors` section. The
     /// [`Scissors`] section is the bit that appears when you run `git commit
     /// --verbose`, that contains the diffs.
     ///
@@ -568,7 +568,7 @@ impl<'a> CommitMessage<'a> {
 
     /// Get the [`Scissors`] from the [`CommitMessage`]
     ///
-    /// We this will get you all the comments in the [`Scissors`] section. The
+    /// This will get you all the comments in the [`Scissors`] section. The
     /// [`Scissors`] section is the bit that appears when you run `git commit
     /// --verbose`, that contains the diffs, and is not preserved when you
     /// save the commit.
@@ -822,7 +822,7 @@ impl<'a> CommitMessage<'a> {
     /// ```
     #[must_use]
     pub fn with_subject(self, subject: Subject<'a>) -> Self {
-        let mut ast: Vec<Fragment<'a>> = self.ast.clone();
+        let mut ast = self.ast;
 
         if !ast.is_empty() {
             ast.remove(0);
@@ -1720,17 +1720,17 @@ mod tests {
             "Old comment should not appear in string representation: {as_string}"
         );
 
-        // BUG: get_comments() returns stale data from the old commit message
-        // because with_subject copies self.comments without recomputing from new AST
+        // Verify that get_comments() returns fresh data recomputed from the new AST,
+        // not stale data carried over from the old commit message
         assert!(
             updated.get_comments().iter().next().is_none(),
             "Comments should be recomputed from new AST, but got stale data: {:?}",
             updated.get_comments().iter().collect::<Vec<_>>()
         );
 
-        // BUG: get_bodies() returns stale data
+        // Verify that get_bodies() returns fresh data recomputed from the new AST.
         // After replacing the comment with a subject body, the old subject body
-        // should now appear in bodies
+        // should now appear in bodies.
         assert!(
             updated
                 .get_body()
