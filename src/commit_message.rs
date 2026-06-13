@@ -830,7 +830,12 @@ impl<'a> CommitMessage<'a> {
 
         let comments = Comments::from(ast.clone());
         let bodies = Bodies::from(ast.clone());
-        let trailers = Trailers::from(ast.clone());
+        // Changing the subject (first Body fragment) does not affect which of
+        // the remaining bodies are trailers, so we keep the correctly-extracted
+        // trailers rather than re-extracting from the grouped AST, which would
+        // merge consecutive trailer lines into a single multi-line Body and
+        // produce a single bogus trailer.
+        let trailers = self.trailers;
 
         Self {
             scissors: self.scissors,
@@ -1690,6 +1695,42 @@ mod tests {
             .into();
         // Property: The subject should be exactly the input string after setting it
         actual == input
+    }
+
+    #[test]
+    fn test_with_subject_preserves_multiple_trailers() {
+        // When multiple consecutive trailers exist, the grouped AST merges them
+        // into a single Body (e.g. "Relates-to: #1\nRelates-to: #2"). Calling
+        // with_subject must NOT collapse those into a single trailer.
+        let commit = CommitMessage::from(indoc!(
+            "
+            feat: add login
+
+            Body text
+
+            Relates-to: #1
+            Relates-to: #2
+            "
+        ));
+
+        assert_eq!(
+            commit.get_trailers().len(),
+            2,
+            "Initial commit should have two trailers"
+        );
+
+        let updated = commit.with_subject("fix: add signup".into());
+        let trailers: Vec<_> = updated.get_trailers().into_iter().collect();
+
+        assert_eq!(
+            trailers.len(),
+            2,
+            "with_subject should preserve all trailers, got {}: {:?}",
+            trailers.len(),
+            trailers
+        );
+        assert_eq!(trailers[0], Trailer::new("Relates-to".into(), "#1".into()),);
+        assert_eq!(trailers[1], Trailer::new("Relates-to".into(), "#2".into()),);
     }
 
     #[test]
