@@ -901,15 +901,23 @@ impl<'a> CommitMessage<'a> {
     #[must_use]
     pub fn with_body_contents(self, contents: &'a str) -> Self {
         let existing_subject: Subject<'a> = self.get_subject();
-        let scissors = self.scissors.map(|s| {
+        let outer_scissors = self.scissors.map(|s| {
             let string: String = s.into();
             Scissors::from(string)
         });
         let body = format!("Unused\n\n{contents}");
-        let commit = Self::from(body);
+        let inner_commit = Self::from(body);
 
-        let mut result = commit.with_subject(existing_subject);
-        result.scissors = scissors;
+        let inner_scissors = inner_commit.scissors.clone().map(|s| {
+            let string: String = s.into();
+            Scissors::from(string)
+        });
+
+        let mut result = inner_commit.with_subject(existing_subject);
+        // Preserve the outer scissors if present, otherwise keep any inner
+        // scissors so content containing the scissors marker is not silently
+        // dropped.
+        result.scissors = outer_scissors.or(inner_scissors);
         result
     }
 
@@ -1761,6 +1769,18 @@ mod tests {
         let actual: String = commit.with_body_contents(&input).into();
         // Property: The body should be replaced with the input string while preserving the multi-line subject
         TestResult::from_bool(actual == expected)
+    }
+
+    #[test]
+    fn test_with_body_contents_preserves_content_containing_scissors_marker() {
+        let input = "some line\n# ------------------------ >8 ------------------------\nmore";
+        let commit: CommitMessage<'_> = "Some Subject\n\nSome Body".into();
+        let expected: String = format!("Some Subject\n\n{input}");
+        let actual: String = commit.with_body_contents(input).into();
+        assert_eq!(
+            actual, expected,
+            "with_body_contents should preserve all content including scissors markers, got: {actual}"
+        );
     }
 
     #[test]
