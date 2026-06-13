@@ -568,7 +568,7 @@ impl<'a> CommitMessage<'a> {
 
     /// Get the [`Scissors`] from the [`CommitMessage`]
     ///
-    /// This will get you all the comments in the [`Scissors`] section. The
+    /// This will get you the [`Scissors`] section. The
     /// [`Scissors`] section is the bit that appears when you run `git commit
     /// --verbose`, that contains the diffs, and is not preserved when you
     /// save the commit.
