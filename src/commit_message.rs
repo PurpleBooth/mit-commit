@@ -1008,7 +1008,11 @@ impl CommitMessage<'_> {
         let mut ast: Vec<Fragment<'_>> = Self::group_ast(per_line_ast);
 
         // Step 6: Handle trailing newline case
-        if message.ends_with('\n') && scissors.is_none() {
+        // Base this on the body portion (`rest`) rather than the whole `message`:
+        // when a scissors section is present, `rest` still ends with the newline
+        // that separates the body from the scissors marker (the blank line). Using
+        // `rest` preserves that blank line through a round-trip.
+        if rest.ends_with('\n') {
             ast.push(Body::default().into());
         }
 
@@ -1979,6 +1983,17 @@ mod tests {
         assert!(
             from_ref.contains("diff --git"),
             "String created from reference should include content after scissors"
+        );
+    }
+
+    #[test]
+    fn test_roundtrip_preserves_blank_line_before_scissors() {
+        let input = "Subject\n\nBody text\n\n# ------------------------ >8 ------------------------\n# Everything below is ignored.\ndiff --git a/file b/file\n";
+        let output: String = CommitMessage::from(input).into();
+
+        assert_eq!(
+            output, input,
+            "Round-tripping a commit message with a body and scissors should preserve the blank line between the body and the scissors marker"
         );
     }
 }
