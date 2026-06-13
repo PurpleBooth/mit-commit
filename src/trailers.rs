@@ -1,6 +1,6 @@
 use std::{convert::TryFrom, slice::Iter};
 
-use crate::{fragment::Fragment, trailer::Trailer};
+use crate::{body::Body, fragment::Fragment, trailer::Trailer};
 
 /// A Collection of `Trailer`
 #[derive(Debug, PartialEq, Eq, Clone, Default)]
@@ -223,8 +223,8 @@ impl<'a> From<Trailers<'a>> for String {
 
 impl<'a> From<Vec<Fragment<'a>>> for Trailers<'a> {
     fn from(ast: Vec<Fragment<'a>>) -> Self {
-        ast.into_iter()
-            .skip(1)
+        let mut bodies: Vec<Body<'a>> = ast
+            .into_iter()
             .filter_map(|values| {
                 if let Fragment::Body(body) = values {
                     Some(body)
@@ -232,6 +232,17 @@ impl<'a> From<Vec<Fragment<'a>>> for Trailers<'a> {
                     None
                 }
             })
+            .collect();
+
+        // Remove the subject line (first Body fragment) so conventional
+        // commit subjects like "feat: add login" are not mistaken for trailers.
+        if bodies.is_empty() {
+            return Self::default();
+        }
+        bodies.remove(0);
+
+        bodies
+            .into_iter()
             .rev()
             .filter_map(|body| {
                 if body.is_empty() {
@@ -255,7 +266,7 @@ mod tests {
     use indoc::indoc;
 
     use super::Trailers;
-    use crate::{Body, fragment::Fragment, trailer::Trailer};
+    use crate::{Body, Comment, fragment::Fragment, trailer::Trailer};
 
     #[test]
     fn implements_iterator() {
@@ -375,6 +386,34 @@ mod tests {
         .into();
 
         assert_eq!(Trailers::from(trailers), expected);
+    }
+
+    #[test]
+    fn conventional_commit_subject_not_mistaken_for_trailer_when_ast_starts_with_comment() {
+        // When the AST starts with a Comment (e.g. a commit whose first line is
+        // a comment), the subject Body "feat: add login" must NOT be treated as
+        // a trailer.  The skip(1) should drop the first Body (the subject), not
+        // the first Fragment (which might be a Comment).
+        let ast = vec![
+            Fragment::Comment(Comment::from("# Comment")),
+            Fragment::Body(Body::from("feat: add login")),
+            Fragment::Body(Body::default()),
+            Fragment::Body(Body::from(
+                "Co-authored-by: Somebody <somebody@example.com>",
+            )),
+        ];
+
+        let expected: Trailers<'_> = vec![Trailer::new(
+            "Co-authored-by".into(),
+            "Somebody <somebody@example.com>".into(),
+        )]
+        .into();
+
+        assert_eq!(
+            Trailers::from(ast),
+            expected,
+            "Conventional commit subject should not be parsed as a trailer"
+        );
     }
 
     #[test]
