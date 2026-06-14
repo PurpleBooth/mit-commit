@@ -47,10 +47,7 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: Run Clippy
-        run: cargo clippy --all-features
-
-      - name: Run cargo check
-        run: cargo check
+        run: cargo clippy --all-features -- -D warnings
 
   security:
     name: Security
@@ -58,9 +55,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install cargo-binstall
+        run: |
+          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+
       - name: Run cargo audit
         run: |
-          cargo install cargo-audit
+          cargo binstall --no-confirm --locked cargo-audit
           cargo audit
 
       - name: Run Trivy filesystem scan
