@@ -11,7 +11,7 @@ env:
 jobs:
   publish:
     name: Publish crate
-    runs-on: ubuntu-latest
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
 

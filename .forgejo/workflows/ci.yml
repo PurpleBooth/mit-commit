@@ -16,7 +16,7 @@ env:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: codeberg-small
     strategy:
       matrix:
         rust: [stable, beta, nightly]
@@ -31,7 +31,7 @@ jobs:
 
   lint:
     name: Lint
-    runs-on: ubuntu-latest
+    runs-on: codeberg-small
     strategy:
       matrix:
         rust: [stable, beta, nightly]
@@ -51,7 +51,7 @@ jobs:
 
   security:
     name: Security
-    runs-on: ubuntu-latest
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
 
@@ -73,7 +73,7 @@ jobs:
     name: Bump version
     needs: [test, lint, security]
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: codeberg-small
     steps:
       - uses: actions/checkout@v4
         with:
