@@ -2,6 +2,30 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v3.3.3 - 2026-06-16
+#### Bug Fixes
+- preserve blank line between body and scissors on round-trip - (d14fc12) - Billie Thompson
+- preserve trailers in with_subject - (f0032e8) - Billie Thompson
+- with_body_contents loses scissors marker in body content - (778c8c6) - Billie Thompson
+- conventional commit subject misidentified as trailer - (e5413f7) - Billie Thompson
+- Fix with_body_contents losing scissors sectionThe with_body_contents method created a new CommitMessage from scratchwith only the new body content, then called with_subject. This discardedthe original scissors section since the new commit had none.Fix by extracting scissors from self before constructing the new commit,then restoring them on the result. Converts to owned String to avoidlifetime issues with self-referential data.Test: test_with_body_contents_preserves_scissors verifies scissors,subject, and new body are all present after with_body_contents. - (ea0d68c) - Billie Thompson
+- remove dead iterator_index, fix misleading comments, unnecessary clone, grammar - (70526cb) - Billie Thompson
+- recompute derived fields in with_subject after AST mutation - (e9c0e01) - Billie Thompson
+#### Documentation
+- correct get_scissors doc comment - (290e580) - Billie Thompson
+#### Continuous Integration
+- use shared install-rust action from common-pipelines - (ea52d45) - Billie Thompson
+- use codeberg-small runner labels for forgejo actions - (e679140) - Billie Thompson
+- fail on clippy warnings and speed up security checks - (4a2cb4c) - Billie Thompson
+- migrate from Woodpecker to Forgejo Actions - (cf8c3e2) - Billie Thompson
+#### Refactoring
+- eliminate unnecessary allocations and clones - (6f81325) - Billie Thompson
+#### Miscellaneous Chores
+- remove dependency pinning that isn't bc break - (ba595d2) - Billie Thompson
+- track examples directory with roundtrip test - (47682f2) - Billie Thompson
+
+- - -
+
 ## v3.3.2 - 2026-06-12
 #### Bug Fixes
 - Subject::len() counts Unicode chars, not bytes - (9efe76f) - Billie Thompson
