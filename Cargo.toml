@@ -11,16 +11,16 @@ readme = "README.md"
 repository = "https://codeberg.org/PurpleBooth/mit-commit"
 
 [dependencies]
-indoc = "2.0.6"
-thiserror = "2.0.12"
-regex = "1.11.1"
-miette = "7.6.0"
+indoc = "2"
+thiserror = "2"
+regex = "1"
+miette = "7"
 
 [dev-dependencies]
-criterion = "0.7.0"
-quickcheck = "1.0.3"
-quickcheck_macros = "1.1.0"
-tempfile = "3.20.0"
+criterion = "0.7"
+quickcheck = "1"
+quickcheck_macros = "1"
+tempfile = "3"
 
 [[bench]]
 name = "commit_message"
