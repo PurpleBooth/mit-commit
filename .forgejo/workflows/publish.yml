@@ -32,10 +32,11 @@ jobs:
           sudo mv cosign-linux-amd64 /usr/local/bin/cosign
 
       - name: Sign crate with Cosign
-        run: |
-          echo "${{ secrets.COSIGN_KEY }}" > cosign.key
-          chmod 600 cosign.key
-          CRATE=$(ls target/package/mit-commit-*.crate | head -n1)
-          cosign sign-blob --key cosign.key --yes "$CRATE"
         env:
+          COSIGN_KEY: ${{ secrets.COSIGN_KEY }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          cosign sign-blob \
+            --key env://COSIGN_KEY \
+            --yes \
+            target/package/mit-commit-*.crate
