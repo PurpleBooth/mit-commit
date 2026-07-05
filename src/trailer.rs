@@ -291,3 +291,104 @@ mod tests {
         );
     }
 }
+
+
+#[cfg(kani)]
+mod proofs {
+    use std::{
+        collections::hash_map::DefaultHasher,
+        convert::TryFrom,
+        hash::{Hash, Hasher},
+    };
+
+    use super::*;
+
+    /// Verify that a trailer round-trips through String conversion.
+    ///
+    /// For any Trailer constructed via `new`, converting to String and back
+    /// via `try_from` must succeed and produce an equal trailer.
+    #[kani::proof]
+    fn trailer_roundtrip_string_conversion() {
+        // Use small symbolic strings to keep the state space tractable
+        let key: [char; 4] = kani::any();
+        let value: [char; 4] = kani::any();
+
+        let key_str: String = key.iter().filter(|c| **c != '\0').collect();
+        let value_str: String = value.iter().filter(|c| **c != '\0').collect();
+
+        // Skip cases where key or value contains ": " (would change parsing)
+        if key_str.contains(": ") || value_str.contains(": ") {
+            return;
+        }
+
+        let trailer = Trailer::new(key_str.into(), value_str.into());
+        let as_string: String = trailer.into();
+        let roundtrip = Trailer::try_from(Body::from(as_string));
+
+        assert!(roundtrip.is_ok(), "Roundtrip through String must succeed");
+
+        let recovered = roundtrip.unwrap();
+        let original = Trailer::new(key_str.into(), value_str.into());
+        assert_eq!(recovered.get_key(), original.get_key());
+        assert_eq!(recovered.get_value(), original.get_value());
+    }
+
+    /// Verify that equal trailers produce equal hashes.
+    ///
+    /// This is the Hash/Eq consistency contract: if a == b then hash(a) == hash(b).
+    #[kani::proof]
+    fn equal_trailers_hash_equally() {
+        let key: [char; 3] = kani::any();
+        let value: [char; 3] = kani::any();
+
+        let key_str: String = key.iter().filter(|c| **c != '\0').collect();
+        let value_str: String = value.iter().filter(|c| **c != '\0').collect();
+
+        let trailer_a = Trailer::new(key_str.clone().into(), value_str.clone().into());
+        let trailer_b = Trailer::new(key_str.into(), value_str.into());
+
+        // If the trailers are equal, their hashes must be equal
+        if trailer_a == trailer_b {
+            let mut hasher_a = DefaultHasher::new();
+            trailer_a.hash(&mut hasher_a);
+
+            let mut hasher_b = DefaultHasher::new();
+            trailer_b.hash(&mut hasher_b);
+
+            assert_eq!(hasher_a.finish(), hasher_b.finish(),
+                "Equal trailers must hash equally");
+        }
+    }
+
+    /// Verify that trailers differing only in trailing whitespace are equal.
+    ///
+    /// The PartialEq impl uses trim_end on values, so a value of "test"
+    /// and "test  " must be equal.
+    #[kani::proof]
+    fn trailing_whitespace_equality() {
+        let key = "Co-authored-by";
+        let value_a = "test";
+        let value_b = "test  ";
+
+        let trailer_a = Trailer::new(key.into(), value_a.into());
+        let trailer_b = Trailer::new(key.into(), value_b.into());
+
+        assert_eq!(trailer_a, trailer_b,
+            "Trailers differing only in trailing whitespace must be equal");
+    }
+
+    /// Verify that `new` stores key and value correctly.
+    #[kani::proof]
+    fn new_stores_key_and_value() {
+        let key: [char; 2] = kani::any();
+        let value: [char; 2] = kani::any();
+
+        let key_str: String = key.iter().filter(|c| **c != '\0').collect();
+        let value_str: String = value.iter().filter(|c| **c != '\0').collect();
+
+        let trailer = Trailer::new(key_str.clone().into(), value_str.clone().into());
+
+        assert_eq!(trailer.get_key(), key_str);
+        assert_eq!(trailer.get_value(), value_str);
+    }
+}

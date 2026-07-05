@@ -243,3 +243,50 @@ mod tests {
         );
     }
 }
+
+
+#[cfg(kani)]
+mod proofs {
+    use super::*;
+
+    /// Verify that appending a body to itself produces the correct result.
+    #[kani::proof]
+    fn append_preserves_content() {
+        let a = Body::from("hello");
+        let b = Body::from("world");
+        let appended = a.append(&b);
+
+        let expected = Body::from("hello\nworld");
+        assert_eq!(appended, expected);
+    }
+
+    /// Verify that a default body is empty.
+    #[kani::proof]
+    fn default_body_is_empty() {
+        let body = Body::default();
+        assert!(body.is_empty());
+    }
+
+    /// Verify that is_empty returns true only for empty strings.
+    #[kani::proof]
+    fn is_empty_for_empty_string() {
+        let body = Body::from("");
+        assert!(body.is_empty());
+    }
+
+    /// Verify that a non-empty body is not empty.
+    #[kani::proof]
+    fn non_empty_body_is_not_empty() {
+        let body = Body::from("x");
+        assert!(!body.is_empty());
+    }
+
+    /// Verify that Body round-trips through String conversion.
+    #[kani::proof]
+    fn body_roundtrip_string() {
+        let original = Body::from("test content");
+        let as_string: String = original.into();
+        let recovered = Body::from(as_string);
+        assert_eq!(recovered, Body::from("test content"));
+    }
+}

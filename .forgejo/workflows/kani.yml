@@ -1,0 +1,37 @@
+name: Kani Verification
+
+on:
+  push:
+    paths-ignore:
+      - CHANGELOG.md
+      - "**.md"
+  pull_request:
+    paths-ignore:
+      - CHANGELOG.md
+      - "**.md"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  kani:
+    name: Kani Model Check
+    runs-on: codeberg-small
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-rust@main
+        with:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Rust nightly
+        run: rustup default nightly
+
+      - name: Install Kani
+        run: |
+          cargo install --locked kani-verifier
+          cargo kani setup
+
+      - name: Run Kani proofs
+        run: cargo kani --output-format terse
