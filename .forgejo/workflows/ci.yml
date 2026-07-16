@@ -16,7 +16,7 @@ env:
 jobs:
   test:
     name: Test
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     strategy:
       matrix:
         rust: [stable, beta, nightly]
@@ -36,7 +36,7 @@ jobs:
 
   lint:
     name: Lint
-    runs-on: codeberg-medium
+    runs-on: codeberg-small
     strategy:
       matrix:
         rust: [stable, beta, nightly]
