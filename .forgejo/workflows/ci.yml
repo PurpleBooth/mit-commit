@@ -23,6 +23,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache Rust toolchains
+        uses: https://code.forgejo.org/actions/cache@v4
+        with:
+          path: ~/.rustup/
+          key: ${{ runner.os }}-rustup-${{ matrix.rust }}
+          restore-keys: ${{ runner.os }}-rustup-
+
       - name: Install Rust Toolchain
         uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-rust@main
         with:
@@ -30,6 +37,13 @@ jobs:
 
       - name: Set up Rust ${{ matrix.rust }}
         run: rustup default ${{ matrix.rust }}
+
+      - name: Cache build artifacts
+        uses: https://code.forgejo.org/actions/cache@v4
+        with:
+          path: target/
+          key: ${{ runner.os }}-target-test-${{ matrix.rust }}-${{ hashFiles('Cargo.toml') }}
+          restore-keys: ${{ runner.os }}-target-test-${{ matrix.rust }}-
 
       - name: Run tests
         run: cargo test
@@ -43,6 +57,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache Rust toolchains
+        uses: https://code.forgejo.org/actions/cache@v4
+        with:
+          path: ~/.rustup/
+          key: ${{ runner.os }}-rustup-${{ matrix.rust }}
+          restore-keys: ${{ runner.os }}-rustup-
+
       - name: Install Rust Toolchain
         uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-rust@main
         with:
@@ -52,6 +73,13 @@ jobs:
         run: |
           rustup default ${{ matrix.rust }}
           rustup component add rustfmt clippy
+
+      - name: Cache build artifacts
+        uses: https://code.forgejo.org/actions/cache@v4
+        with:
+          path: target/
+          key: ${{ runner.os }}-target-lint-${{ matrix.rust }}-${{ hashFiles('Cargo.toml') }}
+          restore-keys: ${{ runner.os }}-target-lint-${{ matrix.rust }}-
 
       - name: Check formatting
         run: cargo fmt --all -- --check
@@ -65,17 +93,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache Rust toolchains
+        uses: https://code.forgejo.org/actions/cache@v4
+        with:
+          path: ~/.rustup/
+          key: ${{ runner.os }}-rustup-stable
+          restore-keys: ${{ runner.os }}-rustup-
+
       - name: Install Rust Toolchain
         uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-rust@main
         with:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Trivy binary
+        uses: https://code.forgejo.org/actions/cache@v4
+        with:
+          path: /usr/local/bin/trivy
+          key: ${{ runner.os }}-trivy
 
       - name: Run cargo audit
         run: cargo audit
 
       - name: Run Trivy filesystem scan
         run: |
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          if ! command -v trivy >/dev/null 2>&1; then
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          fi
           trivy fs --scanners vuln,secret,misconfig --exit-code 1 .
 
   bump:
@@ -88,6 +131,13 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Rust toolchains
+        uses: https://code.forgejo.org/actions/cache@v4
+        with:
+          path: ~/.rustup/
+          key: ${{ runner.os }}-rustup-stable
+          restore-keys: ${{ runner.os }}-rustup-
 
       - name: Install Rust Toolchain
         uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-rust@main
