@@ -15,6 +15,18 @@ indoc = "2"
 thiserror = "2"
 regex = "1"
 miette = "7"
+[profile.release-max]
+inherits = "release"
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+debug = false
+debug-assertions = false
+overflow-checks = false
+incremental = false
+strip = "symbols"
+
 
 [dev-dependencies]
 criterion = "0.7"
