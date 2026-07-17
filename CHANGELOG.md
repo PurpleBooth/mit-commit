@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v3.4.0 - 2026-07-17
+#### Features
+- support '#' separator trailers like 'Fix #42' - (d247506) - Billie Thompson
+#### Bug Fixes
+- (**ci**) revert runner labels to codeberg-small - (ce2655f) - Billie Thompson
+#### Continuous Integration
+- pass cosign key via environment variable - (45d4a1f) - Billie Thompson
+- authenticate cargo publish with environment variable - (5ffb5ec) - Billie Thompson
+
+- - -
+
 ## v3.3.3 - 2026-06-16
 #### Bug Fixes
 - preserve blank line between body and scissors on round-trip - (d14fc12) - Billie Thompson
