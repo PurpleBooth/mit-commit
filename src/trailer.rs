@@ -15,6 +15,9 @@ use crate::{Fragment, body::Body};
 pub struct Trailer<'a> {
     key: Cow<'a, str>,
     value: Cow<'a, str>,
+    /// The separator between key and value — typically `": "` but `"#"` is
+    /// also supported by `git-interpret-trailers` (e.g. `Fix #42`).
+    separator: Cow<'a, str>,
 }
 
 impl<'a> Trailer<'a> {
@@ -39,7 +42,41 @@ impl<'a> Trailer<'a> {
     /// ```
     #[must_use]
     pub const fn new(key: Cow<'a, str>, value: Cow<'a, str>) -> Self {
-        Self { key, value }
+        Self {
+            key,
+            value,
+            separator: Cow::Borrowed(": "),
+        }
+    }
+
+    /// Create a new [`Trailer`] with a custom separator
+    ///
+    /// This is useful for trailers that use `#` as a separator instead of
+    /// `: `, such as `Fix #42`.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::convert::TryFrom;
+    ///
+    /// use mit_commit::{Body, Trailer};
+    /// assert_eq!(
+    ///     Trailer::new_with_separator("Fix".into(), "42".into(), "#".into()),
+    ///     Trailer::try_from(Body::from("Fix #42"))
+    ///         .expect("There should have been a trailer in that body component")
+    /// )
+    /// ```
+    #[must_use]
+    pub const fn new_with_separator(
+        key: Cow<'a, str>,
+        value: Cow<'a, str>,
+        separator: Cow<'a, str>,
+    ) -> Self {
+        Self {
+            key,
+            value,
+            separator,
+        }
     }
 
     /// Get the key of the [`Trailer`]
@@ -94,7 +131,7 @@ impl Hash for Trailer<'_> {
 
 impl From<Trailer<'_>> for String {
     fn from(trailer: Trailer<'_>) -> Self {
-        format!("{}: {}", trailer.key, trailer.value)
+        format!("{}{}{}", trailer.key, trailer.separator, trailer.value)
     }
 }
 
@@ -110,18 +147,62 @@ impl<'a> TryFrom<Body<'a>> for Trailer<'a> {
 
     fn try_from(body: Body<'a>) -> Result<Self, Self::Error> {
         let content: String = body.into();
-        let mut value_and_key = content.splitn(2, ": ").map(ToString::to_string);
 
-        let key: String = value_and_key
-            .next()
-            .ok_or_else(|| Error::new_not_a_trailer(&content))?;
+        // The canonical trailer form is "Key: value" (colon-space), which
+        // covers Signed-off-by, Co-authored-by, Acked-by, See-also, etc.
+        if let Some(trailer) = parse_colon_trailer(&content) {
+            return Ok(trailer);
+        }
 
-        let value: String = value_and_key
-            .next()
-            .ok_or_else(|| Error::new_not_a_trailer(&content))?;
+        // git-interpret-trailers also supports "#" as a separator, producing
+        // trailers like "Fix #42".  This is less common and more prone to
+        // false positives (any line containing "#" could match), so we
+        // restrict it to short, word-like keys.
+        //
+        // See: https://git-scm.com/docs/git-interpret-trailers
+        if let Some(trailer) = parse_hash_trailer(&content) {
+            return Ok(trailer);
+        }
 
-        Ok(Trailer::new(key.into(), value.into()))
+        Err(Error::new_not_a_trailer(&content))
     }
+}
+
+/// Parse a colon-separated trailer: "Key: value".
+fn parse_colon_trailer<'a>(content: &str) -> Option<Trailer<'a>> {
+    let (key, value) = content.split_once(": ")?;
+
+    if key.is_empty() {
+        return None;
+    }
+
+    Some(Trailer::new(key.to_owned().into(), value.to_owned().into()))
+}
+
+/// Parse a hash-separated trailer: "Fix #42".
+///
+/// The key must be a short token (letters, digits, hyphens) with no spaces,
+/// to avoid matching arbitrary body text that happens to contain "#".
+fn parse_hash_trailer<'a>(content: &str) -> Option<Trailer<'a>> {
+    let mut parts = content.splitn(2, '#');
+    let key = parts.next()?.trim();
+    let value = parts.next()?;
+
+    if key.is_empty() {
+        return None;
+    }
+
+    // Only accept word-like keys (e.g. "Fix", "Fixes", "Closes") to prevent
+    // false positives on body prose containing "#".
+    if !key.chars().all(|c| c.is_alphanumeric() || c == '-') {
+        return None;
+    }
+
+    Some(Trailer::new_with_separator(
+        key.to_owned().into(),
+        value.to_owned().into(),
+        " #".into(),
+    ))
 }
 
 /// Errors in parsing potential trailers
@@ -289,5 +370,71 @@ mod tests {
             "Someone <someone@example.com>: extra",
             "Value should include everything after the first ': ', including subsequent ': '"
         );
+    }
+
+    #[test]
+    fn it_parses_hash_separator_trailer() {
+        let trailer = Trailer::try_from(Body::from("Fix #42")).expect("Should parse as a trailer");
+
+        assert_eq!(trailer.get_key(), "Fix");
+        assert_eq!(trailer.get_value(), "42");
+    }
+
+    #[test]
+    fn it_round_trips_hash_separator_trailer() {
+        let trailer = Trailer::try_from(Body::from("Fix #42")).expect("Should parse as a trailer");
+
+        assert_eq!(
+            String::from(trailer),
+            String::from("Fix #42"),
+            "Hash separator trailer should round-trip exactly"
+        );
+    }
+
+    #[test]
+    fn it_parses_fixes_hash_trailer() {
+        let trailer =
+            Trailer::try_from(Body::from("Fixes #123")).expect("Should parse as a trailer");
+
+        assert_eq!(trailer.get_key(), "Fixes");
+        assert_eq!(trailer.get_value(), "123");
+    }
+
+    #[test]
+    fn it_parses_closes_hash_trailer() {
+        let trailer =
+            Trailer::try_from(Body::from("Closes #7")).expect("Should parse as a trailer");
+
+        assert_eq!(trailer.get_key(), "Closes");
+        assert_eq!(trailer.get_value(), "7");
+    }
+
+    #[test]
+    fn it_does_not_parse_prose_with_hash_as_trailer() {
+        // A sentence containing "#" should not be mistaken for a trailer
+        // because the "key" part contains spaces.
+        let result = Trailer::try_from(Body::from("This is a sentence with a #hashtag in it"));
+
+        assert!(
+            result.is_err(),
+            "Prose containing '#' should not be parsed as a hash trailer"
+        );
+    }
+
+    #[test]
+    fn it_round_trips_hash_trailer_from_new_with_separator() {
+        let trailer = Trailer::new_with_separator("Fix".into(), "42".into(), " #".into());
+
+        assert_eq!(String::from(trailer), String::from("Fix #42"));
+    }
+
+    #[test]
+    fn hash_and_colon_trailers_with_same_key_value_are_equal() {
+        // Two trailers with the same key and value are equal regardless
+        // of separator — the separator is a formatting concern, not identity.
+        let hash_trailer = Trailer::new_with_separator("Fix".into(), "42".into(), " #".into());
+        let colon_trailer = Trailer::new("Fix".into(), "42".into());
+
+        assert_eq!(hash_trailer, colon_trailer);
     }
 }
