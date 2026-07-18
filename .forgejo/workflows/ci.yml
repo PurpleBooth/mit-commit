@@ -144,8 +144,8 @@ jobs:
         with:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install tools
-        run: cargo binstall --no-confirm --locked cocogitto
+      - name: Install cocogitto
+        uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-cocogitto@main
 
       - name: Configure Git user
         run: |
