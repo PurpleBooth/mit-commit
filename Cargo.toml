@@ -29,7 +29,7 @@ strip = "symbols"
 
 
 [dev-dependencies]
-criterion = "0.7"
+criterion = "0.8"
 quickcheck = "1"
 quickcheck_macros = "1"
 tempfile = "3"
